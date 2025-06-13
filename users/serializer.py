@@ -15,17 +15,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = [
-            'id', 'mobile', 'is_active', 'name', 'language', 'email', 'dob', 'gender',
-            'marital_status', 'location', 'income', 'profession', 'is_agent',
-            'profile_photo', 'keywords', 'keywords_display',
-
-            # Address fields
-            'address_line1', 'address_line2', 'pincode', 'state', 'city', 'country',
-
-            # Education fields
-            'qualification', 'year_of_graduation',
-        ]
+        fields = '__all__'
         read_only_fields = ['id', 'mobile']
         extra_kwargs = {
             'is_active': {'required': False},
