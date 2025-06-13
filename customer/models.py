@@ -1,57 +1,38 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 
-User = get_user_model()
 
 
-class ScamComplaint(models.Model):
-    CATEGORY_CHOICES = [
-        ('phishing', 'Phishing'),
-        ('investment', 'Investment Scam'),
-        ('fake_product', 'Fake Product'),
-        ('job_fraud', 'Job Fraud'),
-        ('other', 'Other'),
-    ]
+class DeliveryRequest(models.Model):
+    user = models.ForeignKey("users.User", on_delete=models.CASCADE)
 
-    SOCIAL_MEDIA_CHOICES = [
-        ('facebook', 'Facebook'),
-        ('instagram', 'Instagram'),
-        ('linkedin', 'LinkedIn'),
-        ('twitter', 'Twitter'),
-        ('telegram', 'Telegram'),
-        ('whatsapp', 'WhatsApp'),
-        ('other', 'Other'),
-    ]
+    # Parcel Details
+    parcel_title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    parcel_type = models.CharField(max_length=255)
+    weight = models.DecimalField(max_digits=10, decimal_places=2)
+    length = models.DecimalField(max_digits=10, decimal_places=2)
+    width = models.DecimalField(max_digits=10, decimal_places=2)
+    height = models.DecimalField(max_digits=10, decimal_places=2)
+    item_price_worth = models.DecimalField(max_digits=10, decimal_places=2)
+    budget = models.DecimalField(max_digits=10, decimal_places=2)
+    delivery_date = models.DateField()
 
-    STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('in_review', 'In Review'),
-        ('resolved', 'Resolved'),
-        ('rejected', 'Rejected'),
-    ]
+    # Pickup Location
+    pickup_address_line1 = models.CharField(max_length=255)
+    pickup_address_line2 = models.CharField(max_length=255, blank=True, null=True)
+    pickup_pincode = models.CharField(max_length=10)
+    pickup_state = models.CharField(max_length=100)
+    pickup_city = models.CharField(max_length=100)
+    pickup_contact = models.CharField(max_length=20)
 
-    user = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name="scam_complaints")
-    name = models.CharField(max_length=255)
-    website = models.URLField(blank=True, null=True)
-    company_name = models.CharField(max_length=255, blank=True, null=True)
-    phone_number = models.CharField(max_length=20, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
-    location = models.CharField(max_length=255, blank=True, null=True)
-    category = models.ForeignKey("masters.ScamCategory", on_delete=models.CASCADE)
-    description = models.TextField()
+    # Destination
+    destination_address_line1 = models.CharField(max_length=255)
+    destination_address_line2 = models.CharField(max_length=255, blank=True, null=True)
+    destination_pincode = models.CharField(max_length=10)
+    destination_state = models.CharField(max_length=100)
+    destination_city = models.CharField(max_length=100)
+    destination_contact = models.CharField(max_length=20)
 
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    
-    social_media = models.CharField(max_length=50, choices=SOCIAL_MEDIA_CHOICES)
-
-    is_resolved = models.BooleanField(default=False)
+    legal_confirmation = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.name
-
-
-class ScamProof(models.Model):
-    complaint = models.ForeignKey(ScamComplaint, on_delete=models.CASCADE, related_name='proofs')
-    file = models.FileField(upload_to='scam_proofs/')
-    uploaded_at = models.DateTimeField(auto_now_add=True)

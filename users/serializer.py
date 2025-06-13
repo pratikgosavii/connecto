@@ -8,7 +8,6 @@ from masters.serializers import *
 
 
 from rest_framework import serializers
-from .models import User
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -34,3 +33,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'firebase_uid': {'required': True},
             'email': {'required': False, 'allow_blank': True, 'allow_null': True},
         }
+
+
+
+class User_KYCSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = user_kyc
+        fields = ['id', 'user', 'adhar_card', 'pan_card', 'driving_licence', 'approved']
+        read_only_fields = ['user', 'approved']

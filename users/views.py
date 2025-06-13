@@ -126,6 +126,34 @@ class UserProfileViewSet(viewsets.ViewSet):
 
 
 
+from rest_framework import viewsets, permissions
+from rest_framework.exceptions import ValidationError
+from rest_framework.parsers import MultiPartParser, JSONParser
+
+
+from .serializer import *
+from .models import *
+from users.permissions import *
+
+
+class User_KYCViewSet(viewsets.ModelViewSet):
+
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = User_KYCSerializer
+    parser_classes = [MultiPartParser, JSONParser]
+
+    def get_queryset(self):
+        return user_kyc.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        if user_kyc.objects.filter(user=self.request.user).exists():
+            raise ValidationError({"detail": "KYC already submitted for this user."})
+        serializer.save(user=self.request.user)
+
+
+
+
+
 from .permissions import *
 
 

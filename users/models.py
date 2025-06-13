@@ -81,3 +81,16 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.mobile
+
+
+
+
+class user_kyc(models.Model):
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    adhar_card = models.CharField(max_length=50)
+    pan_card = models.CharField(max_length=50)
+    driving_licence = models.CharField(max_length=50)
+    approved = models.BooleanField(default=False)
+
+    

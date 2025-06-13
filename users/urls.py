@@ -18,6 +18,7 @@ from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register(r'profile', UserProfileViewSet, basename='user-profile')
+router.register(r'user-kyc', User_KYCViewSet, basename='user-kyc')
 
 
 urlpatterns = [
