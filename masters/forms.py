@@ -47,51 +47,14 @@ class home_banner_Form(forms.ModelForm):
 
 
 
-from django import forms
-from .models import FAQ
-
-class ScamCategoryForm(forms.ModelForm):
+class city_Form(forms.ModelForm):
     class Meta:
-        model = ScamCategory
+        model = city
         fields = ['name']
         widgets = {
-            'name': forms.TextInput(attrs={
-                'class': 'form-control', 'placeholder': 'Enter your question'
-            }),
-        }
-
-class occupation_category_Form(forms.ModelForm):
-    class Meta:
-        model = occupation_category
-        fields = ['name']
-        widgets = {
+          
             'name': forms.TextInput(attrs={
                 'class': 'form-control', 'placeholder': 'Enter Occupation Category'
-            }),
-        }
-
-class occupation_subcategory_Form(forms.ModelForm):
-    class Meta:
-        model = occupation_subcategory
-        fields = ['name', 'category']
-        widgets = {
-            'category': forms.Select(attrs={
-                'class': 'form-control', 'placeholder': 'Enter Occupation Category'
-            }),
-            'name': forms.TextInput(attrs={
-                'class': 'form-control', 'placeholder': 'Enter Occupation Category'
-            }),
-        }
-
-class occupation_Form(forms.ModelForm):
-    class Meta:
-        model = occupation
-        fields = ['name', 'category', 'subcategory']
-        widgets = {
-            'category': forms.Select(attrs={'class': 'form-control'}),
-            'subcategory': forms.Select(attrs={'class': 'form-control'}),
-            'name': forms.TextInput(attrs={
-                'class': 'form-control', 'placeholder': 'Enter Name'
             }),
         }
 

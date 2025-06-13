@@ -2,19 +2,10 @@ from rest_framework import serializers
 from .models import *
 
 
-class OccupationCategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = occupation_category
-        fields = ['id', 'name']
 
-class OccupationSerializer(serializers.ModelSerializer):
+class city_Serializer(serializers.ModelSerializer):
     class Meta:
-        model = occupation
-        fields = ['id', 'name']
-
-class OccupationSubcategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = occupation_subcategory
+        model = city
         fields = ['id', 'name']
 
 
@@ -46,8 +37,3 @@ class FAQSerializer(serializers.ModelSerializer):
         model = FAQ
         fields = '__all__'
 
-
-class ScamCategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ScamCategory
-        fields = '__all__'

@@ -102,11 +102,11 @@ from .models import User
 from rest_framework.decorators import action
 
 
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 class UserProfileViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]  # 👈 necessary for photo uploads
+    parser_classes = [JSONParser, MultiPartParser, FormParser]  # 👈 necessary for photo uploads
 
     @action(detail=False, methods=['get', 'put'], url_path='me')
     def me(self, request):
