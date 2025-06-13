@@ -7,26 +7,30 @@ from masters.serializers import *
 
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
-    keywords = serializers.ListField(
-        child=serializers.CharField(), required=False, write_only=True
-    )
-    keywords_display = serializers.SerializerMethodField()
+from rest_framework import serializers
+from .models import User
 
+class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
-        read_only_fields = ['id', 'mobile']
+        fields = [
+            'id',
+            'firebase_uid',
+            'mobile',
+            'name',
+            'email',
+            'profile_photo',
+            'address_line1',
+            'address_line2',
+            'pincode',
+            'state',
+            'city',
+            'country',
+            'qualification',
+            'year_of_graduation',
+        ]
+        read_only_fields = ['id', 'mobile']  # Mobile comes from Firebase
         extra_kwargs = {
-            'is_active': {'required': False},
+            'firebase_uid': {'required': True},
             'email': {'required': False, 'allow_blank': True, 'allow_null': True},
         }
-
-    def get_keywords_display(self, obj):
-        return obj.keywords.split(",") if obj.keywords else []
-
-    def update(self, instance, validated_data):
-        keywords = validated_data.pop("keywords", None)
-        if keywords is not None:
-            validated_data["keywords"] = ",".join(keywords)
-        return super().update(instance, validated_data)
