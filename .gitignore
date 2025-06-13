@@ -7,5 +7,4 @@ connecto/firebase_key.json
 media
 .env
 # Ignore wsgi.py
-connecto/wsgi.py
 
