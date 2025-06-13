@@ -1,0 +1,241 @@
+{% extends "partials/adminBase.html" %}
+{% load static %}
+
+{% block title %}Add Scam Complaint{% endblock title %}
+
+{% block extra_css %}
+<link href="{% static 'libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.css' %}" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+<style>
+    body {
+        background-color: #f0d28c;
+        padding-bottom: 20px;
+    }
+
+    .form-container {
+        background-color: #ffffff;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-heading {
+        text-align: left;
+        margin-bottom: 20px;
+        font-weight: bold;
+        font-size: 2rem;
+        color: #775599;
+    }
+
+    textarea.description-box {
+        height: 150px;
+        resize: none;
+    }
+
+    .btn-primary {
+        background-color: #775599;
+        border-color: #775599;
+    }
+
+    .custom-button {
+        width: 150px;
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-content">
+        <div class="container-fluid">
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                        <h4 class="mb-sm-0 font-size-18">Add Scam Complaint</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container">
+                <div class="form-container">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <div class="mb-4">
+                            <label for="{{ complaint_form.name.id_for_label }}" class="form-label">Name:</label>
+                            {{ complaint_form.name }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ complaint_form.website.id_for_label }}" class="form-label">Website (optional):</label>
+                            {{ complaint_form.website }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ complaint_form.company_name.id_for_label }}" class="form-label">Company Name (optional):</label>
+                            {{ complaint_form.company_name }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ complaint_form.phone_number.id_for_label }}" class="form-label">Phone Number (optional):</label>
+                            {{ complaint_form.phone_number }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ complaint_form.email.id_for_label }}" class="form-label">Email (optional):</label>
+                            {{ complaint_form.email }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ complaint_form.location.id_for_label }}" class="form-label">Location (optional):</label>
+                            {{ complaint_form.location }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ complaint_form.category.id_for_label }}" class="form-label">Category:</label>
+                            {{ complaint_form.category }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ complaint_form.description.id_for_label }}" class="form-label">Description:</label>
+                            {{ complaint_form.description }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ complaint_form.social_media.id_for_label }}" class="form-label">Social Media:</label>
+                            {{ complaint_form.social_media }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ complaint_form.status.id_for_label }}" class="form-label">Status:</label>
+                            {{ complaint_form.status }}
+                        </div>
+
+
+                        <h5 class="mt-4">Upload Scam Proofs:</h5>
+
+{{ proof_formset.management_form }}
+
+                        <div id="formset-container">
+   {% for form in proof_formset %}
+    <div class="mb-3 border p-3 rounded position-relative formset-form">
+        {% if form.instance.id %}
+          
+
+ <a href="{% url 'delete_proof' form.instance.id %}" 
+   class="btn btn-sm btn-outline-danger" 
+   title="Delete" 
+   onclick="return confirm('Are you sure you want to delete this proof?');">
+    <i class="bi bi-trash"></i>
+</a>
+
+               
+        {% endif %}
+        {{ form.as_p }}
+    </div>
+{% endfor %}
+
+</div>
+
+
+
+                        <button type="button" id="add-more" class="btn btn-secondary my-2">Add More Proofs</button>
+
+
+
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary custom-button">Submit Complaint</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {% block footer %}
+        {% include 'partials/footer.html' %}
+    {% endblock footer %}
+</div>
+{% endblock content %}
+
+
+{% block extra_js %}
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const addMoreButton = document.getElementById('add-more');
+    const formsetContainer = document.getElementById('formset-container');
+    const totalForms = document.querySelector('#id_proofs-TOTAL_FORMS');
+
+    function updateTotalForms() {
+        const currentFormsCount = formsetContainer.querySelectorAll('.formset-form').length;
+        totalForms.value = currentFormsCount;
+    }
+
+    function addRemoveButton(formDiv) {
+        if (formDiv.querySelector('.btn-remove-proof')) return;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn btn-danger btn-sm mt-2 btn-remove-proof';
+        removeBtn.textContent = 'Remove Proof';
+
+        removeBtn.addEventListener('click', () => {
+            formDiv.remove();
+            updateTotalForms();
+        });
+
+        formDiv.appendChild(removeBtn);
+    }
+
+    // ✅ Only add remove button to client-added forms (not those that have "Currently:" text or a delete form)
+    formsetContainer.querySelectorAll('.formset-form').forEach(formDiv => {
+        const isFromDB = formDiv.innerHTML.includes('Currently:') || formDiv.querySelector('form[action]');
+        if (!isFromDB) {
+            addRemoveButton(formDiv);
+        }
+    });
+
+    addMoreButton.addEventListener('click', () => {
+        const currentFormCount = parseInt(totalForms.value);
+        const lastForm = formsetContainer.querySelector('.formset-form:last-of-type');
+        const newForm = lastForm.cloneNode(true);
+
+        // Update index and reset input fields
+        newForm.querySelectorAll('input, select, textarea').forEach(input => {
+            if (input.name) input.name = input.name.replace(/-\d+-/, `-${currentFormCount}-`);
+            if (input.id) input.id = input.id.replace(/-\d+-/, `-${currentFormCount}-`);
+            if (input.type !== 'hidden') input.value = '';
+            if (input.type === 'checkbox' || input.type === 'radio') input.checked = false;
+        });
+
+        // Remove any server-specific content
+        const deleteForm = newForm.querySelector('form[action]');
+        if (deleteForm) deleteForm.remove();
+
+        // Remove "Currently:" file display if exists
+        const fileCurrently = newForm.querySelector('p');
+        if (fileCurrently && fileCurrently.textContent.includes('Currently:')) {
+            fileCurrently.remove();
+        }
+
+        // Remove any previous remove button in clone
+        newForm.querySelectorAll('.btn-remove-proof').forEach(btn => btn.remove());
+
+        // Add new remove button
+        addRemoveButton(newForm);
+
+        // Append and update total
+        formsetContainer.appendChild(newForm);
+        updateTotalForms();
+    });
+});
+</script>
+
+
+
+
+
+{% endblock extra_js %}

@@ -1,0 +1,163 @@
+{% load static %}
+{% block left_sidebar %}
+        <!-- ========== Left Sidebar Start ========== -->
+        <div class="vertical-menu">
+            <div data-simplebar class="h-100">
+
+                <!--- Sidemenu -->
+                <div id="sidebar-menu">
+                    <!-- Left Menu Start -->
+                    <ul class="metismenu list-unstyled" id="side-menu">
+
+
+                        <li>
+                            <a href="{% url 'dashboard' %}">
+                                <i data-feather="home"></i>
+                                <span class="badge rounded-pill text-success float-end">9+</span>
+                                <span data-key="t-dashboard">Admin Dashboard</span>
+                            </a>
+                        </li>
+
+                   
+                             
+                        <li>
+                            <li>
+                                <a href="javascript: void(0);" class="has-arrow">
+                                    <i data-feather="layers"></i>
+                                    <span data-key="t-authentication">Coupon</span>
+                                </a>
+                                <ul class="sub-menu" aria-expanded="false">
+                                    <li><a href="{% url 'add_coupon' %}">Add Coupon</a></li>
+                                    <li><a href="{% url 'list_coupon' %}">Coupon List</a></li>
+                                </ul>
+                            </li>
+                        <li>
+
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow">
+                                <i data-feather="layers"></i>
+                                <span data-key="t-authentication">Banner</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{% url 'add_home_banner' %}">Banner Add</a></li>
+                                <li><a href="{% url 'list_home_banner' %}">Banner List</a></li>
+
+                            </ul>
+                        </li>
+
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow">
+                                <i data-feather="layers"></i>
+                                <span data-key="t-authentication">FAQ</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{% url 'add_faq' %}">FAQ Add</a></li>
+                                <li><a href="{% url 'list_faq' %}">FAQ List</a></li>
+
+                            </ul>
+                        </li>
+                        
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow">
+                                <i data-feather="layers"></i>
+                                <span data-key="t-authentication">Scam Category</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{% url 'add_scam_category' %}">Scam Category Add</a></li>
+                                <li><a href="{% url 'list_scam_category' %}">Scam Category List</a></li>
+
+                            </ul>
+                        </li>
+
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow">
+                                <i data-feather="layers"></i>
+                                <span data-key="t-authentication">Complaints</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{% url 'add_complaint' %}">Complaints Add</a></li>
+                                <li><a href="{% url 'list_complaint' %}">Complaints List</a></li>
+
+                            </ul>
+                        </li>
+
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow">
+                                <i data-feather="layers"></i>
+                                <span data-key="t-authentication">Category Occupation</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{% url 'add_occupation_category' %}">Category Occupations Add</a></li>
+                                <li><a href="{% url 'list_occupation_category' %}">Category Occupations List</a></li>
+
+                            </ul>
+                        </li>
+
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow">
+                                <i data-feather="layers"></i>
+                                <span data-key="t-authentication">Sub Category Occupation</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{% url 'add_subcategory_occupation' %}">Sub Category Occupations Add</a></li>
+                                <li><a href="{% url 'list_occupation_subcategory' %}">Sub Category Occupations List</a></li>
+
+                            </ul>
+                        </li>
+
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow">
+                                <i data-feather="layers"></i>
+                                <span data-key="t-authentication">Occupation</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{% url 'add_occupation' %}">Occupations Add</a></li>
+                                <li><a href="{% url 'list_occupation' %}">Occupations List</a></li>
+
+                            </ul>
+                        </li>
+
+                           
+
+                    
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow">
+                                <i data-feather="layers"></i>
+                                <span data-key="t-authentication">Users</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{% url 'user_list' %}">Users List</a></li>
+
+                            </ul>
+                        </li>
+                        
+
+                       
+                       
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow">
+                                <i data-feather="layers"></i>
+                                <span data-key="t-authentication">Payments</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                <li><a>Recent Payments</a></li>
+                                <li><a>Initiate Refunds</a></li>
+                                <li><a>Refunds</a></li>
+                                <li><a>Payment Reports</a></li>
+                            </ul>
+                        </li>
+                       
+                        <div style="margin: 100% 0 0 35%; align-content: center">
+                            <form method="POST" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary" style="background-color: #775599;" >Logout</button>
+                        </form>
+                        </div>
+                    </ul>
+
+                </div>
+                <!-- Sidebar -->
+            </div>
+        </div>
+        <!-- Left Sidebar End -->
+{% endblock left_sidebar %}
