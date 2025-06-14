@@ -23,7 +23,7 @@ class DeliveryRequest(models.Model):
     pickup_address_line2 = models.CharField(max_length=255, blank=True, null=True)
     pickup_pincode = models.CharField(max_length=10)
     pickup_state = models.CharField(max_length=100)
-    pickup_city = models.CharField(max_length=100)
+    pickup_city = models.ForeignKey("masters.city", on_delete=models.CASCADE, related_name="pickup_city")
     pickup_contact = models.CharField(max_length=20)
 
     # Destination
@@ -31,7 +31,7 @@ class DeliveryRequest(models.Model):
     destination_address_line2 = models.CharField(max_length=255, blank=True, null=True)
     destination_pincode = models.CharField(max_length=10)
     destination_state = models.CharField(max_length=100)
-    destination_city = models.CharField(max_length=100)
+    destination_city = models.ForeignKey("masters.city", on_delete=models.CASCADE, related_name="destination_city")
     destination_contact = models.CharField(max_length=20)
 
     legal_confirmation = models.BooleanField(default=False)

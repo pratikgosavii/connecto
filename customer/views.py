@@ -23,7 +23,6 @@ from vendor.filters import AddTripFilter
 
 class TripSearchAPIView(generics.ListAPIView):
     queryset = add_trip.objects.all()
-    print(queryset)
     serializer_class = add_trip_Serializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = AddTripFilter
