@@ -9,3 +9,21 @@ class DeliveryRequestViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from vendor.models import *
+from vendor.serializers import *
+from rest_framework import generics
+from django_filters.rest_framework import DjangoFilterBackend
+
+from vendor.filters import AddTripFilter
+
+class TripSearchAPIView(generics.ListAPIView):
+    queryset = add_trip.objects.all()
+    print(queryset)
+    serializer_class = add_trip_Serializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = AddTripFilter

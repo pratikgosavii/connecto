@@ -22,8 +22,8 @@ class add_trip(models.Model):
 
     user = models.ForeignKey("users.User", on_delete=models.CASCADE)
     description = models.TextField()
-    source = models.CharField(max_length=255)
-    destination = models.CharField(max_length=255)
+    source = models.ForeignKey("masters.city", on_delete=models.CASCADE, related_name="source")
+    destination = models.ForeignKey("masters.city", on_delete=models.CASCADE, related_name="destination")
     mode_of_transport = models.CharField(max_length=20, choices=MODE_OF_TRANSPORT_CHOICES)
     private_vehicle_type = models.CharField(max_length=20, choices=PRIVATE_VEHICLE_CHOICES, null=True, blank=True)
     public_vehicle_type = models.CharField(max_length=20, choices=PUBLIC_TRANSPORT_CHOICES, null=True, blank=True)

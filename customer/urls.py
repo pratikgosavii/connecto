@@ -9,6 +9,7 @@ router.register('delivery-request', DeliveryRequestViewSet, basename='DeliveryRe
 
 urlpatterns = router.urls + [
 
+    path('search-trips/', TripSearchAPIView.as_view(), name='search-trips'),
 
 
 ]
