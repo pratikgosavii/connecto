@@ -28,7 +28,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'qualification',
             'year_of_graduation',
         ]
-        read_only_fields = ['id', 'mobile']  # Mobile comes from Firebase
+        read_only_fields = ['id', 'mobile', 'firebase_uid']  # Mobile comes from Firebase
         extra_kwargs = {
             'firebase_uid': {'required': True},
             'email': {'required': False, 'allow_blank': True, 'allow_null': True},

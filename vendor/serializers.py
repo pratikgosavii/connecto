@@ -9,8 +9,13 @@ from masters.serializers import *
 
 from rest_framework import serializers
 
+from users.serializer import *
 
 class trip_Serializer(serializers.ModelSerializer):
+
+    user = UserProfileSerializer(read_only=True)  # nest user details
+
+
     class Meta:
         model = trip
         fields = '__all__'
@@ -19,6 +24,10 @@ class trip_Serializer(serializers.ModelSerializer):
 
 
 class RequestCustomerForDeliverySerializer(serializers.ModelSerializer):
+
+    user = UserProfileSerializer(read_only=True)  # nest user details
+
+
     class Meta:
         model = Request_Customer_for_Delivery
         fields = '__all__'
