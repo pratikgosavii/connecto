@@ -7,7 +7,7 @@ from vendor.models import *
 
 
 class DeliveryRequest(models.Model):
-    user = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    user = models.ForeignKey("users.User", on_delete=models.CASCADE, blank=True, null=True)
 
     # Parcel Details
     parcel_title = models.CharField(max_length=255)
