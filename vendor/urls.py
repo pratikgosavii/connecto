@@ -14,9 +14,13 @@ router = DefaultRouter()
 # router.register(r'customer-address', customer_address_ViewSet, basename='pet-test-booking')
 
 router.register('add-trip', add_trip_ViewSet, basename='add_trip_ViewSet')
+router.register('request-customer', RequestCustomerForDeliveryViewSet, basename='RequestVendorForDeliveryViewSet')
 
 
 urlpatterns = [
+
+    path('view-customer-request/', ViewCustomerRequestViewSet.as_view(), name='ViewCustomerRequestViewSet'),
+    path('show-open-parcels/', ShowOpenParcels.as_view(), name='ShowOpenParcels'),
 
 
 ]  + router.urls

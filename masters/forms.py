@@ -74,3 +74,19 @@ class FAQForm(forms.ModelForm):
 
 
 
+
+class privacy_policyForm(forms.ModelForm):
+    class Meta:
+        model = privacy_policy
+        fields = ['title', 'description']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control', 'placeholder': 'Enter title'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control', 'placeholder': 'Enter description', 'rows': 3
+            }),
+        }
+
+
+

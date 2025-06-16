@@ -41,6 +41,12 @@ urlpatterns = [
     path('delete-faq/<faq_id>', delete_faq, name='delete_faq'),  # create or fetch list of admins
     path('faqs/', FAQListAPIView.as_view(), name='faq-list-api'),
 
+    path('add-privacy-policy/', add_privacy_policy, name='add_privacy_policy'),  # create or fetch list of admins
+    path('update-privacy-policy/<privacy_policy_id>', update_privacy_policy, name='update_privacy_policy'),  # create or fetch list of admins
+    path('list-privacy-policy/', list_privacy_policy, name='list_privacy_policy'),  # create or fetch list of admins
+    path('delete-privacy-policy/<privacy_policy_id>', delete_privacy_policy, name='delete_privacy_policy'),  # create or fetch list of admins
+    path('privacy-policys/', privacy_policyListAPIView.as_view(), name='privacy_policy-list-api'),
+
     
 
 ]  + router.urls

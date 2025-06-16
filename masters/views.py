@@ -348,7 +348,6 @@ def delete_faq(request, faq_id):
     return redirect('list_faq')
 
 
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -361,3 +360,88 @@ class FAQListAPIView(APIView):
         faqs = FAQ.objects.all()
         serializer = FAQSerializer(faqs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+def add_privacy_policy(request):
+    
+    if request.method == "POST":
+
+        forms = privacy_policyForm(request.POST, request.FILES)
+
+        if forms.is_valid():
+            forms.save()
+            return redirect('list_privacy_policy')
+        else:
+            print(forms.errors)
+            context = {
+                'form': forms
+            }
+
+            return render(request, 'add_privacy_policy.html', context)
+    
+    else:
+
+        # create first row using admin then editing only
+
+        
+
+        return render(request, 'add_privacy_policy.html', { 'form' : privacy_policyForm()})
+
+def update_privacy_policy(request, privacy_policy_id):
+    
+    instance = privacy_policy.objects.get(id = privacy_policy_id)
+
+    if request.method == "POST":
+
+
+        instance = privacy_policy.objects.get(id=privacy_policy_id)
+
+        forms = privacy_policyForm(request.POST, request.FILES, instance=instance)
+
+        if forms.is_valid():
+            forms.save()
+            return redirect('list_privacy_policy')
+        else:
+            print(forms.errors)
+            context = {
+                'form': forms
+            }
+
+            return render(request, 'add_privacy_policy.html', context)
+
+    
+    else:
+
+        # create first row using admin then editing only
+
+        forms = privacy_policyForm(instance=instance)
+                
+        context = {
+            'form': forms
+        }
+
+        return render(request, 'add_privacy_policy.html', context)
+
+
+def list_privacy_policy(request):
+
+    data = privacy_policy.objects.all()
+
+    return render(request, 'list_privacy_policy.html', {'data' : data})
+
+
+def delete_privacy_policy(request, privacy_policy_id):
+
+    data = privacy_policy.objects.get(id = privacy_policy_id).delete()
+
+    return redirect('list_privacy_policy')
+
+
+
+class privacy_policyListAPIView(APIView):
+    def get(self, request):
+        faqs = privacy_policy.objects.all()
+        serializer = privacy_policySerializer(faqs, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    

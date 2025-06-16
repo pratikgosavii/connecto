@@ -4,7 +4,7 @@ from django.db import models
 
 
 
-class add_trip(models.Model):
+class trip(models.Model):
     
     MODE_OF_TRANSPORT_CHOICES = [
         ('private', 'Private Vehicle'),
@@ -57,4 +57,28 @@ class add_trip(models.Model):
 
 
 
+class Request_Customer_for_Delivery(models.Model):
+    
+    user = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    parcel = models.ForeignKey("customer.DeliveryRequest", on_delete=models.CASCADE)
+    trip = models.ForeignKey(trip, on_delete=models.CASCADE)
+    price_min = models.DecimalField(max_digits=10, decimal_places=2)
+    price_max = models.DecimalField(max_digits=10, decimal_places=2)
 
+
+
+    status = models.CharField(max_length=20, choices=[
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+        ('cancelled', 'Cancelled'),
+    ], default='pending')
+
+    request_type = models.CharField(max_length=20, choices=[
+        ('pickup', 'Pickup'),
+        ('drop', 'Drop'),
+    ], default='pickup')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+   

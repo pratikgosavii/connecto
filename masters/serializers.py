@@ -37,3 +37,10 @@ class FAQSerializer(serializers.ModelSerializer):
         model = FAQ
         fields = '__all__'
 
+
+
+class privacy_policySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = privacy_policy
+        fields = '__all__'
+

@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 
+from django.db.models import Max
+
+from vendor.models import *
 
 
 class DeliveryRequest(models.Model):
@@ -34,5 +37,47 @@ class DeliveryRequest(models.Model):
     destination_city = models.ForeignKey("masters.city", on_delete=models.CASCADE, related_name="destination_city")
     destination_contact = models.CharField(max_length=20)
 
+    is_agent_assigned = models.BooleanField(default=False)
+
     legal_confirmation = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+
+class Request_Vendor_for_Delivery(models.Model):
+    
+    user = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    parcel = models.ForeignKey("customer.DeliveryRequest", on_delete=models.CASCADE)
+    trip = models.ForeignKey("vendor.trip", on_delete=models.CASCADE)
+
+    status = models.CharField(max_length=20, choices=[
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+        ('cancelled', 'Cancelled'),
+    ], default='pending')
+
+    request_type = models.CharField(max_length=20, choices=[
+        ('pickup', 'Pickup'),
+        ('drop', 'Drop'),
+    ], default='pickup')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.parcel} -> {self.trip} ({self.status})"
+    
+
+
+class Customer_Order(models.Model):
+
+    
+    tracking_id = models.CharField(max_length=100, unique=True, blank=True, null=True)
+    
+    # def save(self, *args, **kwargs):
+    #     if not self.tracking_id:
+    #         last = Request_Vendor_for_Delivery.objects.aggregate(
+    #             Max('id')
+    #         )['id__max'] or 0
+    #         self.tracking_id = f"TRK{last + 1:05d}"  # Example: TRK00001
+    #     super().save(*args, **kwargs)
