@@ -69,12 +69,12 @@ class RequestCustomerForDeliveryViewSet(viewsets.ModelViewSet):
 
 class ViewCustomerRequestViewSet(generics.ListAPIView):
     
-    serializer_class = RequestCustomerForDeliverySerializer
+    serializer_class = RequestVendorForDeliverySerializer
     filter_backends = [DjangoFilterBackend]
 
     def get_queryset(self):
         user = self.request.user
-        return Request_Customer_for_Delivery.objects.filter(parcel__user=user)
+        return Request_Vendor_for_Delivery.objects.filter(parcel__user=user)
 
 
     

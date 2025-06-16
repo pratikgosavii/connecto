@@ -26,9 +26,9 @@ class trip_Serializer(serializers.ModelSerializer):
 class RequestCustomerForDeliverySerializer(serializers.ModelSerializer):
 
     user = UserProfileSerializer(read_only=True)  # nest user details
-
+    trip_details = trip_Serializer(read_only=True)
 
     class Meta:
         model = Request_Customer_for_Delivery
         fields = '__all__'
-        read_only_fields = ['user', 'created_at', 'status']
+        read_only_fields = ['user', 'created_at', 'trip_details', 'status']
