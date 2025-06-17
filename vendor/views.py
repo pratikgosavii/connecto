@@ -74,7 +74,15 @@ class ViewCustomerRequestViewSet(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return Request_Vendor_for_Delivery.objects.filter(parcel__user=user)
+    
+        parcel_id = self.request.query_params.get('parcel')  # ?parcel=123
+
+        queryset = Request_Vendor_for_Delivery.objects.filter(parcel__user=user)
+
+        if parcel_id:
+            queryset = queryset.filter()
+
+        return queryset
 
 
     
