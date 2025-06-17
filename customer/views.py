@@ -29,13 +29,19 @@ class TripSearchAPIView(generics.ListAPIView):
 
 
 class ViewVendorRequestViewSet(generics.ListAPIView):
-    
     serializer_class = RequestCustomerForDeliverySerializer
     filter_backends = [DjangoFilterBackend]
 
     def get_queryset(self):
         user = self.request.user
-        return Request_Customer_for_Delivery.objects.filter(parcel__user=user)
+        parcel_id = self.request.query_params.get('parcel')  # ?parcel=123
+
+        queryset = Request_Customer_for_Delivery.objects.filter(parcel__user=user)
+
+        if parcel_id:
+            queryset = queryset.filter(parcel_id=parcel_id)
+
+        return queryset
 
 
 
