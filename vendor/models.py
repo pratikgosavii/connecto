@@ -39,7 +39,6 @@ class trip(models.Model):
     train_pnr = models.CharField(max_length=50, null=True, blank=True)
 
     parcel_capacity = models.IntegerField()
-    travelling_date = models.DateField()
     agreed = models.BooleanField(default=False)
 
     # Pickup Location
