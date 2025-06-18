@@ -14,8 +14,8 @@ from users.serializer import *
 class trip_Serializer(serializers.ModelSerializer):
 
     user = UserProfileSerializer(read_only=True)  # nest user details
-    source_details = city_Serializer(read_only=True)
-    destination_details = city_Serializer(read_only=True)
+    source_details = city_Serializer(source="source", read_only=True)
+    destination_details = city_Serializer(source="destination", read_only=True)
 
     class Meta:
         model = trip
