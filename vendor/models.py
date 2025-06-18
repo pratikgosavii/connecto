@@ -66,8 +66,7 @@ class Request_Customer_for_Delivery(models.Model):
     user = models.ForeignKey("users.User", on_delete=models.CASCADE)
     parcel = models.ForeignKey("customer.DeliveryRequest", on_delete=models.CASCADE)
     trip = models.ForeignKey(trip, on_delete=models.CASCADE)
-    price_min = models.DecimalField(max_digits=10, decimal_places=2)
-    price_max = models.DecimalField(max_digits=10, decimal_places=2)
+    requested_price = models.DecimalField(max_digits=10, decimal_places=2)
 
 
 
