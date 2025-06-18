@@ -94,3 +94,13 @@ class user_kyc(models.Model):
     approved = models.BooleanField(default=False)
 
     
+
+
+
+class UserCredit(models.Model):
+    user = models.OneToOneField("users.User", on_delete=models.CASCADE)
+    credits = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.user} - {self.credits} credits"
+

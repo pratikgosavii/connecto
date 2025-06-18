@@ -6,6 +6,8 @@ from masters.models import *
 from masters.serializers import *
 
 
+from customer.models import *
+
 
 from rest_framework import serializers
 
@@ -33,6 +35,31 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'firebase_uid': {'required': True},
             'email': {'required': False, 'allow_blank': True, 'allow_null': True},
         }
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        request = self.context.get('request')
+        parcel = self.context.get('parcel')
+        trip = self.context.get('trip')
+
+        # By default, always hide mobile
+        hide_mobile = True
+
+        # If context provided and user is connected, show mobile
+        if request and parcel and trip:
+            is_connected = UserConnectionLog.objects.filter(
+                user=request.user,
+                parcel=parcel,
+                trip=trip,
+            ).exists()
+            if is_connected:
+                hide_mobile = False
+
+        if hide_mobile:
+            data.pop('mobile', None)
+
+        return data
 
 
 

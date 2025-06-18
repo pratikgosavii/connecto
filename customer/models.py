@@ -73,16 +73,43 @@ class Request_Vendor_for_Delivery(models.Model):
         return f"{self.parcel} -> {self.trip} ({self.status})"
     
 
+class UserConnectionLog(models.Model):
+    user = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    parcel = models.ForeignKey("customer.DeliveryRequest", on_delete=models.CASCADE)
+    trip = models.ForeignKey("vendor.trip", on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'parcel', 'trip')
+
+
+
 
 class Customer_Order(models.Model):
 
     
-    tracking_id = models.CharField(max_length=100, unique=True, blank=True, null=True)
-    
-    # def save(self, *args, **kwargs):
-    #     if not self.tracking_id:
-    #         last = Request_Vendor_for_Delivery.objects.aggregate(
-    #             Max('id')
-    #         )['id__max'] or 0
-    #         self.tracking_id = f"TRK{last + 1:05d}"  # Example: TRK00001
-    #     super().save(*args, **kwargs)
+    tracking_id = models.CharField(max_length=100, unique=True)
+
+    parcel = models.ForeignKey("customer.DeliveryRequest", on_delete=models.CASCADE)
+    agent = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    user = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name="orders_user")
+
+    STATUS_CHOICES = [
+        ("assigned", "Assigned"),
+        ("in_transit", "In Transit"),
+        ("delivered", "Delivered"),
+        ("cancelled", "Cancelled"),
+    ]
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default="assigned")
+
+    assigned_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if not self.tracking_id:
+            last_id = Customer_Order.objects.aggregate(Max('id'))['id__max'] or 0
+            self.tracking_id = f"TRK{last_id + 1:05d}"  # Example: TRK00001
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Order {self.tracking_id} - Parcel #{self.parcel.id}"

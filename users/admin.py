@@ -3,6 +3,9 @@ from django.contrib.auth.admin import UserAdmin
 from .models import User
 from .forms import *  # Import your custom form
 
+
+from .models import *
+
 class CustomUserAdmin(UserAdmin):
    
     add_form = CustomUserCreationForm
@@ -29,3 +32,4 @@ class CustomUserAdmin(UserAdmin):
     ordering = ('mobile',)
 
 admin.site.register(User, CustomUserAdmin)
+admin.site.register(UserCredit)
