@@ -19,6 +19,9 @@ router.register('request-customer', RequestCustomerForDeliveryViewSet, basename=
 
 urlpatterns = [
 
+    path('search-parcel/', ParcelSearchAPIView.as_view(), name='search-parcel'),
+
+
     path('view-customer-request/', ViewCustomerRequestViewSet.as_view(), name='ViewCustomerRequestViewSet'),
     path('show-open-parcels/', ShowOpenParcels.as_view(), name='ShowOpenParcels'),
 

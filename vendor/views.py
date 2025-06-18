@@ -65,6 +65,15 @@ class RequestCustomerForDeliveryViewSet(viewsets.ModelViewSet):
         return Response({'detail': 'Cannot cancel this request.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
+from customer.filters import *
+
+class ParcelSearchAPIView(generics.ListAPIView):
+    queryset = DeliveryRequest.objects.all()
+    serializer_class = DeliveryRequestSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = DeliveryRequestFilter
+
+
 
 
 class ViewCustomerRequestViewSet(generics.ListAPIView):
