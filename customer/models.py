@@ -6,6 +6,13 @@ from django.db.models import Max
 from vendor.models import *
 
 
+
+class RequestType(models.Model):
+    name = models.CharField(max_length=50)
+    # other fields ...
+
+
+
 class DeliveryRequest(models.Model):
     user = models.ForeignKey("users.User", on_delete=models.CASCADE)
 
@@ -28,6 +35,8 @@ class DeliveryRequest(models.Model):
     pickup_state = models.CharField(max_length=100)
     pickup_city = models.ForeignKey("masters.city", on_delete=models.CASCADE, related_name="pickup_city")
     pickup_contact = models.CharField(max_length=20)
+
+    request_type = models.ManyToManyField(RequestType)
 
     # Destination
     destination_address_line1 = models.CharField(max_length=255)
@@ -57,10 +66,6 @@ class Request_Vendor_for_Delivery(models.Model):
         ('cancelled', 'Cancelled'),
     ], default='pending')
 
-    request_type = models.CharField(max_length=20, choices=[
-        ('pickup', 'Pickup'),
-        ('drop', 'Drop'),
-    ], default='pickup')
 
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -6,10 +6,20 @@ from vendor.serializers import *
 from users.serializer import *
 
 
-
+class RequestTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RequestType
+        fields = ['id', 'name']
 
 
 class DeliveryRequestSerializer(serializers.ModelSerializer):
+
+    request_type_details = RequestTypeSerializer(source="request_type", many=True, read_only=True)
+
+    request_type = serializers.PrimaryKeyRelatedField(
+            queryset=RequestType.objects.all(),
+            many=True
+        )
 
     user = UserProfileSerializer(read_only=True)  # nest user details
     pickup_city_details = city_Serializer(source="pickup_city", read_only=True)
@@ -18,7 +28,7 @@ class DeliveryRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeliveryRequest
         fields = '__all__'
-        read_only_fields = ['user', 'created_at', 'is_agent_assigned']
+        read_only_fields = ['user', 'request_type_details', 'created_at', 'is_agent_assigned']
 
 
 

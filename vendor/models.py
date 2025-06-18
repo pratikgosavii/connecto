@@ -50,6 +50,10 @@ class trip(models.Model):
     pickup_city = models.CharField(max_length=100)
     pickup_contact = models.CharField(max_length=20)
 
+    departure_datetime = models.DateTimeField()
+    arrival_datetime = models.DateTimeField()
+
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

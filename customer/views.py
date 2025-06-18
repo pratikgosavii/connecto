@@ -28,6 +28,19 @@ class TripSearchAPIView(generics.ListAPIView):
     filterset_class = TripFilter
 
 
+class avaiable_vendors(generics.ListAPIView):
+    serializer_class = trip_Serializer
+    filter_backends = [DjangoFilterBackend]
+
+    def get_queryset(self):
+        
+        queryset = trip.objects.filter(
+            start_date_time__gt=timezone.now(),  # only future trips
+        )
+
+
+        return queryset
+
 class ViewVendorRequestViewSet(generics.ListAPIView):
     serializer_class = RequestCustomerForDeliverySerializer
     filter_backends = [DjangoFilterBackend]

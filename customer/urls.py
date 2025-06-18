@@ -11,6 +11,7 @@ router.register('request-vendor', RequestVendorForDeliveryViewSet, basename='Req
 urlpatterns = router.urls + [
 
     path('search-trips/', TripSearchAPIView.as_view(), name='search-trips'),
+    path('avaiable-vendors/', avaiable_vendors.as_view(), name='avaiable_vendors'),
     path('view-vendor-request/', ViewVendorRequestViewSet.as_view(), name='ViewVendorRequestViewSet'),
 
 
