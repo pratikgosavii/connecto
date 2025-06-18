@@ -35,11 +35,15 @@ class avaiable_vendors(generics.ListAPIView):
     def get_queryset(self):
         
         queryset = trip.objects.filter(
-            start_date_time__gt=timezone.now(),  # only future trips
+            departure_datetime__gt=timezone.now(),  # only future trips
         )
 
 
         return queryset
+    
+
+from django.utils import timezone  # ✅ CORRECT
+
 
 class ViewVendorRequestViewSet(generics.ListAPIView):
     serializer_class = RequestCustomerForDeliverySerializer
@@ -49,10 +53,14 @@ class ViewVendorRequestViewSet(generics.ListAPIView):
         user = self.request.user
         parcel_id = self.request.query_params.get('parcel')  # ?parcel=123
 
+        print(parcel_id)
         queryset = Request_Customer_for_Delivery.objects.filter(parcel__user=user)
 
         if parcel_id:
-            queryset = queryset.filter()
+            print('-------------------------------')
+            print('-------------------------------')
+            print('-------------------------------')
+            queryset = queryset.filter(parcel__id = parcel_id)
 
         return queryset
 

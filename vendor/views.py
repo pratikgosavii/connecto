@@ -80,7 +80,7 @@ class ViewCustomerRequestViewSet(generics.ListAPIView):
         queryset = Request_Vendor_for_Delivery.objects.filter(parcel__user=user)
 
         if parcel_id:
-            queryset = queryset.filter()
+            queryset = queryset.filter(parcel__id = parcel_id)
 
         return queryset
 
