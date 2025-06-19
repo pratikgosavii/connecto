@@ -77,6 +77,8 @@ class SignupView(APIView):
 
             user.save()
 
+            user_details = UserProfileSerializer(user).data
+
             refresh = RefreshToken.for_user(user)
             return Response({
                 "access": str(refresh.access_token),
@@ -86,6 +88,9 @@ class SignupView(APIView):
                     "mobile": user.mobile,
                     "is_agent": user.is_agent,
                     "created": created,
+                },
+                "user_details": {
+                    user_details
                 }
             })
 
