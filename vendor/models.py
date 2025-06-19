@@ -83,4 +83,6 @@ class Request_Customer_for_Delivery(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
-   
+    
+    class Meta:
+        unique_together = ('trip', 'parcel') 

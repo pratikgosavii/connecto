@@ -53,6 +53,12 @@ class RequestCustomerForDeliveryViewSet(viewsets.ModelViewSet):
         return Request_Customer_for_Delivery.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
+        trip = serializer.validated_data.get('trip')
+        parcel = serializer.validated_data.get('parcel')
+
+        if Request_Customer_for_Delivery.objects.filter(trip=trip, parcel=parcel).exists():
+            raise serializers.ValidationError("A request already exists for this trip and parcel.")
+
         serializer.save(user=self.request.user)
 
     @action(detail=True, methods=['post'])
