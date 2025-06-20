@@ -29,22 +29,22 @@ class DeliveryRequest(models.Model):
     delivery_date = models.DateField()
 
     # Pickup Location
-    pickup_address_line1 = models.CharField(max_length=255)
+    pickup_address_line1 = models.CharField(max_length=255, blank=True, null=True)
     pickup_address_line2 = models.CharField(max_length=255, blank=True, null=True)
-    pickup_pincode = models.CharField(max_length=10)
-    pickup_state = models.CharField(max_length=100)
-    pickup_city = models.ForeignKey("masters.city", on_delete=models.CASCADE, related_name="pickup_city")
-    pickup_contact = models.CharField(max_length=20)
+    pickup_pincode = models.CharField(max_length=10, blank=True, null=True)
+    pickup_state = models.CharField(max_length=100, blank=True, null=True)
+    pickup_city = models.ForeignKey("masters.city", on_delete=models.CASCADE, related_name="pickup_city", blank=True, null=True)
+    pickup_contact = models.CharField(max_length=20, blank=True, null=True)
 
     request_type = models.ManyToManyField(RequestType)
 
     # Destination
-    destination_address_line1 = models.CharField(max_length=255)
+    destination_address_line1 = models.CharField(max_length=255, blank=True, null=True)
     destination_address_line2 = models.CharField(max_length=255, blank=True, null=True)
-    destination_pincode = models.CharField(max_length=10)
-    destination_state = models.CharField(max_length=100)
-    destination_city = models.ForeignKey("masters.city", on_delete=models.CASCADE, related_name="destination_city")
-    destination_contact = models.CharField(max_length=20)
+    destination_pincode = models.CharField(max_length=10, blank=True, null=True)
+    destination_state = models.CharField(max_length=100, blank=True, null=True)
+    destination_city = models.ForeignKey("masters.city", on_delete=models.CASCADE, related_name="destination_city", blank=True, null=True)
+    destination_contact = models.CharField(max_length=20, blank=True, null=True)
 
     is_agent_assigned = models.BooleanField(default=False)
 
