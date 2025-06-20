@@ -210,6 +210,11 @@ class get_chat_token(APIView):
         api_key = os.getenv("STREAM_API_KEY")
         api_secret = os.getenv("STREAM_API_SECRET")
 
+        print("✅ STREAM_API_KEY from .env:", os.getenv("STREAM_API_KEY"))
+
+        print(api_key)
+        print(api_secret)
+
         if not api_key or not api_secret:
             return Response({"error": "Missing Stream credentials"}, status=500)
 

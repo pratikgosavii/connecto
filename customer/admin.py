@@ -7,3 +7,4 @@ from .models import *
 
 admin.site.register(DeliveryRequest)
 admin.site.register(Customer_Order)
+admin.site.register(UserConnectionLog)

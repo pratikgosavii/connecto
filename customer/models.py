@@ -12,7 +12,6 @@ class RequestType(models.Model):
     # other fields ...
 
 
-
 class DeliveryRequest(models.Model):
     user = models.ForeignKey("users.User", on_delete=models.CASCADE)
 
