@@ -89,10 +89,11 @@ class SignupView(APIView):
                     "is_agent": user.is_agent,
                     "created": created,
                 },
-                "user_details": {
+                "user_details": 
                     user_details
-                }
+                
             })
+
 
         except Exception as e:
             return Response({"error": "Invalid or expired Firebase token."}, status=400)

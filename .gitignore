@@ -6,5 +6,6 @@ __pycache__/
 connecto/firebase_key.json
 media
 .env
+connecto/.env
 # Ignore wsgi.py
 
