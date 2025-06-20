@@ -218,11 +218,11 @@ class get_chat_token(APIView):
         if not api_key or not api_secret:
             return Response({"error": "Missing Stream credentials"}, status=500)
 
-        # UserConnectionLog_id = request.GET.get("UserConnectionLog_id")
-        # user_id = str(request.user.id)
+        UserConnectionLog_id = request.GET.get("UserConnectionLog_id")
+        user_id = str(request.user.id)
 
-        # if not UserConnectionLog_id:
-        #     return Response({"error": "Missing UserConnectionLog_id"}, status=400)
+        if not UserConnectionLog_id:
+            return Response({"error": "Missing UserConnectionLog_id"}, status=400)
 
         try:
             UserConnectionLog_instance = UserConnectionLog.objects.get(id=UserConnectionLog_id, user = request.user)
