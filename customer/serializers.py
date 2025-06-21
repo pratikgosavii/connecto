@@ -12,12 +12,6 @@ class RequestTypeSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 
-class Customer_OrderSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Customer_Order
-        fields = '__all__'
-
-
 class DeliveryRequestSerializer(serializers.ModelSerializer):
 
     request_type_details = RequestTypeSerializer(source="request_type", many=True, read_only=True)
@@ -26,7 +20,7 @@ class DeliveryRequestSerializer(serializers.ModelSerializer):
             queryset=RequestType.objects.all(),
             many=True
         )
-
+    
     user = UserProfileSerializer(read_only=True)  # nest user details
     pickup_city_details = city_Serializer(source="pickup_city", read_only=True)
     destination_city_details = city_Serializer(source="destination_city", read_only=True)
@@ -35,6 +29,17 @@ class DeliveryRequestSerializer(serializers.ModelSerializer):
         model = DeliveryRequest
         fields = '__all__'
         read_only_fields = ['user', 'request_type_details', 'created_at', 'is_agent_assigned']
+
+
+class Customer_OrderSerializer(serializers.ModelSerializer):
+
+    trip_details = trip_Serializer(source='trip', read_only=True)
+    parcel_details = DeliveryRequestSerializer(source='parcel', read_only=True)
+
+
+    class Meta:
+        model = Customer_Order
+        fields = '__all__'
 
 
 
