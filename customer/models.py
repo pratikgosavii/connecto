@@ -97,7 +97,8 @@ class Customer_Order(models.Model):
         ("assigned", "Assigned"),
         ("in_transit", "In Transit"),
         ("delivered", "Delivered"),
-        ("cancelled", "Cancelled"),
+        ("cancelled_by_vendor", "Cancelled By Vendor"),
+        ("cancelled_by_customer", "Cancelled By Customer"),
     ]
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default="assigned")
 
