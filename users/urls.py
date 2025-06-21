@@ -29,6 +29,7 @@ urlpatterns = [
     path('logout/', logout_page, name='logout'),
 
     path('user_list/', user_list, name='user_list'),
+    path('DeleteUserView/', DeleteUserView.as_view(), name='DeleteUserView'),
     
 
 ] + router.urls

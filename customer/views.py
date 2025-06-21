@@ -202,6 +202,20 @@ import os
 from .utils import generate_channel_id
 
 
+class MyShipmentsViewSet(viewsets.ModelViewSet):
+
+    queryset = Customer_Order.objects.all()
+    serializer_class = Customer_OrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+
+    def get_queryset(self):
+
+        return Customer_Order.objects.filter(user=self.request.user)
+
+      
+
+
 class get_chat_token(APIView):
     
     permission_classes = [IsAuthenticated]
@@ -225,7 +239,7 @@ class get_chat_token(APIView):
             return Response({"error": "Missing UserConnectionLog_id"}, status=400)
 
         try:
-            UserConnectionLog_instance = UserConnectionLog.objects.get(id=UserConnectionLog_id)
+            UserConnectionLog_instance = UserConnectionLog.objects.get(id=UserConnectionLog_id, user = request.user)
         except UserConnectionLog.DoesNotExist:
             return Response({"error": "Please use connect first"}, status=404)
 
@@ -276,7 +290,7 @@ class get_chat_vendor_token(APIView):
             return Response({"error": "Missing UserConnectionLog_id"}, status=400)
 
         try:
-            UserConnectionLog_instance = UserConnectionLog.objects.get(id=UserConnectionLog_id, user = request.user)
+            UserConnectionLog_instance = UserConnectionLog.objects.get(id=UserConnectionLog_id)
         except UserConnectionLog.DoesNotExist:
             return Response({"error": "Please use connect first"}, status=404)
 

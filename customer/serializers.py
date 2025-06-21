@@ -12,6 +12,12 @@ class RequestTypeSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 
+class Customer_OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer_Order
+        fields = '__all__'
+
+
 class DeliveryRequestSerializer(serializers.ModelSerializer):
 
     request_type_details = RequestTypeSerializer(source="request_type", many=True, read_only=True)

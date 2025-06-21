@@ -56,6 +56,10 @@ class SignupView(APIView):
             created = False
 
             if user:
+                if not user.is_active:
+                    user.is_active = True  # Reactivate if needed
+                    user.save()
+
                 if user.firebase_uid != uid:
                     user.firebase_uid = uid
                     user.save()
@@ -229,3 +233,15 @@ def user_list(request):
     data = User.objects.all()
 
     return render(request, 'user_list.html', { 'data' : data})
+
+
+
+
+class DeleteUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+        user.is_active = False
+        user.save()
+        return Response({"message": "User account deactivated successfully."}, status=status.HTTP_200_OK)

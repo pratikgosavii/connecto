@@ -7,6 +7,7 @@ from .views import *
 router = DefaultRouter()
 router.register('delivery-request', DeliveryRequestViewSet, basename='DeliveryRequestViewSet')
 router.register('request-vendor', RequestVendorForDeliveryViewSet, basename='RequestVendorForDeliveryViewSet')
+router.register('my-shipments', MyShipmentsViewSet, basename='my_shipmentsViewSet')
 
 urlpatterns = router.urls + [
 
@@ -19,7 +20,7 @@ urlpatterns = router.urls + [
     path('connect-with-vendor/', connect_with_agent, name='connect_with_agent'),
 
     path("stream/get-chat-token/", get_chat_token.as_view()),
-    path("stream/get--vendor-chat-token/", get_chat_token.as_view()),
+    path("stream/get-vendor-chat-token/", get_chat_token.as_view()),
 
 
 ]
