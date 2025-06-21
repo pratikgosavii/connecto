@@ -159,20 +159,19 @@ def assign_parcel_to_agent(request):
     try:
         parcel = DeliveryRequest.objects.get(id=parcel_id, user=user)
         trip_instance = trip.objects.get(id=trip_id)
-        agent_user = trip_instance.user  # Assuming trip.user is the agent
 
         # Check if user is connected with this agent for this parcel & trip
         if not UserConnectionLog.objects.filter(user=user, parcel=parcel, trip=trip_instance).exists():
             return Response({"error": "You are not connected with this agent for this parcel"}, status=403)
 
         # Check if already assigned to prevent duplicates or logic for update
-        if Customer_Order.objects.filter(parcel=parcel, agent=agent_user).exists():
+        if Customer_Order.objects.filter(parcel=parcel, trip=trip_instance).exists():
             return Response({"message": "Parcel already assigned to this agent"}, status=200)
 
         # Create Customer_Order / assignment
         order = Customer_Order.objects.create(
             parcel=parcel,
-            agent=agent_user,
+            trip =trip_instance,
             user=user,
             status='assigned',
             assigned_at=timezone.now(),

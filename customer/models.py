@@ -90,7 +90,7 @@ class Customer_Order(models.Model):
     tracking_id = models.CharField(max_length=100, unique=True)
 
     parcel = models.ForeignKey("customer.DeliveryRequest", on_delete=models.CASCADE)
-    agent = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    trip = models.ForeignKey("vendor.trip", on_delete=models.CASCADE)
     user = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name="orders_user")
 
     STATUS_CHOICES = [
