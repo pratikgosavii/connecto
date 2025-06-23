@@ -22,8 +22,12 @@ urlpatterns = [
 
     path('search-parcel/', ParcelSearchAPIView.as_view(), name='search-parcel'),
 
+    path('my-shipments/<int:pk>/update-status/', update_shipment_status, name='update-shipment-status'),
 
+    
     path('view-customer-request/', ViewCustomerRequestViewSet.as_view(), name='ViewCustomerRequestViewSet'),
+    path('show-open-parcels/', ShowOpenParcels.as_view(), name='ShowOpenParcels'),
+    
     path('show-open-parcels/', ShowOpenParcels.as_view(), name='ShowOpenParcels'),
 
 

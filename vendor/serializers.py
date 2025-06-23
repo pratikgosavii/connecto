@@ -38,3 +38,15 @@ class RequestCustomerForDeliverySerializer(serializers.ModelSerializer):
         model = Request_Customer_for_Delivery
         fields = '__all__'
         read_only_fields = ['user', 'created_at', 'trip_details', 'status']
+
+
+
+# serializers.py
+
+from rest_framework import serializers
+from customer.models import Customer_Order
+
+class VendorShipmentStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer_Order
+        fields = ['status']  # Only 'status' is editable

@@ -123,3 +123,23 @@ class VendorMyShipmentsViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
 
         return Customer_Order.objects.filter(trip__user=self.request.user)
+
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework import status, permissions
+
+
+@api_view(['PATCH'])
+@permission_classes([permissions.IsAuthenticated])
+def update_shipment_status(request, pk):
+    try:
+        order = Customer_Order.objects.get(pk=pk, trip__user=request.user)
+    except Customer_Order.DoesNotExist:
+        return Response({'detail': 'Shipment not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = VendorShipmentStatusSerializer(order, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
