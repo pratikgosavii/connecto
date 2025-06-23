@@ -15,6 +15,7 @@ router = DefaultRouter()
 
 router.register('add-trip', add_trip_ViewSet, basename='add_trip_ViewSet')
 router.register('request-customer', RequestCustomerForDeliveryViewSet, basename='RequestVendorForDeliveryViewSet')
+router.register('vendor-my-shipments', VendorMyShipmentsViewSet, basename='Vendormy_shipmentsViewSet')
 
 
 urlpatterns = [

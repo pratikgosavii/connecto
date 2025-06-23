@@ -110,3 +110,16 @@ class ShowOpenParcels(generics.ListAPIView):
         user = self.request.user
         return DeliveryRequest.objects.filter(is_agent_assigned=False)
 
+
+
+
+class VendorMyShipmentsViewSet(viewsets.ModelViewSet):
+
+    queryset = Customer_Order.objects.all()
+    serializer_class = Customer_OrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+
+    def get_queryset(self):
+
+        return Customer_Order.objects.filter(trip__user=self.request.user)
