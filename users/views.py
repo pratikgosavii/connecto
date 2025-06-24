@@ -245,3 +245,18 @@ class DeleteUserView(APIView):
         user.is_active = False
         user.save()
         return Response({"message": "User account deactivated successfully."}, status=status.HTTP_200_OK)
+
+
+
+# views.py
+
+from rest_framework import generics, permissions
+from .models import Notification
+from .serializer import NotificationSerializer
+
+class UserNotificationListView(generics.ListAPIView):
+    serializer_class = NotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Notification.objects.filter(user=self.request.user).order_by('-created_at')

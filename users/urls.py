@@ -24,6 +24,8 @@ router.register(r'user-kyc', User_KYCViewSet, basename='user-kyc')
 urlpatterns = [
     path('login-admin/', login_admin, name='login_admin'),
     path('signup/', SignupView.as_view(), name='signup'),
+
+    path('notifications/', UserNotificationListView.as_view(), name='user-notifications'),
     
     path('reset-password/', ResetPasswordView.as_view(), name='ResetPasswordView'),
     path('logout/', logout_page, name='logout'),

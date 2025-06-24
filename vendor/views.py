@@ -99,6 +99,79 @@ class ViewCustomerRequestViewSet(generics.ListAPIView):
 
         return queryset
 
+    def post(self, request):
+        action_type = request.data.get('action')   # 'accept' or 'cancel'
+        request_id = request.data.get('id')        # delivery request ID
+
+        if not request_id or action_type not in ['accept', 'cancel']:
+            return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            delivery_request = Request_Vendor_for_Delivery.objects.get(id=request_id, trip__user=request.user)
+        except Request_Vendor_for_Delivery.DoesNotExist:
+            return Response({'error': 'Request not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Handle actions
+        if action_type == 'accept':
+            if delivery_request.status == 'pending':
+                delivery_request.status = 'accepted'
+                delivery_request.save()
+                Notification.objects.create(
+                    user=delivery_request.user,
+                    title='Delivery Request Accepted',
+                    message=f'Your delivery request #{delivery_request.id} has been accepted.'
+                )
+                return Response({'detail': 'Request accepted.'})
+            return Response({'error': 'Only pending requests can be accepted.'}, status=400)
+
+        if action_type == 'cancel':
+            if delivery_request.status in ['pending', 'accepted']:
+                delivery_request.status = 'cancelled'
+                delivery_request.save()
+                Notification.objects.create(
+                    user=delivery_request.user,
+                    title='Delivery Request Cancelled',
+                    message=f'Your delivery request #{delivery_request.id} has been cancelled.'
+                )
+                return Response({'detail': 'Request cancelled.'})
+            return Response({'error': 'Cannot cancel this request.'}, status=400)
+
+class RequestVendorForDeliveryViewSet(viewsets.ModelViewSet):
+
+    serializer_class = RequestVendorForDeliverySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Request_Vendor_for_Delivery.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        request_obj = serializer.save(user=self.request.user)
+
+        # ✅ Create notification on creation
+        Notification.objects.create(
+            user=self.trip.user,
+            title='Delivery Request Created',
+            message=f'Your delivery request #{request_obj.id} has been submitted successfully.'
+        )
+
+    @action(detail=True, methods=['post'])
+    def cancel(self, request, pk=None):
+        delivery_request = self.get_object()
+        if delivery_request.status in ['accepted', 'pending']:
+            delivery_request.status = 'cancelled'
+            delivery_request.save()
+
+            # ✅ Create notification on cancel
+            Notification.objects.create(
+                user=request.user,
+                title='Delivery Request Cancelled',
+                message=f'Your delivery request #{delivery_request.id} has been cancelled.'
+            )
+
+            return Response({'detail': 'Request cancelled and notification sent.'}, status=status.HTTP_200_OK)
+
+        return Response({'detail': 'Cannot cancel this request.'}, status=status.HTTP_400_BAD_REQUEST)
+
 
     
 class ShowOpenParcels(generics.ListAPIView):
@@ -140,6 +213,11 @@ def update_shipment_status(request, pk):
 
     serializer = VendorShipmentStatusSerializer(order, data=request.data, partial=True)
     if serializer.is_valid():
-        serializer.save()
+        instance = serializer.save()
+        Notification.objects.create(
+                    user=instance.user,
+                    title='Delivery Status Changed',
+                    message=f'Your delivery request #{instance.id} has been {instance.status}.'
+                )
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

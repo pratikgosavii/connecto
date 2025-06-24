@@ -72,7 +72,6 @@ from rest_framework import status
 
 class RequestVendorForDeliveryViewSet(viewsets.ModelViewSet):
 
-
     serializer_class = RequestVendorForDeliverySerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -80,17 +79,16 @@ class RequestVendorForDeliveryViewSet(viewsets.ModelViewSet):
         return Request_Vendor_for_Delivery.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        request_obj = serializer.save(user=self.request.user)
 
-    @action(detail=True, methods=['post'])
-    def cancel(self, request, pk=None):
-        delivery_request = self.get_object()
-        if delivery_request.status in ['accepted', 'pending']:
-            delivery_request.status = 'cancelled'
-            delivery_request.save()
-            return Response({'detail': 'Request cancelled successfully.'}, status=status.HTTP_200_OK)
-        return Response({'detail': 'Cannot cancel this request.'}, status=status.HTTP_400_BAD_REQUEST)
+        # ✅ Create notification on creation
+        Notification.objects.create(
+            user=self.trip.user,
+            title='Delivery Request Created',
+            message=f'Your delivery request #{request_obj.id} has been submitted successfully.'
+        )
 
+   
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated

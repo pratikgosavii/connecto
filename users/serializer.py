@@ -68,3 +68,15 @@ class User_KYCSerializer(serializers.ModelSerializer):
         model = user_kyc
         fields = ['id', 'user', 'adhar_card', 'pan_card', 'driving_licence', 'approved']
         read_only_fields = ['user', 'approved']
+
+
+
+# serializers.py
+
+from rest_framework import serializers
+from .models import Notification
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ['id', 'title', 'message', 'is_read', 'created_at']
