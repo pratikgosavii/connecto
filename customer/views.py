@@ -83,7 +83,7 @@ class RequestVendorForDeliveryViewSet(viewsets.ModelViewSet):
 
         # ✅ Create notification on creation
         Notification.objects.create(
-            user=self.trip.user,
+            trip__user=self.request.user,
             title='Delivery Request Created',
             message=f'Your delivery request #{request_obj.id} has been submitted successfully.'
         )

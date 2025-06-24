@@ -9,3 +9,4 @@ media
 connecto/.env
 # Ignore wsgi.py
 
+#  RequestType.objects.bulk_create([RequestType(name="Self Drop"),RequestType(name="Home Pickup"),RequestType(name="Home Drop"),RequestType(name="Self Pickup"),])
