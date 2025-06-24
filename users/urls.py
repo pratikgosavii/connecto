@@ -26,6 +26,7 @@ urlpatterns = [
     path('signup/', SignupView.as_view(), name='signup'),
 
     path('notifications/', UserNotificationListView.as_view(), name='user-notifications'),
+    path('mark-notification-as-read/<pk>', mark_notification_read.as_view(), name='mark_notification_read'),
     
     path('reset-password/', ResetPasswordView.as_view(), name='ResetPasswordView'),
     path('logout/', logout_page, name='logout'),

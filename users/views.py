@@ -260,3 +260,18 @@ class UserNotificationListView(generics.ListAPIView):
 
     def get_queryset(self):
         return Notification.objects.filter(user=self.request.user).order_by('-created_at')
+
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def mark_notification_read(request, pk):
+    try:
+        note = Notification.objects.get(id=pk, user=request.user)
+        note.is_read = True
+        note.save()
+        return Response({'status': 'marked as read'})
+    except Notification.DoesNotExist:
+        return Response({'error': 'Not found'}, status=404)
