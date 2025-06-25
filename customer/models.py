@@ -57,12 +57,14 @@ class Request_Vendor_for_Delivery(models.Model):
     user = models.ForeignKey("users.User", on_delete=models.CASCADE)
     parcel = models.ForeignKey("customer.DeliveryRequest", on_delete=models.CASCADE)
     trip = models.ForeignKey("vendor.trip", on_delete=models.CASCADE)
+    request_price = models.DecimalField(max_digits=10, decimal_places=2)
 
-    status = models.CharField(max_length=20, choices=[
+    status = models.CharField(max_length=30, choices=[
         ('pending', 'Pending'),
         ('accepted', 'Accepted'),
-        ('rejected', 'Rejected'),
-        ('cancelled', 'Cancelled'),
+        ("rejected_by_vendor", "Rejected By Vendor"),
+        ("rejected_by_customer", "Rejected By Customer"),
+        ('cancelled_by_customer', 'Cancelled'),
     ], default='pending')
 
 
