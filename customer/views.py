@@ -260,8 +260,16 @@ class get_chat_token(APIView):
         client = StreamChat(api_key=api_key, api_secret=api_secret)
 
         # Upsert both users
-        client.upsert_user({"id": user_id})
-        client.upsert_user({"id": vendor_user_id})
+      
+        client.upsert_user({
+            "id": str(user_id),
+            "name": request.user.get_full_name() or request.user.username,
+        })
+
+        client.upsert_user({
+            "id": str(vendor_user_id),
+            "name": request.user.get_full_name() or request.user.username,
+        })
 
         vendor_user_id = str(UserConnectionLog_instance.trip.user.id)
 
