@@ -47,7 +47,7 @@ class RequestVendorForDeliverySerializer(serializers.ModelSerializer):
 
     user = UserProfileSerializer(read_only=True)  # nest user details
     trip_details = trip_Serializer(source='trip', read_only=True)
-    parcel_details = DeliveryRequestSerializer(read_only=True)
+    parcel_details = DeliveryRequestSerializer(source="parcel", read_only=True)
     
     class Meta:
         model = Request_Vendor_for_Delivery
