@@ -124,11 +124,12 @@ def connect_with_agent(request):
         user_credit.save()
 
         # Log connection
-        UserConnectionLog.objects.create(user=user, parcel=parcel, trip=trip_instance)
+        instance = UserConnectionLog.objects.create(user=user, parcel=parcel, trip=trip_instance)
 
         agent_data = UserProfileSerializer(trip_instance.user, context={'request': request,'parcel': parcel,'trip': trip_instance}).data
         return Response({
             "message": "Connected successfully",
+            "connect_id" : instance.id
             "agent": agent_data
         }, status=200)
 
