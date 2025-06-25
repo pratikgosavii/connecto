@@ -20,7 +20,7 @@ urlpatterns = router.urls + [
     path('connect-with-vendor/', connect_with_agent, name='connect_with_agent'),
 
     path("stream/get-chat-token/", get_chat_token.as_view()),
-    path("stream/get-vendor-chat-token/", get_chat_token.as_view()),
+    path("stream/get-vendor-chat-token/", get_chat_vendor_token.as_view()),
 
 
 ]
