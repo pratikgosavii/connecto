@@ -109,9 +109,15 @@ def connect_with_agent(request):
         # Check if already connected
         if UserConnectionLog.objects.filter(user=user, parcel=parcel, trip=trip_instance).exists():
             agent_data = UserProfileSerializer(trip_instance.user, context={'request': request,'parcel': parcel,'trip': trip_instance}).data
+
+            instance = UserConnectionLog.objects.get(user=user, parcel=parcel, trip=trip_instance)
+
+
             return Response({
                 "message": "Already connected",
-                "agent": agent_data
+                "agent": agent_data,
+                "connect_id" : instance.id,
+
             }, status=200)
 
         # Check if user has credit
