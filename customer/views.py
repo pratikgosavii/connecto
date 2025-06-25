@@ -247,7 +247,7 @@ class get_chat_token(APIView):
             return Response({"error": "Missing UserConnectionLog_id"}, status=400)
 
         try:
-            UserConnectionLog_instance = UserConnectionLog.objects.get(id=UserConnectionLog_id, trip__user = request.user)
+            UserConnectionLog_instance = UserConnectionLog.objects.get(id=UserConnectionLog_id, user = request.user)
         except UserConnectionLog.DoesNotExist:
             return Response({"error": "Please use connect first"}, status=404)
 
@@ -263,11 +263,15 @@ class get_chat_token(APIView):
         client.upsert_user({"id": user_id})
         client.upsert_user({"id": vendor_user_id})
 
+        vendor_user_id = str(UserConnectionLog_instance.trip.user.id)
+
+
         # Create token for authenticated user
         token = client.create_token(user_id)
 
         return Response({
             "user_id": user_id,
+            "vendor_user_id": vendor_user_id,
             "token": token,
             "channel_id": channel_id,
             "api_key": api_key,  # for frontend use
