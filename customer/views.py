@@ -247,7 +247,7 @@ class get_chat_token(APIView):
             return Response({"error": "Missing UserConnectionLog_id"}, status=400)
 
         try:
-            UserConnectionLog_instance = UserConnectionLog.objects.get(id=UserConnectionLog_id, user = request.user)
+            UserConnectionLog_instance = UserConnectionLog.objects.get(id=UserConnectionLog_id, trip__user = request.user)
         except UserConnectionLog.DoesNotExist:
             return Response({"error": "Please use connect first"}, status=404)
 
