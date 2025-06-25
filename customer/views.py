@@ -112,6 +112,11 @@ def connect_with_agent(request):
 
             instance = UserConnectionLog.objects.get(user=user, parcel=parcel, trip=trip_instance)
 
+            request_instance = Request_Customer_for_Delivery.objects.get(user=request.user, trip = trip_instance)
+            request_instance.status = "accepted"
+            request_instance.save()
+
+
 
             return Response({
                 "message": "Already connected",

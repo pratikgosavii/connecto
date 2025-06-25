@@ -69,17 +69,15 @@ class Request_Customer_for_Delivery(models.Model):
 
 
 
-    status = models.CharField(max_length=20, choices=[
+    status = models.CharField(max_length=30, choices=[
         ('pending', 'Pending'),
         ('accepted', 'Accepted'),
-        ('rejected', 'Rejected'),
-        ('cancelled', 'Cancelled'),
+        ("rejected_by_vendor", "Rejected By Vendor"),
+        ("rejected_by_customer", "Rejected By Customer"),
+        ('cancelled_by_customer', 'Cancelled'),
     ], default='pending')
 
-    request_type = models.CharField(max_length=20, choices=[
-        ('pickup', 'Pickup'),
-        ('drop', 'Drop'),
-    ], default='pickup')
+   
 
     created_at = models.DateTimeField(auto_now_add=True)
 
