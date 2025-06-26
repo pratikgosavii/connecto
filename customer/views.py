@@ -145,7 +145,6 @@ def connect_with_agent(request):
                 assigned = True
 
             return Response({
-                "message": "Already connected",
                 "agent": agent_data,
                 "connect_id" : instance.id,
                 "assigned" : assigned
