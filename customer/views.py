@@ -7,6 +7,10 @@ class DeliveryRequestViewSet(viewsets.ModelViewSet):
     serializer_class = DeliveryRequestSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    
+    def get_queryset(self):
+        return DeliveryRequest.objects.filter(user=self.request.user)
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
