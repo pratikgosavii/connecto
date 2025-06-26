@@ -10,6 +10,7 @@ class DeliveryRequestViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+from rest_framework.decorators import api_view, permission_classes
 
 from rest_framework.views import APIView
 from rest_framework.response import Response

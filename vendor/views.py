@@ -11,6 +11,8 @@ from customer.models import *
 from .serializers import *
 from customer.serializers import *
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.decorators import api_view, permission_classes
+
 
 
 
