@@ -18,7 +18,7 @@ urlpatterns = router.urls + [
     path('assign-parcel-to-agent/', assign_parcel_to_agent, name='assign_parcel_to_agent'),
 
     path('connect-with-vendor/', connect_with_agent, name='connect_with_agent'),
-    path('reject-vendor_request/', reject_vendor_request, name='reject_vendor_request'),
+    path('reject-vendor-request/', reject_vendor_request, name='reject_vendor_request'),
 
     path("stream/get-chat-token/", get_chat_token.as_view()),
     path("stream/get-vendor-chat-token/", get_chat_vendor_token.as_view()),
