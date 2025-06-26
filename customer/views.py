@@ -417,4 +417,4 @@ class ShowTripParcels(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend]
 
     def get_queryset(self):
-        return DeliveryRequest.objects.all()
+        return DeliveryRequest.objects.filter(user = self.request.user, is_agent_assigned=False).order_by('-id') 
