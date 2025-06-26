@@ -59,6 +59,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
         if hide_mobile:
             data.pop('mobile', None)
 
+        try:
+            data['credits'] = instance.usercredit.credits
+        except UserCredit.DoesNotExist:
+            data['credits'] = 0
+            
         return data
 
 
