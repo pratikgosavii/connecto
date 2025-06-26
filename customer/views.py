@@ -206,8 +206,13 @@ def reject_vendor_request(request):
         trip_instance = trip.objects.get(id=trip_id)
 
         # Check if already connected
-        request_instance = Request_Customer_for_Delivery.objects.get(user=request.user, trip = trip_instance, parcel=parcel)
-        
+        try:
+
+            request_instance = Request_Customer_for_Delivery.objects.get(trip = trip_instance, parcel=parcel)
+        except Request_Customer_for_Delivery:
+            return Response({"error": "Request not found"}, status=404)
+
+
         if request_instance != "accepted":
         
             request_instance.status = "rejected_by_customer"
