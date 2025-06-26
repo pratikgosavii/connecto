@@ -265,9 +265,11 @@ def assign_parcel_to_agent(request):
         parcel.is_agent_assigned = True
         parcel.save()
 
-        # Check if user is connected with this agent for this parcel & trip
-        if not UserConnectionLog.objects.filter(user=user, parcel=parcel, trip=trip_instance).exists():
+        try:
+            connection = UserConnectionLog.objects.get(user=user, parcel=parcel, trip=trip_instance)
+        except UserConnectionLog.DoesNotExist:
             return Response({"error": "You are not connected with this agent for this parcel"}, status=403)
+
 
         # Check if already assigned to prevent duplicates or logic for update
         if Customer_Order.objects.filter(parcel=parcel, trip=trip_instance).exists():
@@ -279,6 +281,7 @@ def assign_parcel_to_agent(request):
             trip =trip_instance,
             user=user,
             status='assigned',
+            connection_id = connection.id,
             assigned_at=timezone.now(),
         )
 

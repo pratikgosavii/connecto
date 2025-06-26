@@ -103,7 +103,7 @@ class Customer_Order(models.Model):
         ("cancelled_by_customer", "Cancelled By Customer"),
     ]
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default="assigned")
-
+    connection_id = models.IntegerField(blank=True, null=True)
     assigned_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
