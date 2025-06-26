@@ -445,3 +445,27 @@ class privacy_policyListAPIView(APIView):
         serializer = privacy_policySerializer(faqs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+
+from customer.models import *
+
+def all_shipments(request):
+
+
+    data = Customer_Order.objects.all()
+
+    context = {
+        'data' : data
+    }
+
+    return render(request, 'all_shipments.html', context)
+
+def view_order_detail(request, booking_id):
+
+
+    data = Customer_Order.objects.get(id = booking_id)
+
+    context = {
+        'data' : data
+    }
+
+    return render(request, 'view_shipments.html', context)

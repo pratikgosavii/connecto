@@ -47,6 +47,8 @@ urlpatterns = [
     path('delete-privacy-policy/<privacy_policy_id>', delete_privacy_policy, name='delete_privacy_policy'),  # create or fetch list of admins
     path('privacy-policys/', privacy_policyListAPIView.as_view(), name='privacy_policy-list-api'),
 
+    path('all-shipments/', all_shipments, name='all_shipments'),
+    path('view-order-detail/<booking_id>', view_order_detail, name='view_order_detail'),
     
 
 ]  + router.urls

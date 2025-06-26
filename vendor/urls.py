@@ -28,7 +28,6 @@ urlpatterns = [
     path('view-customer-request/', ViewCustomerRequestViewSet.as_view(), name='ViewCustomerRequestViewSet'),
     path('show-open-parcels/', ShowOpenParcels.as_view(), name='ShowOpenParcels'),
     
-    path('show-open-parcels/', ShowOpenParcels.as_view(), name='ShowOpenParcels'),
 
 
 ]  + router.urls

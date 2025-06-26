@@ -1,0 +1,120 @@
+{% extends "partials/adminBase.html" %}
+{% load static %}
+
+{% block title %}My Shipments{% endblock title %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+<style>
+    body {
+        background-color: gainsboro;
+        color: #775599;
+    }
+    .card {
+        background-color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .card-header {
+        background-color: #775599;
+        color: #ffffff;
+        border-radius: 8px 8px 0 0;
+        padding: 20px;
+    }
+    .card-title {
+        margin: 0;
+    }
+    .table thead {
+        background-color: gray;
+        color: white;
+    }
+    .table tbody tr {
+        background-color: white;
+        color: black;
+    }
+    .table tbody tr:hover {
+        background-color: #f0d28c;
+        color: #775599;
+    }
+    .status-pending {
+        color: blue;
+        font-weight: bold;
+    }
+    .status-accepted {
+        color: green;
+        font-weight: bold;
+    }
+    .status-rejected_by_vendor,
+    .status-rejected_by_customer,
+    .status-cancelled_by_customer {
+        color: red;
+        font-weight: bold;
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-content">
+        <div class="container-fluid">
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <h4 class="mb-sm-0 font-size-18">My Shipments</h4>
+            </div>
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Parcel ID</th>
+                                                <th>Customer</th>
+                                                <th>Requested Price</th>
+                                                <th>Status</th>
+                                                <th>Created At</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% if data %}
+                                                    <tr>
+                                                        <td>{{ forloop.counter }}</td>
+                                                        <td>#{{ data.parcel.id }}</td>
+                                                        <td>{{ data.user.get_full_name }}</td>
+                                                        <td>₹ {{ data.request_price }}</td>
+                                                        <td class="status-{{ data.status }}">
+                                                            {{ data.get_status_display }}
+                                                        </td>
+                                                        <td>{{ data.created_at|date:"Y-m-d H:i" }}</td>
+                                                      
+                                                    </tr>
+                                            {% else %}
+                                                <tr>
+                                                    <td colspan="7" class="text-center">No shipments found.</td>
+                                                </tr>
+                                            {% endif %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% block footer %}
+            {% include 'partials/footer.html' %}
+        {% endblock footer %}
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock extra_js %}

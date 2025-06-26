@@ -3,7 +3,7 @@ from .models import *
 from .serializers import *
 
 class DeliveryRequestViewSet(viewsets.ModelViewSet):
-    queryset = DeliveryRequest.objects.all()
+    queryset = DeliveryRequest.objects.all().order_by('-id') 
     serializer_class = DeliveryRequestSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -54,7 +54,7 @@ class ViewVendorRequestViewSet(generics.ListAPIView):
         parcel_id = self.request.query_params.get('parcel')  # ?parcel=123
 
         print(parcel_id)
-        queryset = Request_Customer_for_Delivery.objects.filter(parcel__user=user)
+        queryset = Request_Customer_for_Delivery.objects.filter(parcel__user=user).order_by('-id') 
 
         if parcel_id:
             print('-------------------------------')
@@ -76,7 +76,7 @@ class RequestVendorForDeliveryViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Request_Vendor_for_Delivery.objects.filter(user=self.request.user)
+        return Request_Vendor_for_Delivery.objects.filter(user=self.request.user).order_by('-id')
 
     def perform_create(self, serializer):
         request_obj = serializer.save(user=self.request.user)
@@ -259,7 +259,7 @@ class MyShipmentsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
 
-        return Customer_Order.objects.filter(user=self.request.user)
+        return Customer_Order.objects.filter(user=self.request.user).order_by('-id')
 
       
 

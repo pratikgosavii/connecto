@@ -15,7 +15,7 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 
 class add_trip_ViewSet(ModelViewSet):
-    queryset = trip.objects.all()
+    queryset = trip.objects.all().order_by('-id') 
     serializer_class = trip_Serializer
     permission_classes = [IsAuthenticated]
     parser_classes = [JSONParser, MultiPartParser, FormParser]  # Handles file uploads (car photo, license, etc.)
@@ -50,7 +50,7 @@ class RequestCustomerForDeliveryViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Request_Customer_for_Delivery.objects.filter(user=self.request.user)
+        return Request_Customer_for_Delivery.objects.filter(user=self.request.user).order_by('-id') 
 
     def perform_create(self, serializer):
         trip = serializer.validated_data.get('trip')
@@ -92,7 +92,7 @@ class ViewCustomerRequestViewSet(generics.ListAPIView):
     
         parcel_id = self.request.query_params.get('parcel')  # ?parcel=123
 
-        queryset = Request_Vendor_for_Delivery.objects.filter(trip__user=user).exclude(status='cancelled')
+        queryset = Request_Vendor_for_Delivery.objects.filter(trip__user=user).exclude(status='cancelled').order_by('-id') 
 
         if parcel_id:
             queryset = queryset.filter(parcel__id = parcel_id)
@@ -152,14 +152,14 @@ class ShowOpenParcels(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return DeliveryRequest.objects.filter(is_agent_assigned=False)
+        return DeliveryRequest.objects.filter(is_agent_assigned=False).order_by('-id') 
 
 
 
 
 class VendorMyShipmentsViewSet(viewsets.ModelViewSet):
 
-    queryset = Customer_Order.objects.all()
+    queryset = Customer_Order.objects.all().order_by('-id') 
     serializer_class = Customer_OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
     
