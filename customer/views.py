@@ -206,7 +206,7 @@ def reject_vendor_request(request):
         trip_instance = trip.objects.get(id=trip_id)
 
         # Check if already connected
-        request_instance = Request_Customer_for_Delivery.objects.get(user=request.user, trip = trip_instance)
+        request_instance = Request_Customer_for_Delivery.objects.get(user=request.user, trip = trip_instance, parcel=parcel)
         
         if request_instance != "accepted":
         
