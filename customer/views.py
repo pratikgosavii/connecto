@@ -110,14 +110,16 @@ def connect_with_agent(request):
             instance = UserConnectionLog.objects.get(user=user, parcel=parcel, trip=trip_instance)
 
             if request_origin == "customer":
-            
-                request_instance = Request_Vendor_for_Delivery.objects.get(user=request.user, trip = trip_instance)
+                request_instance = Request_Vendor_for_Delivery.objects.get(
+                    user=request.user, trip=trip_instance, parcel=parcel
+                )
                 request_instance.status = "accepted"
                 request_instance.save()
 
-            
             elif request_origin == "vendor":
-                request_instance = Request_Customer_for_Delivery.objects.get(user=request.user, trip = trip_instance)
+                request_instance = Request_Customer_for_Delivery.objects.get(
+                    user=request.user, trip=trip_instance, parcel=parcel
+                )
                 request_instance.status = "accepted"
                 request_instance.save()
 
