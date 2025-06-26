@@ -98,6 +98,10 @@ def connect_with_agent(request):
     trip_id = request.data.get("trip_id")
     request_origin = request.data.get("request_origin")
 
+    print('--------------------')
+
+    print(request_origin)
+
     try:
 
         parcel = DeliveryRequest.objects.get(id=parcel_id, user=user)
@@ -110,6 +114,8 @@ def connect_with_agent(request):
             instance = UserConnectionLog.objects.get(user=user, parcel=parcel, trip=trip_instance)
 
             if request_origin == "customer":
+                print('----------1----------')
+
                 request_instance = Request_Vendor_for_Delivery.objects.get(
                     user=request.user, trip=trip_instance, parcel=parcel
                 )
@@ -117,6 +123,9 @@ def connect_with_agent(request):
                 request_instance.save()
 
             elif request_origin == "vendor":
+
+                print('----------2----------')
+
                 request_instance = Request_Customer_for_Delivery.objects.get(
                     user=request.user, trip=trip_instance, parcel=parcel
                 )
