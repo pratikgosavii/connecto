@@ -139,12 +139,17 @@ def connect_with_agent(request):
                 request_instance.status = "accepted"
                 request_instance.save()
 
-
+            if Customer_Order.objects.filter(parcel=parcel, trip=trip_instance).exists():
+                assigned = True
+            else:    
+                assigned = True
 
             return Response({
                 "message": "Already connected",
                 "agent": agent_data,
                 "connect_id" : instance.id,
+                "assigned" : assigned
+
 
             }, status=200)
 
