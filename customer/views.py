@@ -153,6 +153,27 @@ def connect_with_agent(request):
         # Log connection
         instance = UserConnectionLog.objects.create(user=user, parcel=parcel, trip=trip_instance)
 
+        
+        if request_origin == "customer":
+            print('----------1----------')
+
+            request_instance = Request_Vendor_for_Delivery.objects.get(
+                user=request.user, trip=trip_instance, parcel=parcel
+            )
+            request_instance.status = "accepted"
+            request_instance.save()
+
+        elif request_origin == "vendor":
+
+            print('----------2----------')
+
+            request_instance = Request_Customer_for_Delivery.objects.get(
+                user=request.user, trip=trip_instance, parcel=parcel
+            )
+            request_instance.status = "accepted"
+            request_instance.save()
+
+
         agent_data = UserProfileSerializer(trip_instance.user, context={'request': request,'parcel': parcel,'trip': trip_instance}).data
         return Response({
             "message": "Connected successfully",
