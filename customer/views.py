@@ -257,7 +257,10 @@ def assign_parcel_to_agent(request):
     try:
         parcel = DeliveryRequest.objects.get(id=parcel_id, user=user)
         trip_instance = trip.objects.get(id=trip_id)
-
+        
+        parcel.is_agent_assigned = True
+        parcel.save()
+        
         # Check if user is connected with this agent for this parcel & trip
         if not UserConnectionLog.objects.filter(user=user, parcel=parcel, trip=trip_instance).exists():
             return Response({"error": "You are not connected with this agent for this parcel"}, status=403)
