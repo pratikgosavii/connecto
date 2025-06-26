@@ -127,7 +127,7 @@ def connect_with_agent(request):
                 print('----------2----------')
 
                 request_instance = Request_Customer_for_Delivery.objects.get(
-                    user=request.user, trip=trip_instance, parcel=parcel
+                    trip=trip_instance, parcel=parcel
                 )
                 request_instance.status = "accepted"
                 request_instance.save()
@@ -153,7 +153,7 @@ def connect_with_agent(request):
         # Log connection
         instance = UserConnectionLog.objects.create(user=user, parcel=parcel, trip=trip_instance)
 
-        
+
         if request_origin == "customer":
             print('----------1----------')
 
