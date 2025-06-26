@@ -56,7 +56,7 @@ class ViewVendorRequestViewSet(generics.ListAPIView):
         queryset = Request_Customer_for_Delivery.objects.filter(
             parcel__user=user
         ).exclude(
-            status__in=['accepted', 'rejected_by_vendor', 'rejected_by_customer', 'cancelled_by_customer']
+            status__in=['rejected_by_vendor', 'rejected_by_customer', 'cancelled_by_customer']
         ).order_by('-id')
 
         if parcel_id:
