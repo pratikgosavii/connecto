@@ -92,7 +92,7 @@ class ViewCustomerRequestViewSet(generics.ListAPIView):
     
         parcel_id = self.request.query_params.get('parcel')  # ?parcel=123
 
-        queryset = Request_Vendor_for_Delivery.objects.filter(trip__user=user).exclude(status='cancelled').order_by('-id') 
+        queryset = Request_Vendor_for_Delivery.objects.filter(trip__user=user).exclude(status__in =['cancelled', 'accepted']).order_by('-id') 
 
         if parcel_id:
             queryset = queryset.filter(parcel__id = parcel_id)
