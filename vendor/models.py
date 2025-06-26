@@ -77,10 +77,7 @@ class Request_Customer_for_Delivery(models.Model):
         ('cancelled_by_customer', 'Cancelled'),
     ], default='pending')
 
-    request_type = models.CharField(max_length=20, choices=[
-        ('pickup', 'Pickup'),
-        ('drop', 'Drop'),
-    ], default='pickup')
+   
 
     created_at = models.DateTimeField(auto_now_add=True)
 
