@@ -53,14 +53,14 @@ class ViewVendorRequestViewSet(generics.ListAPIView):
         user = self.request.user
         parcel_id = self.request.query_params.get('parcel')  # ?parcel=123
 
-        print(parcel_id)
-        queryset = Request_Customer_for_Delivery.objects.filter(parcel__user=user).order_by('-id') 
+        queryset = Request_Customer_for_Delivery.objects.filter(
+            parcel__user=user
+        ).exclude(
+            status__in=['accepted', 'rejected_by_vendor', 'rejected_by_customer', 'cancelled_by_customer']
+        ).order_by('-id')
 
         if parcel_id:
-            print('-------------------------------')
-            print('-------------------------------')
-            print('-------------------------------')
-            queryset = queryset.filter(parcel__id = parcel_id)
+            queryset = queryset.filter(parcel__id=parcel_id)
 
         return queryset
 
