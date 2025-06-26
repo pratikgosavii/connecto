@@ -29,7 +29,7 @@ class RequestCustomerForDeliverySerializer(serializers.ModelSerializer):
     from customer.serializers import DeliveryRequestSerializer
 
     user = UserProfileSerializer(read_only=True)  # nest user details
-    trip_details = trip_Serializer(read_only=True)
+    trip_details = trip_Serializer(source = 'trip' , read_only=True)
     parcel_details = DeliveryRequestSerializer(source='parcel', read_only=True)
     
     
