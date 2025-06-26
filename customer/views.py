@@ -212,8 +212,11 @@ def reject_vendor_request(request):
         except Request_Customer_for_Delivery:
             return Response({"error": "Request not found"}, status=404)
 
+        print('--------------------')
 
-        if request_instance != "accepted":
+
+
+        if request_instance.status != "accepted":
         
             request_instance.status = "rejected_by_customer"
             request_instance.save()
