@@ -260,7 +260,7 @@ def assign_parcel_to_agent(request):
         
         parcel.is_agent_assigned = True
         parcel.save()
-        
+
         # Check if user is connected with this agent for this parcel & trip
         if not UserConnectionLog.objects.filter(user=user, parcel=parcel, trip=trip_instance).exists():
             return Response({"error": "You are not connected with this agent for this parcel"}, status=403)
@@ -408,3 +408,14 @@ class get_chat_vendor_token(APIView):
             "token": token,
             "api_key": api_key
         })
+
+
+        
+class ShowTripParcels(generics.ListAPIView):
+    
+    serializer_class = DeliveryRequestSerializer
+    filter_backends = [DjangoFilterBackend]
+
+    def get_queryset(self):
+        user = self.request.user
+        return DeliveryRequest.objects.filter(user = self.request.user, is_agent_assigned=False).exclude(user = self.request.user, ).order_by('-id') 
