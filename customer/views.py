@@ -194,6 +194,9 @@ def connect_with_agent(request):
 
 
 
+from rest_framework.decorators import api_view, permission_classes
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def reject_vendor_request(request):
