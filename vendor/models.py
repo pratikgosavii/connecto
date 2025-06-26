@@ -72,6 +72,7 @@ class Request_Customer_for_Delivery(models.Model):
     status = models.CharField(max_length=30, choices=[
         ('pending', 'Pending'),
         ('accepted', 'Accepted'),
+        ('assigned', 'Assigned'),
         ("rejected_by_vendor", "Rejected By Vendor"),
         ("rejected_by_customer", "Rejected By Customer"),
         ('cancelled_by_customer', 'Cancelled'),

@@ -63,7 +63,7 @@ class ViewVendorRequestViewSet(generics.ListAPIView):
         queryset = Request_Customer_for_Delivery.objects.filter(
             parcel__user=user
         ).exclude(
-            status__in=['rejected_by_vendor', 'rejected_by_customer', 'cancelled_by_customer']
+            status__in=['rejected_by_vendor', 'rejected_by_customer', 'assigned', 'cancelled_by_customer']
         ).order_by('-id')
 
         if parcel_id:
@@ -265,6 +265,8 @@ def assign_parcel_to_agent(request):
     user = request.user
     parcel_id = request.data.get('parcel_id')
     trip_id = request.data.get('trip_id')
+    request_origin = request.data.get("request_origin")
+    
 
     if not parcel_id or not trip_id:
         return Response({"error": "parcel_id and trip_id are required"}, status=400)
@@ -283,8 +285,26 @@ def assign_parcel_to_agent(request):
 
 
         # Check if already assigned to prevent duplicates or logic for update
-        if Customer_Order.objects.filter(parcel=parcel, trip=trip_instance).exists():
-            return Response({"message": "Parcel already assigned to this agent"}, status=200)
+        
+        if request_origin == "customer":
+            print('----------1----------')
+
+            request_instance = Request_Vendor_for_Delivery.objects.get(
+                user=request.user, trip=trip_instance, parcel=parcel
+            )
+            request_instance.status = "assigned"
+            request_instance.save()
+
+        elif request_origin == "vendor":
+
+            print('----------2----------')
+
+            request_instance = Request_Customer_for_Delivery.objects.get(
+                trip=trip_instance, parcel=parcel
+            )
+            request_instance.status = "assigned"
+            request_instance.save()
+
 
         # Create Customer_Order / assignment
         order = Customer_Order.objects.create(
