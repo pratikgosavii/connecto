@@ -142,7 +142,7 @@ def connect_with_agent(request):
             if Customer_Order.objects.filter(parcel=parcel, trip=trip_instance).exists():
                 assigned = True
             else:    
-                assigned = True
+                assigned = False
 
             return Response({
                 "agent": agent_data,
@@ -187,7 +187,8 @@ def connect_with_agent(request):
         if Customer_Order.objects.filter(parcel=parcel, trip=trip_instance).exists():
             assigned = True
         else:    
-            assigned = True
+            assigned = False
+
         agent_data = UserProfileSerializer(trip_instance.user, context={'request': request,'parcel': parcel,'trip': trip_instance}).data
         return Response({
             "message": "Connected successfully",
