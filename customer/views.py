@@ -82,12 +82,7 @@ class RequestVendorForDeliveryViewSet(viewsets.ModelViewSet):
         request_obj = serializer.save(user=self.request.user)
 
         # ✅ Create notification on creation
-        Notification.objects.create(
-            trip__user=self.request.user,
-            title='Delivery Request Created',
-            message=f'Your delivery request #{request_obj.id} has been submitted successfully.'
-        )
-
+       
    
 
 from rest_framework.decorators import api_view, permission_classes
@@ -101,8 +96,10 @@ def connect_with_agent(request):
     user = request.user
     parcel_id = request.data.get("parcel_id")
     trip_id = request.data.get("trip_id")
+    request_origin = request.data.get("request_origin")
 
     try:
+
         parcel = DeliveryRequest.objects.get(id=parcel_id, user=user)
         trip_instance = trip.objects.get(id=trip_id)
 
@@ -112,9 +109,17 @@ def connect_with_agent(request):
 
             instance = UserConnectionLog.objects.get(user=user, parcel=parcel, trip=trip_instance)
 
-            request_instance = Request_Customer_for_Delivery.objects.get(user=request.user, trip = trip_instance)
-            request_instance.status = "accepted"
-            request_instance.save()
+            if request_origin == "customer":
+            
+                request_instance = Request_Vendor_for_Delivery.objects.get(user=request.user, trip = trip_instance)
+                request_instance.status = "accepted"
+                request_instance.save()
+
+            
+            elif request_origin == "vendor":
+                request_instance = Request_Customer_for_Delivery.objects.get(user=request.user, trip = trip_instance)
+                request_instance.status = "accepted"
+                request_instance.save()
 
 
 
