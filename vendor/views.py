@@ -92,7 +92,7 @@ class ViewCustomerRequestViewSet(generics.ListAPIView):
     
         parcel_id = self.request.query_params.get('parcel')  # ?parcel=123
 
-        queryset = Request_Vendor_for_Delivery.objects.filter(trip__user=user).exclude(status__in =['cancelled', 'accepted']).order_by('-id') 
+        queryset = Request_Vendor_for_Delivery.objects.filter(trip__user=user).exclude(status__in =['cancelled_by_customer', 'rejected_by_vendor', 'accepted']).order_by('-id') 
 
         if parcel_id:
             queryset = queryset.filter(parcel__id = parcel_id)
@@ -104,7 +104,7 @@ class ViewCustomerRequestViewSet(generics.ListAPIView):
         new_status = request.data.get('status')  # should be 'accepted' or 'rejected_by_vendor'
         request_price = request.data.get('request_price')
 
-        if not request_id or new_status not in ['accepted', 'rejected_by_vendor']:
+        if not request_id or new_status not in ['accepted', 'rejected_by_vendor', 'cancelled_by_customer']:
             return Response({'error': 'Invalid status or request ID.'}, status=400)
 
         try:
