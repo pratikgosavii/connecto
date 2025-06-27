@@ -146,8 +146,11 @@ class ViewCustomerRequestDetailsViewSet(APIView):
     
    
     def get(self, request):
+
+        parcel_id = request.GET.get('parcel_id')
+        
         try:
-            request_instance = Request_Vendor_for_Delivery.objects.get(trip__user=request.user)
+            request_instance = Request_Vendor_for_Delivery.objects.get(parcel__id = parcel_id, trip__user=request.user)
             serializer = RequestVendorForDeliverySerializer(request_instance)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Request_Vendor_for_Delivery.DoesNotExist:
