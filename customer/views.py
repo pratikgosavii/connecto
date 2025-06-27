@@ -9,7 +9,7 @@ class DeliveryRequestViewSet(viewsets.ModelViewSet):
 
     
     def get_queryset(self):
-        return DeliveryRequest.objects.filter(user=self.request.user)
+        return DeliveryRequest.objects.filter(user=self.request.user).order_by('-id') 
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

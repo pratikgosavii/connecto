@@ -28,7 +28,7 @@ class add_trip_ViewSet(ModelViewSet):
 
     def get_queryset(self):
         # Return only the trips created by the current user
-        return trip.objects.filter(user=self.request.user)
+        return trip.objects.filter(user=self.request.user).order_by('-id') 
     
 
 
