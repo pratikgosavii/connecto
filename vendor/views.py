@@ -92,8 +92,13 @@ class ViewCustomerRequestViewSet(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
     
+        parcel_id = self.request.query_params.get('parcel')  # ?parcel=123
+
         queryset = Request_Vendor_for_Delivery.objects.filter(trip__user=user).exclude(status__in =['cancelled_by_customer', 'rejected_by_vendor', 'accepted']).order_by('-id') 
-    
+
+        if parcel_id:
+            queryset = queryset.filter(parcel__id = parcel_id)
+
         return queryset
 
     def post(self, request):
@@ -142,31 +147,20 @@ class ViewCustomerRequestViewSet(generics.ListAPIView):
 
 
 
-class ViewCustomerRequestDetailsViewSet(APIView):
-    
-   
-    def get(self, request):
-
-        parcel_id = request.GET.get('parcel_id')
-        
-        try:
-            request_instance = Request_Vendor_for_Delivery.objects.get(parcel__id = parcel_id, trip__user=request.user)
-            serializer = RequestVendorForDeliverySerializer(request_instance)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Request_Vendor_for_Delivery.DoesNotExist:
-            return Response({'error': 'No request found.'}, status=status.HTTP_404_NOT_FOUND)
-
-
 class ShowOpenParcels(generics.ListAPIView):
     
     serializer_class = DeliveryRequestSerializer
     filter_backends = [DjangoFilterBackend]
 
     def get_queryset(self):
-        user = self.request.user
         return DeliveryRequest.objects.filter(is_agent_assigned=False).exclude(user = self.request.user).order_by('-id') 
 
 
+class ShowOpenParcelDetail(generics.RetrieveAPIView):
+    queryset = DeliveryRequest.objects.filter(is_agent_assigned=False)
+    serializer_class = DeliveryRequestSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'id'  # or 'pk' if you use the default
 
 
 @api_view(['POST'])
