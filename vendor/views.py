@@ -92,13 +92,8 @@ class ViewCustomerRequestViewSet(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
     
-        parcel_id = self.request.query_params.get('parcel')  # ?parcel=123
-
         queryset = Request_Vendor_for_Delivery.objects.filter(trip__user=user).exclude(status__in =['cancelled_by_customer', 'rejected_by_vendor', 'accepted']).order_by('-id') 
-
-        if parcel_id:
-            queryset = queryset.filter(parcel__id = parcel_id)
-
+    
         return queryset
 
     def post(self, request):
@@ -145,6 +140,18 @@ class ViewCustomerRequestViewSet(generics.ListAPIView):
 
             return Response({'detail': 'Request rejected by vendor.'}, status=200)
 
+
+
+class ViewCustomerRequestDetailsViewSet(APIView):
+    
+   
+    def get(self, request):
+        try:
+            request_instance = Request_Vendor_for_Delivery.objects.get(trip__user=request.user)
+            serializer = RequestVendorForDeliverySerializer(request_instance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Request_Vendor_for_Delivery.DoesNotExist:
+            return Response({'error': 'No request found.'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class ShowOpenParcels(generics.ListAPIView):

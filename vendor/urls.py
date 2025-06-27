@@ -26,6 +26,7 @@ urlpatterns = [
 
     
     path('view-customer-request/', ViewCustomerRequestViewSet.as_view(), name='ViewCustomerRequestViewSet'),
+    path('view-customer-request-details/', ViewCustomerRequestDetailsViewSet.as_view(), name='ViewCustomerRequestDetailsViewSet'),
     path('show-open-parcels/', ShowOpenParcels.as_view(), name='ShowOpenParcels'),
     
     path('reject-customer-request/', reject_customer_request, name='reject_customer_request'),
