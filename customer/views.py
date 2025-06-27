@@ -43,7 +43,7 @@ class avaiable_vendors(generics.ListAPIView):
         
         queryset = trip.objects.filter(
             departure_datetime__gt=timezone.now(),  # only future trips
-        )
+        ).order_by('departure_datetime')
 
 
         return queryset

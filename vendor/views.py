@@ -154,7 +154,7 @@ class ShowOpenParcels(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return DeliveryRequest.objects.filter(is_agent_assigned=False).exclude(user = self.request.user, ).order_by('-id') 
+        return DeliveryRequest.objects.filter(is_agent_assigned=False).exclude(user = self.request.user).order_by('-id') 
 
 
 
