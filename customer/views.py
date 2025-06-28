@@ -499,3 +499,19 @@ class ShowTripParcels(generics.ListAPIView):
 
     def get_queryset(self):
         return DeliveryRequest.objects.filter(user = self.request.user, is_agent_assigned=False).order_by('-id') 
+
+
+
+from rest_framework import viewsets, permissions
+from .models import DeliveryRating
+
+class DeliveryRatingViewSet(viewsets.ModelViewSet):
+    queryset = DeliveryRating.objects.all()
+    serializer_class = DeliveryRatingSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+    
+    def get_queryset(self):
+        return DeliveryRating.objects.filter(user=self.request.user)

@@ -54,3 +54,10 @@ class RequestVendorForDeliverySerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['user', 'created_at', 'status', 'trip_details']
 
+
+
+class DeliveryRatingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeliveryRating
+        fields = ['id', 'delivery', 'agent', 'user', 'rating', 'feedback', 'created_at']
+        read_only_fields = ['id', 'user', 'created_at']

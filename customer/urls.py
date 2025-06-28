@@ -8,6 +8,7 @@ router = DefaultRouter()
 router.register('delivery-request', DeliveryRequestViewSet, basename='DeliveryRequestViewSet')
 router.register('request-vendor', RequestVendorForDeliveryViewSet, basename='RequestVendorForDeliveryViewSet')
 router.register('my-shipments', MyShipmentsViewSet, basename='my_shipmentsViewSet')
+router.register('delivery-ratings', DeliveryRatingViewSet, basename='delivery-rating')
 
 urlpatterns = router.urls + [
 
