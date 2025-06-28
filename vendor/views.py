@@ -122,7 +122,7 @@ class ViewCustomerRequestViewSet(generics.ListAPIView):
                 return Response({'error': 'request_price is required when accepting.'}, status=400)
 
             delivery_request.status = 'accepted_by_vendor'
-            delivery_request.request_price = request_price
+            delivery_request.requested_price = request_price
             delivery_request.save()
 
             Notification.objects.create(
