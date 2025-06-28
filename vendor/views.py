@@ -104,7 +104,7 @@ class ViewCustomerRequestViewSet(generics.ListAPIView):
     def post(self, request):
         request_id = request.data.get('id')
         new_status = request.data.get('status')  # should be 'accepted' or 'rejected_by_vendor'
-        request_price = request.data.get('request_price')
+        request_price = request.data.get('requested_price')
 
         if not request_id or new_status not in ['accepted', 'accepted_by_vendor', 'rejected_by_vendor', 'cancelled_by_customer']:
             return Response({'error': 'Invalid status or request ID.'}, status=400)
