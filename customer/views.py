@@ -505,6 +505,7 @@ class ShowTripParcels(generics.ListAPIView):
 from rest_framework import viewsets, permissions
 from .models import DeliveryRating
 
+
 class DeliveryRatingViewSet(viewsets.ModelViewSet):
     queryset = DeliveryRating.objects.all()
     serializer_class = DeliveryRatingSerializer
@@ -512,6 +513,15 @@ class DeliveryRatingViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-    
+
     def get_queryset(self):
         return DeliveryRating.objects.filter(user=self.request.user)
+
+    @action(detail=False, methods=['get'], url_path='by-vendor/(?P<vendor_id>[^/.]+)')
+    def by_vendor(self, request, vendor_id):
+        try:
+            rating = DeliveryRating.objects.get(user=request.user, vendor_id=vendor_id)
+            serializer = self.get_serializer(rating)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except DeliveryRating.DoesNotExist:
+            return Response({"detail": "Rating not found."}, status=status.HTTP_404_NOT_FOUND)
