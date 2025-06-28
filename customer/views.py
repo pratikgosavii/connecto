@@ -252,6 +252,49 @@ def reject_vendor_request(request):
 
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def reject_reserve_vendor_request(request):
+    user = request.user
+    parcel_id = request.data.get("parcel_id")
+    trip_id = request.data.get("trip_id")
+
+    try:
+        parcel = DeliveryRequest.objects.get(id=parcel_id, user=user)
+        trip_instance = trip.objects.get(id=trip_id)
+
+        # Check if already connected
+        try:
+
+            request_instance = Request_Vendor_for_Delivery.objects.get(trip = trip_instance, parcel=parcel)
+        except Request_Vendor_for_Delivery:
+            return Response({"error": "Request not found"}, status=404)
+
+        print('--------------------')
+
+
+
+        if request_instance.status != "accepted":
+        
+            request_instance.status = "rejected_by_customer"
+            request_instance.save()
+
+            return Response({ "message": "Request cancled successfully"}, status=200)
+
+
+        else:
+
+            return Response({ "message": "Request already accepted"}, status=200)
+
+
+
+    except DeliveryRequest.DoesNotExist:
+        return Response({"error": "Parcel not found"}, status=404)
+    except trip.DoesNotExist:
+        return Response({"error": "Trip not found"}, status=404)
+
+
+
 
 
 from rest_framework.decorators import api_view, permission_classes
