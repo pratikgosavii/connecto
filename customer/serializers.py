@@ -59,5 +59,5 @@ class RequestVendorForDeliverySerializer(serializers.ModelSerializer):
 class DeliveryRatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeliveryRating
-        fields = ['id', 'delivery', 'agent', 'user', 'rating', 'feedback', 'created_at']
+        fields = ['id', 'agent', 'user', 'rating', 'feedback', 'created_at']
         read_only_fields = ['id', 'user', 'created_at']
