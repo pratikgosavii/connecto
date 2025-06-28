@@ -117,21 +117,21 @@ class ViewCustomerRequestViewSet(generics.ListAPIView):
         if delivery_request.status != 'pending':
             return Response({'error': 'Only pending requests can be updated.'}, status=400)
 
-        if new_status == 'accepted':
+        if new_status == 'accepted_by_vendor':
             if not request_price:
                 return Response({'error': 'request_price is required when accepting.'}, status=400)
 
-            delivery_request.status = 'accepted'
+            delivery_request.status = 'accepted_by_vendor'
             delivery_request.request_price = request_price
             delivery_request.save()
 
             Notification.objects.create(
                 user=delivery_request.user,
-                title='Delivery Request Accepted',
-                message=f'Your delivery request #{delivery_request.id} was accepted by the vendor.'
+                title='Delivery Request accepted_by_vendor',
+                message=f'Your delivery request #{delivery_request.id} was accepted_by_vendor by the vendor.'
             )
 
-            return Response({'detail': 'Request accepted and price updated.'}, status=200)
+            return Response({'detail': 'Request accepted_by_vendor and price updated.'}, status=200)
 
         elif new_status == 'rejected_by_vendor':
             delivery_request.status = 'rejected_by_vendor'

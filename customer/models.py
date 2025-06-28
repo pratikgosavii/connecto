@@ -61,6 +61,7 @@ class Request_Vendor_for_Delivery(models.Model):
 
     status = models.CharField(max_length=30, choices=[
         ('pending', 'Pending'),
+        ('accepted_by_vendor', 'Vendor Accepted'),
         ('accepted', 'Accepted'),
         ('assigned', 'Assigned'),
         ("rejected_by_vendor", "Rejected By Vendor"),
