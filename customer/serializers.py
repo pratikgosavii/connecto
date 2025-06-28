@@ -56,8 +56,10 @@ class RequestVendorForDeliverySerializer(serializers.ModelSerializer):
 
 
 
+
 class DeliveryRatingSerializer(serializers.ModelSerializer):
+    vendor = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    
     class Meta:
         model = DeliveryRating
-        fields = '__all__"'
-        read_only_fields = ['id', 'user', 'created_at']
+        fields = ['vendor', 'rating', 'feedback']
