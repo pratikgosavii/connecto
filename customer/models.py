@@ -75,6 +75,11 @@ class Request_Vendor_for_Delivery(models.Model):
     def __str__(self):
         return f"{self.parcel} -> {self.trip} ({self.status})"
     
+    class Meta:
+        unique_together = ('user', 'parcel', 'trip')
+
+
+    
 
 class UserConnectionLog(models.Model):
     user = models.ForeignKey("users.User", on_delete=models.CASCADE)

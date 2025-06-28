@@ -84,4 +84,4 @@ class Request_Customer_for_Delivery(models.Model):
 
     
     class Meta:
-        unique_together = ('trip', 'parcel') 
+        unique_together = ('trip', 'parcel', 'user') 
