@@ -49,6 +49,11 @@ urlpatterns = [
 
     path('all-shipments/', all_shipments, name='all_shipments'),
     path('view-order-detail/<booking_id>', view_order_detail, name='view_order_detail'),
+
+        # urls.py
+    path('admin/support-tickets/', list_support_tickets, name='list_support_tickets'),
+    path('admin/support-tickets/<int:ticket_id>/', ticket_detail, name='ticket_detail'),
+
     
 
 ]  + router.urls

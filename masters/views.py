@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 
 
 # Create your views here.
@@ -469,3 +469,31 @@ def view_order_detail(request, booking_id):
     }
 
     return render(request, 'view_shipments.html', context)
+
+
+
+@login_required(login_url='login_admin')
+def list_support_tickets(request):
+    data = SupportTicket.objects.all().order_by('-created_at')
+    return render(request, 'support_chat.html', {'data': data})
+
+
+
+@login_required(login_url='login_admin')
+def ticket_detail(request, ticket_id):
+    ticket = get_object_or_404(SupportTicket, id=ticket_id)
+    messages = ticket.messages.all().order_by('created_at')
+    data = SupportTicket.objects.all().order_by('-created_at')
+
+    if request.method == "POST":
+        msg = request.POST.get('message')
+        if msg:
+            TicketMessage.objects.create(ticket=ticket, sender=request.user, message=msg)
+            return redirect('ticket_detail', ticket_id=ticket_id)
+
+    return render(request, 'support_chat.html', {
+        'ticket': ticket,
+        'messages': messages,
+        'data': data,
+        'active_id': ticket.id  # ✅ This enables active highlighting in template
+    })

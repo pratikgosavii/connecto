@@ -63,3 +63,21 @@ class DeliveryRatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeliveryRating
         fields = ['vendor', 'rating', 'feedback']
+
+
+class SupportTicketSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupportTicket
+        fields = ['id', 'subject', 'description', 'is_resolved', 'created_at']
+        read_only_fields = ['id', 'is_resolved', 'created_at']
+
+
+
+
+class TicketMessageSerializer(serializers.ModelSerializer):
+    sender_name = serializers.CharField(source='sender.name', read_only=True)
+
+    class Meta:
+        model = TicketMessage
+        fields = ['id', 'ticket', 'sender', 'sender_name', 'message', 'created_at']
+        read_only_fields = ['sender', 'created_at']

@@ -556,5 +556,49 @@ def confirm_shipment_delivery(request):
 
 
 
+from rest_framework import viewsets, permissions
 
 
+class SupportTicketViewSet(viewsets.ModelViewSet):
+    serializer_class = SupportTicketSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return SupportTicket.objects.filter(user=self.request.user).order_by('-created_at')
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+
+
+
+class TicketMessageViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def list(self, request):
+        ticket_id = request.query_params.get('ticket_id')
+        if not ticket_id:
+            return Response({'error': 'ticket_id is required'}, status=400)
+
+        messages = TicketMessage.objects.filter(ticket__id=ticket_id).order_by('created_at')
+        serializer = TicketMessageSerializer(messages, many=True)
+        return Response(serializer.data)
+
+    def create(self, request):
+        ticket_id = request.data.get('ticket')
+        message = request.data.get('message')
+
+        if not ticket_id or not message:
+            return Response({'error': 'ticket and message are required'}, status=400)
+
+        ticket = get_object_or_404(SupportTicket, id=ticket_id)
+
+        new_message = TicketMessage.objects.create(
+            ticket=ticket,
+            sender=request.user,
+            message=message
+        )
+
+        serializer = TicketMessageSerializer(new_message)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

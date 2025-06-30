@@ -141,3 +141,20 @@ class DeliveryRating(models.Model):
 
     def __str__(self):
         return f"Rating {self.rating} by {self.user} for {self.agent}"
+
+
+
+
+
+class SupportTicket(models.Model):
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE)
+    issue_type = models.CharField(max_length=50, choices=[('booking', 'Booking'), ('payment', 'Payment'), ('account', 'Account'), ('other', 'Other')])
+    subject = models.CharField(max_length=255)
+    is_resolved = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class TicketMessage(models.Model):
+    ticket = models.ForeignKey(SupportTicket, on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey('users.User', on_delete=models.CASCADE)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
