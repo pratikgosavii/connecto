@@ -525,3 +525,36 @@ class DeliveryRatingViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except DeliveryRating.DoesNotExist:
             return Response({"detail": "Rating not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def confirm_shipment_delivery(request):
+
+    shipment_id = request.data.get("shipment_id")
+
+    try:
+
+        instance = Customer_Order.objects.get(id = shipment_id)
+
+        if instance.status == "delivered":
+            instance.status = "delivered_by_customer"
+            instance.save()
+
+            return Response({"message": "Shipment Marked as Devlivered"}, status=status.HTTP_200_OK)
+        
+        else:
+
+            return Response({"message": "Shipment not Marked as Devlivered by Vendor yet"}, status=status.HTTP_200_OK)
+
+        
+
+    except Customer_Order.DoesNotExist:
+        
+        return Response({"detail": "Shipment not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+
+
+

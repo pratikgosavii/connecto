@@ -106,6 +106,7 @@ class Customer_Order(models.Model):
         ("assigned", "Assigned"),
         ("in_transit", "In Transit"),
         ("delivered", "Delivered"),
+        ("delivered_by_customer", "Delivered By Customer"),
         ("cancelled_by_vendor", "Cancelled By Vendor"),
         ("cancelled_by_customer", "Cancelled By Customer"),
     ]

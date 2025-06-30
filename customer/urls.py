@@ -22,6 +22,8 @@ urlpatterns = router.urls + [
     path('reject-vendor-request/', reject_vendor_request, name='reject_vendor_request'),
     path('reject-reverse-vendor-request/', reject_reserve_vendor_request, name='reject_reserve_vendor_request'),
 
+    path('confirm-shipment-delivery/', confirm_shipment_delivery, name='confirm_shipment_delivery'),
+
     path("stream/get-chat-token/", get_chat_token.as_view()),
     path("stream/get-vendor-chat-token/", get_chat_vendor_token.as_view()),
 
