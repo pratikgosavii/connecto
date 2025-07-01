@@ -148,7 +148,7 @@ class DeliveryRating(models.Model):
 
 class SupportTicket(models.Model):
     user = models.ForeignKey('users.User', on_delete=models.CASCADE)
-    issue_type = models.CharField(max_length=50, choices=[('booking', 'Booking'), ('payment', 'Payment'), ('account', 'Account'), ('other', 'Other')])
+    shipment = models.ForeignKey(Customer_Order, on_delete=models.CASCADE)
     subject = models.CharField(max_length=255)
     is_resolved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
