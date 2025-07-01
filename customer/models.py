@@ -129,6 +129,7 @@ class Customer_Order(models.Model):
 class DeliveryRating(models.Model):
     user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='user')
     vendor = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='vendor_agent')
+    shipment = models.ForeignKey('customer.customer_order', on_delete=models.CASCADE, related_name='sdsdsd')
     
     rating = models.PositiveSmallIntegerField(choices=[(i, f"{i} Star{'s' if i > 1 else ''}") for i in range(1, 6)])
     feedback = models.TextField(blank=True, null=True)
@@ -136,7 +137,7 @@ class DeliveryRating(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('vendor', 'user')  # prevents duplicate ratings from same user
+        unique_together = ('vendor', 'user', 'shipment')  # prevents duplicate ratings from same user
         ordering = ['-created_at']
 
     def __str__(self):

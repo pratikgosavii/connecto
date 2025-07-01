@@ -62,7 +62,7 @@ class DeliveryRatingSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = DeliveryRating
-        fields = ['vendor', 'rating', 'feedback']
+        fields = ['vendor', 'rating', 'feedback', 'shipment']
 
 
 class SupportTicketSerializer(serializers.ModelSerializer):
