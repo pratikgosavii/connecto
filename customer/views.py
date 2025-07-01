@@ -586,7 +586,7 @@ class TicketMessageViewSet(viewsets.ViewSet):
             return Response({'error': 'ticket_id is required'}, status=400)
 
         messages = TicketMessage.objects.filter(ticket__id=ticket_id).order_by('created_at')
-        serializer = TicketMessageSerializer(messages, many=True)
+        serializer = TicketMessageSerializer(messages, many=True, context={'request': request})
         return Response(serializer.data)
 
     def create(self, request):
@@ -604,5 +604,5 @@ class TicketMessageViewSet(viewsets.ViewSet):
             message=message
         )
 
-        serializer = TicketMessageSerializer(new_message)
+        serializer = TicketMessageSerializer(new_message, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)

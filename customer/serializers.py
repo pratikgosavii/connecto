@@ -76,8 +76,13 @@ class SupportTicketSerializer(serializers.ModelSerializer):
 
 class TicketMessageSerializer(serializers.ModelSerializer):
     sender_name = serializers.CharField(source='sender.name', read_only=True)
+    is_from_user = serializers.SerializerMethodField()
 
     class Meta:
         model = TicketMessage
-        fields = ['id', 'ticket', 'sender', 'sender_name', 'message', 'created_at']
+        fields = ['id', 'ticket', 'sender', 'sender_name', 'message', 'created_at', 'is_from_user']
         read_only_fields = ['sender', 'created_at']
+
+    def get_is_from_user(self, obj):
+        request = self.context.get('request')
+        return obj.sender == request.user if request else False
