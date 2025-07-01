@@ -516,6 +516,9 @@ class DeliveryRatingViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
     def get_queryset(self):
+        vendor_id = self.request.query_params.get('vendor_id')
+        if vendor_id:
+            return DeliveryRating.objects.filter(vendor_id=vendor_id)
         return DeliveryRating.objects.filter(user=self.request.user)
 
     @action(detail=False, methods=['get'], url_path='by-vendor/(?P<vendor_id>[^/.]+)')
