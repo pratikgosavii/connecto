@@ -44,6 +44,8 @@ class avaiable_vendors(generics.ListAPIView):
         
         queryset = trip.objects.filter(
             departure_datetime__gt=timezone.now(),  # only future trips
+        ).exclude(
+            status="in_transit"
         ).order_by('-departure_datetime')
 
 

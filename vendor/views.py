@@ -233,13 +233,21 @@ def update_shipment_status(request, pk):
     except Customer_Order.DoesNotExist:
         return Response({'detail': 'Shipment not found.'}, status=status.HTTP_404_NOT_FOUND)
 
+    new_status = request.data.get('status')  # ✅ Get status from incoming PATCH data
+
+    if new_status == "in_transit" and order.trip:
+        trip_instance = order.trip
+        trip_instance.status = "in_transit"
+        trip_instance.save()
+
     serializer = VendorShipmentStatusSerializer(order, data=request.data, partial=True)
     if serializer.is_valid():
         instance = serializer.save()
         Notification.objects.create(
-                    user=instance.user,
-                    title='Delivery Status Changed',
-                    message=f'Your delivery request #{instance.id} has been {instance.status}.'
-                )
+            user=instance.user,
+            title='Delivery Status Changed',
+            message=f'Your delivery request #{instance.id} has been {instance.status}.'
+        )
         return Response(serializer.data)
+
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
