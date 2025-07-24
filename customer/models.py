@@ -92,12 +92,16 @@ class UserConnectionLog(models.Model):
 
 
 
+import random
+
 
 class Customer_Order(models.Model):
 
     
     tracking_id = models.CharField(max_length=100, unique=True)
-
+   
+    otp = models.CharField(max_length=6, blank=True, null=True)  # New OTP f
+    
     parcel = models.ForeignKey("customer.DeliveryRequest", on_delete=models.CASCADE)
     trip = models.ForeignKey("vendor.trip", on_delete=models.CASCADE)
     user = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name="orders_user")
@@ -115,12 +119,18 @@ class Customer_Order(models.Model):
     assigned_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
     def save(self, *args, **kwargs):
         if not self.tracking_id:
             last_id = Customer_Order.objects.aggregate(Max('id'))['id__max'] or 0
             self.tracking_id = f"TRK{last_id + 1:05d}"  # Example: TRK00001
+
+        if not self.otp:
+            self.otp = f"{random.randint(100000, 999999)}"  # Generate 6-digit random OTP
+
         super().save(*args, **kwargs)
 
+ 
     def __str__(self):
         return f"Order {self.tracking_id} - Parcel #{self.parcel.id}"
 

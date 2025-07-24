@@ -31,6 +31,7 @@ urlpatterns = [
 
     path('reject-customer-request/', reject_customer_request, name='reject_customer_request'),
 
+    path('orders/<int:id>/mark-delivered/', MarkOrderDeliveredAPIView.as_view(), name='mark-order-delivered'),
 
 ]  + router.urls
 

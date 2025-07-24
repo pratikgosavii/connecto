@@ -50,3 +50,28 @@ class VendorShipmentStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer_Order
         fields = ['status']  # Only 'status' is editable
+    
+    def validate_status(self, value):
+        if value == "completed":
+            raise serializers.ValidationError("Can't mark as completed")
+        return value
+    
+
+class CustomerOrderStatusUpdateSerializer(serializers.ModelSerializer):
+    otp = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = Customer_Order
+        fields = ['status', 'otp']
+
+    def validate(self, attrs):
+        instance = self.instance
+        otp = attrs.get('otp')
+
+        if otp != instance.otp:
+            raise serializers.ValidationError({"otp": "OTP is incorrect"})
+
+        if attrs.get('status') != 'delivered':
+            raise serializers.ValidationError({"status": "Only 'delivered' status is allowed."})
+
+        return attrs

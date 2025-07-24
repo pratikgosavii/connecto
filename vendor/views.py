@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 
 # Create your views here.
 
@@ -251,3 +251,17 @@ def update_shipment_status(request, pk):
         return Response(serializer.data)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+class MarkOrderDeliveredAPIView(APIView):
+    def post(self, request, id):
+        order = get_object_or_404(Customer_Order, id=id)
+        
+        serializer = CustomerOrderStatusUpdateSerializer(order, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"detail": "Order marked as delivered."})
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -31,6 +31,10 @@ urlpatterns = router.urls + [
 
     path('show-trip-parcels/', ShowTripParcels.as_view(), name='ShowTripParcels'),
     
+
+    
+    path("stream/get-chat-token/", get_chat_token.as_view()),
+    path("stream/get-vendor-chat-token/", get_chat_vendor_token.as_view()),
     
 
 ]

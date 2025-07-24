@@ -36,35 +36,90 @@
                 <h4 class="mb-sm-0 font-size-18">Shipment Detail</h4>
             </div>
 
-            <div class="card">
-                <h5 class="mb-4">Tracking ID: {{ data.tracking_id }}</h5>
+            <div class="container">
+    <h2 class="mb-4 text-center">Order Details - {{ data.tracking_id }}</h2>
 
-                <div class="row mb-3">
-                    <div class="col-md-4"><span class="label">Parcel ID:</span> <span class="value">#{{ data.parcel.id }}</span></div>
-                    <div class="col-md-4"><span class="label">Trip ID:</span> <span class="value">#{{ data.trip.id }}</span></div>
-                    <div class="col-md-4"><span class="label">Customer:</span> <span class="value">{{ data.user.get_full_name }}</span></div>
-                </div>
+    <!-- Order Card -->
+    <div class="card mb-4 shadow">
+        <div class="card-header bg-primary text-white" style="padding: 7px; padding-left: 14px; background-color: black ! IMPORTANT;">
+            Order Summary
+        </div>
+        <div class="card-body">
+            <p><strong>Tracking ID:</strong> {{ data.tracking_id }}</p>
+            <p><strong>Status:</strong> {{ data.get_status_display }}</p>
+            <p><strong>OTP:</strong> {{ data.otp }}</p>
+            <p><strong>User name:</strong> {{ data.user.get_full_name }}</p>
+            <p><strong>Assigned At:</strong> {{ data.assigned_at }}</p>
+        </div>
+    </div>
 
-                <div class="row mb-3">
-                    <div class="col-md-4"><span class="label">Status:</span> <span class="value">{{ data.get_status_display }}</span></div>
-                    <div class="col-md-4"><span class="label">Assigned At:</span> <span class="value">{{ data.assigned_at|date:"Y-m-d H:i" }}</span></div>
-                    <div class="col-md-4"><span class="label">Last Updated:</span> <span class="value">{{ data.updated_at|date:"Y-m-d H:i" }}</span></div>
-                </div>
-            </div>
+    <!-- Parcel Card -->
+    <div class="card mb-4 shadow">
+        <div class="card-header bg-success text-white" style="padding: 7px; padding-left: 14px; background-color: black ! IMPORTANT;">
+            Parcel Information
+        </div>
+        <div class="card-body">
+            <p><strong>Title:</strong> {{ data.parcel.parcel_title }}</p>
+            <p><strong>Description:</strong> {{ data.parcel.description }}</p>
+            <p><strong>Type:</strong> {{ data.parcel.parcel_type }}</p>
+            <p><strong>Weight:</strong> {{ data.parcel.weight }} kg</p>
+            <p><strong>Dimensions:</strong> {{ data.parcel.length }} x {{ data.parcel.width }} x {{ data.parcel.height }} cm</p>
+            <p><strong>Worth:</strong> ₹{{ data.parcel.item_price_worth }}</p>
+            <p><strong>Budget:</strong> ₹{{ data.parcel.budget }}</p>
+            <p><strong>Delivery Date:</strong> {{ data.parcel.delivery_date }}</p>
 
-              <div class="card">
-                <h5 class="mb-4">User Name: {{ data.user.name }}</h5>
+            <hr>
+            <h6 class="text-muted">Pickup Info</h6>
+            <p><strong>Address:</strong> {{ data.parcel.pickup_address_line1 }}, {{ data.parcel.pickup_address_line2 }}</p>
+            <p><strong>City:</strong> {{ data.parcel.pickup_city }}</p>
+            <p><strong>Pincode:</strong> {{ data.parcel.pickup_pincode }}</p>
+            <p><strong>Contact:</strong> {{ data.parcel.pickup_contact }}</p>
 
-                <div class="row mb-3">
-                    <div class="col-md-4"><span class="label">Mobile :</span> <span class="value">#{{ data.user.mobile }}</span></div>
-                    <div class="col-md-4"><span class="label">Email ID:</span> <span class="value">#{{ data.email }}</span></div>
-                </div>
+            <h6 class="text-muted mt-3">Destination Info</h6>
+            <p><strong>Address:</strong> {{ data.parcel.destination_address_line1 }}, {{ data.parcel.destination_address_line2 }}</p>
+            <p><strong>City:</strong> {{ data.parcel.destination_city }}</p>
+            <p><strong>Pincode:</strong> {{ data.parcel.destination_pincode }}</p>
+            <p><strong>Contact:</strong> {{ data.parcel.destination_contact }}</p>
+        </div>
+    </div>
 
-                <div class="row mb-3">
-                    <div class="col-md-4"><span class="label">Status:</span> <span class="value">{{ data.get_status_display }}</span></div>
-                    <div class="col-md-4"><span class="label">Assigned At:</span> <span class="value">{{ data.assigned_at|date:"Y-m-d H:i" }}</span></div>
-                    <div class="col-md-4"><span class="label">Last Updated:</span> <span class="value">{{ data.updated_at|date:"Y-m-d H:i" }}</span></div>
-                </div>
+    <!-- Trip Card -->
+    <div class="card mb-4 shadow">
+        <div class="card-header bg-info text-white" style="padding: 7px; padding-left: 14px; background-color: black ! IMPORTANT;">
+            Trip Details
+        </div>
+        <div class="card-body">
+            <p><strong>Description:</strong> {{ data.trip.description }}</p>
+            <p><strong>Route:</strong> {{ data.trip.source }} → {{ data.trip.destination }}</p>
+            <p><strong>Transport Mode:</strong> {{ data.trip.get_mode_of_transport_display }}</p>
+            <p><strong>Departure:</strong> {{ data.trip.departure_datetime }}</p>
+            <p><strong>Arrival:</strong> {{ data.trip.arrival_datetime }}</p>
+
+            {% if data.trip.mode_of_transport == "private" %}
+                <p><strong>Vehicle Type:</strong> {{ data.trip.get_private_vehicle_type_display }}</p>
+                <p><strong>Car Number:</strong> {{ data.trip.car_number }}</p>
+                {% if data.trip.car_photo %}
+                    <p><strong>Car Photo:</strong><br><img src="{{ data.trip.car_photo.url }}" class="img-fluid rounded" style="max-width: 200px;"></p>
+                {% endif %}
+            {% elif data.trip.mode_of_transport == "public" %}
+                <p><strong>Vehicle Type:</strong> {{ data.trip.get_public_vehicle_type_display }}</p>
+                {% if data.trip.public_vehicle_type == "train" %}
+                    <p><strong>PNR:</strong> {{ data.trip.train_pnr }}</p>
+                {% elif data.trip.public_vehicle_type == "bus" or data.trip.public_vehicle_type == "taxi" %}
+                    <p><strong>Bus/Taxi Number:</strong> {{ data.trip.bus_number }}</p>
+                    <p><strong>Seat Number:</strong> {{ data.trip.seat_number }}</p>
+                {% endif %}
+            {% endif %}
+
+            <hr>
+            <h6 class="text-muted">Pickup Info</h6>
+            <p><strong>Address:</strong> {{ data.trip.pickup_address_line1 }}, {{ data.trip.pickup_address_line2 }}</p>
+            <p><strong>City:</strong> {{ data.trip.pickup_city }}</p>
+            <p><strong>Pincode:</strong> {{ data.trip.pickup_pincode }}</p>
+            <p><strong>Contact:</strong> {{ data.trip.pickup_contact }}</p>
+        </div>
+    </div>
+</div>
 
 
                 <div class="mt-4">
