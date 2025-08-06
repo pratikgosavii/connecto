@@ -151,7 +151,7 @@ class DeliveryRating(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"Rating {self.rating} by {self.user} for {self.agent}"
+        return f"Rating {self.rating} by {self.user} for {self.vendor}"
 
 
 
