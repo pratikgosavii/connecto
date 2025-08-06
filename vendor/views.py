@@ -234,7 +234,7 @@ def update_shipment_status(request, pk):
         return Response({'detail': 'Shipment not found.'}, status=status.HTTP_404_NOT_FOUND)
 
     new_status = request.data.get('status')  # ✅ Get status from incoming PATCH data
-
+    trip_instance = order.trip
     if new_status == "in_transit" and order.trip:
         trip_instance = order.trip
         trip_instance.status = "in_transit"

@@ -20,11 +20,16 @@ class trip(models.Model):
         ('private_bus', 'Private Bus'),
     ]
 
+    STATUS_CHOICES = [
+        ("new", "new"),
+        ("in_transit", "In Transit"),
+    ]
     user = models.ForeignKey("users.User", on_delete=models.CASCADE)
     description = models.TextField()
     source = models.ForeignKey("masters.city", on_delete=models.CASCADE, related_name="source")
     destination = models.ForeignKey("masters.city", on_delete=models.CASCADE, related_name="destination")
     mode_of_transport = models.CharField(max_length=20, choices=MODE_OF_TRANSPORT_CHOICES)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, null=True, blank=True)
     private_vehicle_type = models.CharField(max_length=20, choices=PRIVATE_VEHICLE_CHOICES, null=True, blank=True)
     public_vehicle_type = models.CharField(max_length=20, choices=PUBLIC_TRANSPORT_CHOICES, null=True, blank=True)
 
