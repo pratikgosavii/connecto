@@ -47,6 +47,7 @@ class DeliveryRequest(models.Model):
 
     is_agent_assigned = models.BooleanField(default=False)
 
+    fragile = models.BooleanField(default=False)
     legal_confirmation = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
