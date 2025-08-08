@@ -683,8 +683,11 @@ class FetchDigilockerDocumentsView(APIView):
 
         except Exception as e:
             print("Surepass KYC fetch error:", e)
-            return Response({"error": "Something went wrong while fetching documents.", "e" : e}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                            )
+            return Response({
+                "error": "Something went wrong while fetching documents.",
+                "details": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 from rest_framework.decorators import api_view, permission_classes
