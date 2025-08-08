@@ -52,7 +52,13 @@ class DeliveryRequest(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-
+    def is_fully_verified(self):
+        return (
+            self.aadhaar_status == 'verified' and
+            self.pan_status == 'verified' and
+            self.dl_status == 'verified'
+        )
+    
 class Request_Vendor_for_Delivery(models.Model):
     
     user = models.ForeignKey("users.User", on_delete=models.CASCADE)

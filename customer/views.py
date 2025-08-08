@@ -608,3 +608,102 @@ class TicketMessageViewSet(viewsets.ViewSet):
 
         serializer = TicketMessageSerializer(new_message, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
+class SaveClientIDAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        kyc, _ = UserKYC.objects.get_or_create(user=user)
+
+        documents = request.data.get("documents")  # expecting a list of dicts
+
+        if not isinstance(documents, list):
+            return Response({"error": "Expected 'documents' to be a list"}, status=400)
+
+        for doc in documents:
+            doc_type = doc.get("document_type")
+            client_id = doc.get("client_id")
+
+            if doc_type not in ['aadhaar', 'pan', 'dl']:
+                return Response({"error": f"Invalid document_type: {doc_type}"}, status=400)
+            if not client_id:
+                return Response({"error": f"Missing client_id for {doc_type}"}, status=400)
+
+            if doc_type == 'aadhaar':
+                kyc.aadhaar_client_id = client_id
+                kyc.aadhaar_status = 'pending'
+            elif doc_type == 'pan':
+                kyc.pan_client_id = client_id
+                kyc.pan_status = 'pending'
+            elif doc_type == 'dl':
+                kyc.dl_client_id = client_id
+                kyc.dl_status = 'pending'
+
+        # Auto-approve check after updating statuses
+        if (
+            kyc.aadhaar_status == 'verified' and
+            (kyc.pan_status == 'verified' or kyc.dl_status == 'verified')
+        ):
+            kyc.approved = True
+        else:
+            kyc.approved = False  # optional, to auto-revoke if any doc changes back
+
+        kyc.save()
+        return Response({"message": "Documents processed successfully"})
+
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+
+# @csrf_exempt
+# @api_view(['POST'])
+# def surepass_webhook(request):
+#     payload = request.data
+#     client_id = payload.get("client_id")
+#     status = payload.get("status")
+#     data = payload.get("data", {})
+
+#     if not client_id:
+#         return Response({"error": "Missing client_id"}, status=400)
+
+#     try:
+#         kyc = UserKYC.objects.get(
+#             models.Q(aadhaar_client_id=client_id) |
+#             models.Q(pan_client_id=client_id) |
+#             models.Q(dl_client_id=client_id)
+#         )
+#     except UserKYC.DoesNotExist:
+#         return Response({"error": "KYC record not found"}, status=404)
+
+#     # Identify the document type
+#     if client_id == kyc.aadhaar_client_id:
+#         if status == "completed" and data.get("aadhaar_linked", False):
+#             kyc.aadhaar_status = "verified"
+#         else:
+#             kyc.aadhaar_status = "failed"
+
+#     elif client_id == kyc.pan_client_id:
+#         if status == "completed" and data.get("verified", False):
+#             kyc.pan_status = "verified"
+#         else:
+#             kyc.pan_status = "failed"
+
+#     elif client_id == kyc.dl_client_id:
+#         if status == "completed" and data.get("verified", False):
+#             kyc.dl_status = "verified"
+#         else:
+#             kyc.dl_status = "failed"
+
+#     # Check if all verified
+#     if (
+#         kyc.aadhaar_status == "verified"
+#         and kyc.pan_status == "verified"
+#         and kyc.dl_status == "verified"
+#     ):
+#         kyc.approved = True
+
+#     kyc.save()
+#     return Response({"message": "Webhook processed successfully"})

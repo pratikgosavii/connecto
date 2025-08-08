@@ -70,7 +70,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class User_KYCSerializer(serializers.ModelSerializer):
     class Meta:
-        model = user_kyc
+        model = UserKYC
         fields = ['id', 'user', 'adhar_card', 'pan_card', 'driving_licence', 'approved']
         read_only_fields = ['user', 'approved']
 

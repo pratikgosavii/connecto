@@ -57,6 +57,7 @@ class User(AbstractUser):
     email = models.EmailField(null=True, blank=True, validators=[EmailValidator(message="Enter a valid email address.")])
 
     is_agent = models.BooleanField(default = False)
+    is_verified = models.BooleanField(default = False)
 
     username = None
     USERNAME_FIELD = 'mobile'
@@ -85,13 +86,48 @@ class User(AbstractUser):
 
 
 
-class user_kyc(models.Model):
-    
+class UserKYC(models.Model):
+    DOCUMENT_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('verified', 'Verified'),
+        ('failed', 'Failed'),
+    ]
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    adhar_card = models.CharField(max_length=50)
-    pan_card = models.CharField(max_length=50)
-    driving_licence = models.CharField(max_length=50)
+
+    # Document numbers
+    aadhaar_number = models.CharField(max_length=20, null=True, blank=True)
+    pan_number = models.CharField(max_length=20, null=True, blank=True)
+    driving_license_number = models.CharField(max_length=20, null=True, blank=True)
+
+    # Surepass KYC Client IDs (to track async responses/status)
+    aadhaar_client_id = models.CharField(max_length=100, null=True, blank=True)
+    pan_client_id = models.CharField(max_length=100, null=True, blank=True)
+    dl_client_id = models.CharField(max_length=100, null=True, blank=True)
+
+    # Verification statuses
+    aadhaar_status = models.CharField(max_length=10, choices=DOCUMENT_STATUS_CHOICES, default='pending')
+    pan_status = models.CharField(max_length=10, choices=DOCUMENT_STATUS_CHOICES, default='pending')
+    dl_status = models.CharField(max_length=10, choices=DOCUMENT_STATUS_CHOICES, default='pending')
+
+    # Overall KYC Approval
     approved = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def check_and_update_approval(self):
+        if self.aadhaar_status == 'verified' and (
+            self.pan_status == 'verified' or self.dl_status == 'verified'
+        ):
+            self.approved = True
+        else:
+            self.approved = False
+        self.save()
+
+    def __str__(self):
+        return f"KYC for {self.user.name or self.user.mobile}"
+
 
     
 

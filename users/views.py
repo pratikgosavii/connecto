@@ -153,10 +153,10 @@ class User_KYCViewSet(viewsets.ModelViewSet):
     parser_classes = [MultiPartParser, JSONParser]
 
     def get_queryset(self):
-        return user_kyc.objects.filter(user=self.request.user)
+        return UserKYC.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        if user_kyc.objects.filter(user=self.request.user).exists():
+        if UserKYC.objects.filter(user=self.request.user).exists():
             raise ValidationError({"detail": "KYC already submitted for this user."})
         serializer.save(user=self.request.user)
 
@@ -275,3 +275,4 @@ def mark_notification_read(request, pk):
         return Response({'status': 'marked as read'})
     except Notification.DoesNotExist:
         return Response({'error': 'Not found'}, status=404)
+    
