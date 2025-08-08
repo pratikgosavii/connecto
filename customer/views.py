@@ -634,13 +634,13 @@ class SaveClientIDAPIView(APIView):
 
             if doc_type == 'aadhaar':
                 kyc.aadhaar_client_id = client_id
-                kyc.aadhaar_status = 'pending'
+                kyc.aadhaar_status = 'verified'
             elif doc_type == 'pan':
                 kyc.pan_client_id = client_id
-                kyc.pan_status = 'pending'
+                kyc.pan_status = 'verified'
             elif doc_type == 'dl':
                 kyc.dl_client_id = client_id
-                kyc.dl_status = 'pending'
+                kyc.dl_status = 'verified'
 
         # Auto-approve check after updating statuses
         if (

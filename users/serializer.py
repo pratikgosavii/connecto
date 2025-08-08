@@ -12,6 +12,9 @@ from customer.models import *
 from rest_framework import serializers
 
 class UserProfileSerializer(serializers.ModelSerializer):
+
+    is_approved = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = [
@@ -29,13 +32,18 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'country',
             'qualification',
             'year_of_graduation',
+            'is_approved'
         ]
-        read_only_fields = ['id', 'mobile', 'firebase_uid']  # Mobile comes from Firebase
+        read_only_fields = ['id', 'mobile', 'firebase_uid', 'is_approved']  # Mobile comes from Firebase
         extra_kwargs = {
             'firebase_uid': {'required': True},
             'email': {'required': False, 'allow_blank': True, 'allow_null': True},
         }
 
+    def get_is_approved(self, obj):
+        kyc = getattr(obj, "userkyc", None)
+        return kyc.approved if kyc else False
+    
     def to_representation(self, instance):
         data = super().to_representation(instance)
 
