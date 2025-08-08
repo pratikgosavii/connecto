@@ -17,14 +17,14 @@ class CustomUserAdmin(UserAdmin):
 
     fieldsets = (
         (None, {'fields': ('mobile', 'email', 'password', 'firebase_uid')}),
-        ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser')}),
+        ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser', 'is_verified')}),
         ('Groups & Permissions', {'fields': ('groups', 'user_permissions')}),
     )
 
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('mobile', 'email', 'password1', 'password2', 'is_staff', 'is_active')}
+            'fields': ('mobile', 'email', 'password1', 'password2', 'is_staff', 'is_active', 'is_verified')}
         ),
     )
 
@@ -33,3 +33,4 @@ class CustomUserAdmin(UserAdmin):
 
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(UserCredit)
+admin.site.register(UserKYC)

@@ -610,49 +610,80 @@ class TicketMessageViewSet(viewsets.ViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
+import requests
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+from django.conf import settings
+from django.contrib import messages
 
-class SaveClientIDAPIView(APIView):
+
+class FetchDigilockerDocumentsView(APIView):
+
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
+    def get(self, request, *args, **kwargs):
+        client_id = request.GET.get('client_id')
+        
         user = request.user
-        kyc, _ = UserKYC.objects.get_or_create(user=user)
 
-        documents = request.data.get("documents")  # expecting a list of dicts
+        try:
+            kyc, _ = UserKYC.objects.get_or_create(user=user)
 
-        if not isinstance(documents, list):
-            return Response({"error": "Expected 'documents' to be a list"}, status=400)
-
-        for doc in documents:
-            doc_type = doc.get("document_type")
-            client_id = doc.get("client_id")
-
-            if doc_type not in ['aadhaar', 'pan', 'dl']:
-                return Response({"error": f"Invalid document_type: {doc_type}"}, status=400)
+            
             if not client_id:
-                return Response({"error": f"Missing client_id for {doc_type}"}, status=400)
+                return Response({"error": "DigiLocker Client ID not found for this user."}, status=status.HTTP_400_BAD_REQUEST)
 
-            if doc_type == 'aadhaar':
-                kyc.aadhaar_client_id = client_id
-                kyc.aadhaar_status = 'verified'
-            elif doc_type == 'pan':
-                kyc.pan_client_id = client_id
-                kyc.pan_status = 'verified'
-            elif doc_type == 'dl':
-                kyc.dl_client_id = client_id
-                kyc.dl_status = 'verified'
+            url = f"https://kyc-api.surepass.app/api/v1/digilocker/list-documents/{client_id}"
+            headers = {
+                "Authorization": f"Bearer {settings.SUREPASS_TOKEN}",
+                "Content-Type": "application/json"
+            }
 
-        # Auto-approve check after updating statuses
-        if (
-            kyc.aadhaar_status == 'verified' and
-            (kyc.pan_status == 'verified' or kyc.dl_status == 'verified')
-        ):
-            kyc.approved = True
-        else:
-            kyc.approved = False  # optional, to auto-revoke if any doc changes back
+            response = requests.get(url, headers=headers)
+            data = response.json()
 
-        kyc.save()
-        return Response({"message": "Documents processed successfully"})
+            if not data.get("success"):
+                return Response({"error": f"Surepass Error: {data.get('message', 'Unknown error')}"}, status=status.HTTP_400_BAD_REQUEST)
+
+            documents = data["data"].get("documents", [])
+
+            # Reset statuses
+            kyc.aadhaar_status = 'pending'
+            kyc.pan_status = 'pending'
+            kyc.dl_status = 'pending'
+
+            aadhaar_verified = False
+            pan_verified = False
+            dl_verified = False
+
+            for doc in documents:
+                doc_type = doc.get("doc_type")
+                downloaded = doc.get("downloaded", False)
+
+                if doc_type == "ADHAR" and downloaded:
+                    kyc.aadhaar_status = "verified"
+                    aadhaar_verified = True
+                elif doc_type == "PANCR" and downloaded:
+                    kyc.pan_status = "verified"
+                    pan_verified = True
+                elif doc_type == "DL" and downloaded:
+                    kyc.dl_status = "verified"
+                    dl_verified = True
+
+            kyc.save()
+            kyc.check_and_update_approval()
+
+            return Response({
+                "message": "Documents fetched and statuses updated successfully.",
+                "aadhaar_verified": aadhaar_verified,
+                "pan_verified": pan_verified,
+                "dl_verified": dl_verified
+            })
+
+
+        except Exception as e:
+            print("Surepass KYC fetch error:", e)
+            return Response({"error": "Something went wrong while fetching documents."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 from rest_framework.decorators import api_view, permission_classes
