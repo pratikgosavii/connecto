@@ -673,13 +673,33 @@ class FetchDigilockerDocumentsView(APIView):
             kyc.save()
             kyc.check_and_update_approval()
 
+            # Step 2: If Aadhaar verified, fetch detailed Aadhaar info
+            user_name_updated = False
+            if aadhaar_verified:
+                aadhaar_url = f"https://kyc-api.surepass.app/api/v1/digilocker/download-aadhaar/{client_id}"
+                aadhaar_resp = requests.get(aadhaar_url, headers=headers)
+                aadhaar_data = aadhaar_resp.json()
+
+                if aadhaar_data.get("success") and "data" in aadhaar_data:
+                    # Extract full name from response
+                    full_name = aadhaar_data["data"].get("digilocker_metadata", {}).get("name")
+                    if full_name:
+                        # Update logged in user name
+                        user.name = full_name
+                        user.save()
+                        user_name_updated = True
+
+                        # Example: Call your own API to block user or other action here
+                        # For example:
+                        # block_user_api(user.id)
+
             return Response({
                 "message": "Documents fetched and statuses updated successfully.",
                 "aadhaar_verified": aadhaar_verified,
                 "pan_verified": pan_verified,
-                "dl_verified": dl_verified
+                "dl_verified": dl_verified,
+                "user_name_updated": user_name_updated,
             })
-
 
         except Exception as e:
             print("Surepass KYC fetch error:", e)
@@ -688,6 +708,7 @@ class FetchDigilockerDocumentsView(APIView):
                 "details": str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+           
 
 
 from rest_framework.decorators import api_view, permission_classes
