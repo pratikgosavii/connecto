@@ -105,7 +105,7 @@ class UserKYC(models.Model):
     pan_status = models.CharField(max_length=10, choices=DOCUMENT_STATUS_CHOICES, default='pending')
     dl_status = models.CharField(max_length=10, choices=DOCUMENT_STATUS_CHOICES, default='pending')
 
-    approved = models.BooleanField(default=False)
+    is_approved = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
