@@ -470,6 +470,30 @@ def all_parcels(request):
 
     return render(request, 'all_parcels.html', context)
 
+def all_trip(request):
+
+
+    data = trip.objects.all()
+
+    context = {
+        'data' : data
+    }
+
+    return render(request, 'all_trip.html', context)
+
+def view_parcel(request, parcel_id):
+
+    request_obj = DeliveryRequest.objects.get(id = parcel_id)
+
+    return render(request, 'view_parcel.html', {'request_obj' : request_obj})
+
+def view_trip(request, trip_id):
+
+    request_obj = trip.objects.get(id = trip_id)
+
+    return render(request, 'view_trip.html', {'request_obj' : request_obj})
+
+
 def view_order_detail(request, booking_id):
 
 

@@ -1,0 +1,116 @@
+{% extends "partials/adminBase.html" %}
+{% load static %}
+
+{% block title %}Parcel Details{% endblock title %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+<style>
+    body {
+        background-color: gainsboro;
+        color: #775599;
+    }
+    .card {
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .label {
+        font-weight: bold;
+        color: #333;
+    }
+    .value {
+        color: #000;
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-content">
+        <div class="container-fluid">
+
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <h4 class="mb-sm-0 font-size-18">Parcel Details</h4>
+            </div>
+
+            <div class="container">
+                <h2 class="mb-4 text-center">Parcel Title - {{ request_obj.parcel_title }}</h2>
+
+                <!-- Parcel Summary -->
+                <div class="card mb-4 shadow">
+                    <div class="card-header bg-info text-white" style="padding: 7px; padding-left: 14px; background-color: black !important;">
+                        Parcel Summary
+                    </div>
+                    <div class="card-body">
+                        <p><strong>User:</strong> {{ request_obj.user.get_full_name }}</p>
+                        <p><strong>Description:</strong> {{ request_obj.description }}</p>
+                        <p><strong>Parcel Type:</strong> {{ request_obj.parcel_type }}</p>
+                        <p><strong>Weight (kg):</strong> {{ request_obj.weight }}</p>
+                        <p><strong>Dimensions (L × W × H cm):</strong> {{ request_obj.length }} × {{ request_obj.width }} × {{ request_obj.height }}</p>
+                        <p><strong>Item Price Worth:</strong> ₹{{ request_obj.item_price_worth }}</p>
+                        <p><strong>Budget:</strong> ₹{{ request_obj.budget }}</p>
+                        <p><strong>Delivery Date:</strong> {{ request_obj.delivery_date }}</p>
+                    </div>
+                </div>
+
+                <!-- Pickup Information -->
+                <div class="card mb-4 shadow">
+                    <div class="card-header bg-success text-white" style="padding: 7px; padding-left: 14px; background-color: black !important;">
+                        Pickup Information
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Address:</strong> {{ request_obj.pickup_address_line1 }}, {{ request_obj.pickup_address_line2 }}</p>
+                        <p><strong>City:</strong> {{ request_obj.pickup_city }}</p>
+                        <p><strong>State:</strong> {{ request_obj.pickup_state }}</p>
+                        <p><strong>Pincode:</strong> {{ request_obj.pickup_pincode }}</p>
+                        <p><strong>Contact:</strong> {{ request_obj.pickup_contact }}</p>
+                        <p><strong>Request Types:</strong>
+                            {% for req_type in request_obj.request_type.all %}
+                                {{ req_type.name }}{% if not forloop.last %}, {% endif %}
+                            {% empty %}
+                                None
+                            {% endfor %}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Destination Information -->
+                <div class="card mb-4 shadow">
+                    <div class="card-header bg-warning text-white" style="padding: 7px; padding-left: 14px; background-color: black !important;">
+                        Destination Information
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Address:</strong> {{ request_obj.destination_address_line1 }}, {{ request_obj.destination_address_line2 }}</p>
+                        <p><strong>City:</strong> {{ request_obj.destination_city }}</p>
+                        <p><strong>State:</strong> {{ request_obj.destination_state }}</p>
+                        <p><strong>Pincode:</strong> {{ request_obj.destination_pincode }}</p>
+                        <p><strong>Contact:</strong> {{ request_obj.destination_contact }}</p>
+                    </div>
+                </div>
+
+                <!-- Other Information -->
+                <div class="card mb-4 shadow">
+                    <div class="card-header bg-secondary text-white" style="padding: 7px; padding-left: 14px; background-color: black !important;">
+                        Other Information
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Agent Assigned:</strong> {{ request_obj.is_agent_assigned|yesno:"Yes,No" }}</p>
+                        <p><strong>Fragile:</strong> {{ request_obj.fragile|yesno:"Yes,No" }}</p>
+                        <p><strong>Legal Confirmation:</strong> {{ request_obj.legal_confirmation|yesno:"Yes,No" }}</p>
+                        <p><strong>Created At:</strong> {{ request_obj.created_at }}</p>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{% url 'all_parcels' %}" class="btn btn-secondary">Back to List</a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock content %}

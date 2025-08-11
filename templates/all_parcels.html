@@ -90,8 +90,8 @@
                                                         <td>{{ req.parcel_type }}</td>
                                                         <td>{{ req.weight }}</td>
                                                         <td>{{ req.length }} × {{ req.width }} × {{ req.height }}</td>
-                                                        <td>{{ req.pickup_city.name if req.pickup_city }}</td>
-                                                        <td>{{ req.destination_city.name if req.destination_city }}</td>
+                                                        <td>{{ req.pickup_city.name }}</td>
+                                                        <td>{{ req.destination_city.name }}</td>
                                                         <td>{{ req.budget }}</td>
                                                         <td>{{ req.delivery_date|date:"Y-m-d" }}</td>
                                                         <td class="status-{{ req.is_agent_assigned }}">
@@ -99,7 +99,7 @@
                                                         </td>
                                                         <td>{{ req.created_at|date:"Y-m-d H:i" }}</td>
                                                         <td>
-                                                            <a href="{% url 'view_delivery_request_detail' req.id %}">
+                                                            <a href="{% url 'view_parcel' req.id %}">
                                                                 <i class="bi bi-eye text-info" title="View"></i>
                                                             </a>
                                                         </td>

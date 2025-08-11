@@ -1,0 +1,107 @@
+{% extends "partials/adminBase.html" %}
+{% load static %}
+
+{% block title %}Trip Details{% endblock title %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+<style>
+    body {
+        background-color: gainsboro;
+        color: #775599;
+    }
+    .card {
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .label {
+        font-weight: bold;
+        color: #333;
+    }
+    .value {
+        color: #000;
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-content">
+        <div class="container-fluid">
+
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <h4 class="mb-sm-0 font-size-18">Trip Details</h4>
+            </div>
+
+            <div class="container">
+                <h2 class="mb-4 text-center">Trip ID - {{ request_obj.id }}</h2>
+
+                <!-- Trip Summary -->
+                <div class="card mb-4 shadow">
+                    <div class="card-header bg-info text-white" style="padding: 7px; padding-left: 14px; background-color: black !important;">
+                        Trip Summary
+                    </div>
+                    <div class="card-body">
+                        <p><strong>User:</strong> {{ request_obj.user.get_full_name }}</p>
+                        <p><strong>Description:</strong> {{ request_obj.description }}</p>
+                        <p><strong>Status:</strong> {{ request_obj.get_status_display }}</p>
+                        <p><strong>Route:</strong> {{ request_obj.source }} → {{ request_obj.destination }}</p>
+                        <p><strong>Transport Mode:</strong> {{ request_obj.get_mode_of_transport_display }}</p>
+                        <p><strong>Departure:</strong> {{ request_obj.departure_datetime }}</p>
+                        <p><strong>Arrival:</strong> {{ request_obj.arrival_datetime }}</p>
+                        <p><strong>Parcel Capacity:</strong> {{ request_obj.parcel_capacity }}</p>
+                    </div>
+                </div>
+
+                <!-- Vehicle Details -->
+                <div class="card mb-4 shadow">
+                    <div class="card-header bg-warning text-white" style="padding: 7px; padding-left: 14px; background-color: black !important;">
+                        Vehicle Details
+                    </div>
+                    <div class="card-body">
+                        {% if request_obj.mode_of_transport == "private" %}
+                            <p><strong>Vehicle Type:</strong> {{ request_obj.get_private_vehicle_type_display }}</p>
+                            <p><strong>Car Number:</strong> {{ request_obj.car_number }}</p>
+                            {% if request_obj.car_photo %}
+                                <p><strong>Car Photo:</strong><br>
+                                    <img src="{{ request_obj.car_photo.url }}" class="img-fluid rounded" style="max-width: 200px;">
+                                </p>
+                            {% endif %}
+                        {% elif request_obj.mode_of_transport == "public" %}
+                            <p><strong>Vehicle Type:</strong> {{ request_obj.get_public_vehicle_type_display }}</p>
+                            {% if request_obj.public_vehicle_type == "train" %}
+                                <p><strong>PNR:</strong> {{ request_obj.train_pnr }}</p>
+                            {% elif request_obj.public_vehicle_type == "bus" or request_obj.public_vehicle_type == "taxi" %}
+                                <p><strong>Bus/Taxi Number:</strong> {{ request_obj.bus_number }}</p>
+                                <p><strong>Seat Number:</strong> {{ request_obj.seat_number }}</p>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Pickup Information -->
+                <div class="card mb-4 shadow">
+                    <div class="card-header bg-success text-white" style="padding: 7px; padding-left: 14px; background-color: black !important;">
+                        Pickup Information
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Address:</strong> {{ request_obj.pickup_address_line1 }}, {{ request_obj.pickup_address_line2 }}</p>
+                        <p><strong>City:</strong> {{ request_obj.pickup_city }}</p>
+                        <p><strong>State:</strong> {{ request_obj.pickup_state }}</p>
+                        <p><strong>Pincode:</strong> {{ request_obj.pickup_pincode }}</p>
+                        <p><strong>Contact:</strong> {{ request_obj.pickup_contact }}</p>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{% url 'all_trip' %}" class="btn btn-secondary">Back to List</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock content %}
