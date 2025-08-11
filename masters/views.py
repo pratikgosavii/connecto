@@ -459,6 +459,17 @@ def all_shipments(request):
 
     return render(request, 'all_shipments.html', context)
 
+def all_parcels(request):
+
+
+    data = DeliveryRequest.objects.all()
+
+    context = {
+        'data' : data
+    }
+
+    return render(request, 'all_parcels.html', context)
+
 def view_order_detail(request, booking_id):
 
 

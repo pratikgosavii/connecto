@@ -48,6 +48,7 @@ urlpatterns = [
     path('privacy-policys/', privacy_policyListAPIView.as_view(), name='privacy_policy-list-api'),
 
     path('all-shipments/', all_shipments, name='all_shipments'),
+    path('all-parcels/', all_parcels, name='all_parcels'),
     path('view-order-detail/<booking_id>', view_order_detail, name='view_order_detail'),
 
         # urls.py
