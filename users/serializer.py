@@ -13,6 +13,7 @@ from rest_framework import serializers
 
 class UserProfileSerializer(serializers.ModelSerializer):
 
+    is_approved = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -30,15 +31,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'city',
             'country',
             'qualification',
-            'is_approved',  # Add field here
+            'is_approved',
         ]
-        read_only_fields = ['id', 'mobile', 'firebase_uid', 'is_approved'] # Mobile comes from Firebase
-        extra_kwargs = {
-            'firebase_uid': {'required': True},
-            'email': {'required': False, 'allow_blank': True, 'allow_null': True},
-        }
+        read_only_fields = ['id', 'mobile', 'firebase_uid', 'is_approved']
 
-   
+    def get_is_approved(self, obj):
+        if hasattr(obj, "userkyc") and obj.userkyc:
+            return obj.userkyc.is_approved
+        return False
     
     def to_representation(self, instance):
         data = super().to_representation(instance)
