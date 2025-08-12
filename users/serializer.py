@@ -40,9 +40,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'email': {'required': False, 'allow_blank': True, 'allow_null': True},
         }
 
-    def get_is_approved(self, obj):
-        kyc = getattr(obj, "userkyc", None)
-        return kyc.is_approved if kyc else False
+   
     
     def to_representation(self, instance):
         data = super().to_representation(instance)
