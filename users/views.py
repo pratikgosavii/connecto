@@ -45,15 +45,20 @@ class SignupView(APIView):
             return Response({"error": "idToken is required"}, status=400)
 
         try:
+            print('------1----------')
+
             decoded_token = firebase_auth.verify_id_token(id_token)
             mobile = decoded_token.get("phone_number")
             uid = decoded_token.get("uid")
+            print('------2----------')
 
             if not mobile:
                 return Response({"error": "Phone number not found in token"}, status=400)
 
             user = User.objects.filter(mobile=mobile).first()
             created = False
+
+            print('------3----------')
 
             if user:
                 if not user.is_active:
@@ -69,6 +74,7 @@ class SignupView(APIView):
                     firebase_uid=uid
                 )
                 created = True
+            print('------4----------')
 
             # Handle optional fields from frontend
             optional_fields = [
@@ -78,10 +84,12 @@ class SignupView(APIView):
             for field in optional_fields:
                 if field in request.data:
                     setattr(user, field, request.data.get(field))
+            print('------5----------')
 
             user.save()
 
             user_details = UserProfileSerializer(user).data
+            print('------6----------')
 
             refresh = RefreshToken.for_user(user)
             return Response({
