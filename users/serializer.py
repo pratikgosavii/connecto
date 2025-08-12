@@ -31,6 +31,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'city',
             'country',
             'qualification',
+            'year_of_graduation',
             'is_approved',
         ]
         read_only_fields = ['id', 'mobile', 'firebase_uid', 'is_approved']
