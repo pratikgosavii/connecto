@@ -32,6 +32,7 @@ urlpatterns = [
     path('logout/', logout_page, name='logout'),
 
     path('user_list/', user_list, name='user_list'),
+    path('provider_list/', provider_list, name='provider_list'),
     path('DeleteUserView/', DeleteUserView.as_view(), name='DeleteUserView'),
     
 

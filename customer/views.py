@@ -679,6 +679,7 @@ class FetchDigilockerDocumentsView(APIView):
                 aadhaar_url = f"https://kyc-api.surepass.app/api/v1/digilocker/download-aadhaar/{client_id}"
                 aadhaar_resp = requests.get(aadhaar_url, headers=headers)
                 aadhaar_data = aadhaar_resp.json()
+                print(aadhaar_data)
 
                 if aadhaar_data.get("success") and "data" in aadhaar_data:
                     # Extract full name from response
@@ -697,6 +698,7 @@ class FetchDigilockerDocumentsView(APIView):
                 "message": "Documents fetched and statuses updated successfully.",
                 "aadhaar_verified": aadhaar_verified,
                 "pan_verified": pan_verified,
+                "aadhaar_data": aadhaar_data,
                 "dl_verified": dl_verified,
                 "user_name_updated": user_name_updated,
             })

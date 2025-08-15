@@ -19,7 +19,7 @@ urlpatterns = router.urls + [
     path('view-vendor-request/', ViewVendorRequestViewSet.as_view(), name='ViewVendorRequestViewSet'),
 
     path('kyc/fetch-documents/', FetchDigilockerDocumentsView.as_view(), name='fetch_documents'),
-
+    
     # path("webhook/surepass/", surepass_webhook, name="surepass-webhook"),
 
     path('assign-parcel-to-agent/', assign_parcel_to_agent, name='assign_parcel_to_agent'),
