@@ -171,3 +171,32 @@ class TicketMessage(models.Model):
     sender = models.ForeignKey('users.User', on_delete=models.CASCADE)
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+
+from django.db import models
+from django.conf import settings
+
+class PaymentLog(models.Model):
+    STATUS_CHOICES = [
+        ('created', 'Created'),
+        ('captured', 'Captured'),
+        ('failed', 'Failed'),
+        ('pending', 'Pending'),
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    order_id = models.CharField(max_length=100, unique=True)
+    payment_id = models.CharField(max_length=100, null=True, blank=True)
+    signature = models.TextField(null=True, blank=True)
+    package_key = models.CharField(max_length=50)
+    amount = models.PositiveIntegerField()  # in paise
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='created')
+    credits_added = models.BooleanField(default=False)  # prevent double credit
+    raw_data = models.JSONField(default=dict, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.order_id} - {self.status}"

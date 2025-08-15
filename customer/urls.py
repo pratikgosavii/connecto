@@ -41,6 +41,5 @@ urlpatterns = router.urls + [
     path("stream/get-vendor-chat-token/", get_chat_vendor_token.as_view()),
     
     path('purchase/create-order/', create_order, name='create_order'),
-    path('purchase/payment-success/', payment_success, name='payment_success'),
 
 ]
