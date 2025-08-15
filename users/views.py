@@ -238,15 +238,9 @@ def customer_user_list(request):
 
 def user_list(request):
 
-    data = User.objects.all()
+    data = User.objects.select_related('userkyc').all()
 
     return render(request, 'user_list.html', { 'data' : data})
-
-def provider_list(request):
-
-    data = User.objects.all()
-
-    return render(request, 'provider_list.html', { 'data' : data})
 
 
 

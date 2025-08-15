@@ -682,9 +682,36 @@ class FetchDigilockerDocumentsView(APIView):
                 print(aadhaar_data)
 
                 if aadhaar_data.get("success") and "data" in aadhaar_data:
-                    # Extract full name from response
-                    full_name = aadhaar_data["data"].get("digilocker_metadata", {}).get("name")
+                    data_block = aadhaar_data["data"]
+                    aadhaar_info = data_block.get("aadhaar_xml_data", {})
+
+                    # Convert and save image
+                    profile_image_file = save_base64_image(aadhaar_info.get("profile_image"))
+
+                    AadhaarDetails.objects.update_or_create(
+                        user=user,
+                        client_id=data_block.get("client_id"),
+                        defaults={
+                            "name": data_block.get("digilocker_metadata", {}).get("name"),
+                            "gender": data_block.get("digilocker_metadata", {}).get("gender"),
+                            "dob": data_block.get("digilocker_metadata", {}).get("dob"),
+                            "yob": aadhaar_info.get("yob"),
+                            "zip_code": aadhaar_info.get("zip"),
+                            "profile_image": profile_image_file,  # Now it's an ImageField
+                            "masked_aadhaar": aadhaar_info.get("masked_aadhaar"),
+                            "full_address": aadhaar_info.get("full_address"),
+                            "father_name": aadhaar_info.get("father_name"),
+                            "address_json": aadhaar_info.get("address"),
+                            "xml_url": data_block.get("xml_url"),
+                        }
+                    )
+
+                    # Update user name
+                    full_name = data_block.get("digilocker_metadata", {}).get("name")
                     if full_name:
+                        user.name = full_name
+                        user.save()
+
                         # Update logged in user name
                         user.name = full_name
                         user.save()

@@ -200,3 +200,26 @@ class PaymentLog(models.Model):
 
     def __str__(self):
         return f"{self.order_id} - {self.status}"
+
+
+# models.py
+class AadhaarDetails(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="aadhaar_details")
+    client_id = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    gender = models.CharField(max_length=10, blank=True, null=True)
+    dob = models.DateField(blank=True, null=True)
+    yob = models.CharField(max_length=4, blank=True, null=True)
+    zip_code = models.CharField(max_length=10, blank=True, null=True)
+    profile_image = models.ImageField(upload_to="aadhaar_photos/", blank=True, null=True)  # Changed here
+    masked_aadhaar = models.CharField(max_length=20, blank=True, null=True)
+    full_address = models.TextField(blank=True, null=True)
+    father_name = models.CharField(max_length=255, blank=True, null=True)
+    address_json = models.JSONField(blank=True, null=True)
+    xml_url = models.URLField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Aadhaar of {self.user}"
+
+

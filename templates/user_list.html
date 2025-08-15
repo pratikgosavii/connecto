@@ -100,42 +100,57 @@
                             <div class="card">
                                 <div class="card-body">
                                     <div class="table-responsive">
-                                        <table
-                                                id="datatable"
-                                                class="table table-bordered table-striped"
-                                        >
+                                        <table class="table table-bordered table-striped">
                                             <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Name</th>
-                                                <th>Email</th>
-                                                <th>Type</th>
-                                            </tr>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Name</th>
+                                                    <th>Mobile</th>
+                                                    <th>Email</th>
+                                                    <th>Type</th>
+                                                    <th>KYC Status</th>
+                                                    <th>Address</th>
+                                                    <th>Qualification</th>
+                                                    <th>Year of Graduation</th>
+                                                </tr>
                                             </thead>
-                                            <tbody id="tableBody">
-                                                {% if data %}
-                                            {% for i in data %}
+                                            <tbody>
+                                                {% for user in data %}
                                                 <tr>
                                                     <td>{{ forloop.counter }}</td>
-                                                    <td>{{ i.username }}</td>
-                                                    <td>{{ i.email }}</td>
-                                                    <td>   {% if i.is_customer %}
-                                                    Customer
-                                                {% elif i.is_doctor %}
-                                                    Doctor
-                                                {% elif i.is_daycare %}
-                                                    Daycare
-                                                {% elif i.is_service_provider %}
-                                                    Service Provider
-                                                {% else %}
-                                                    Unknown
-                                                {% endif %}</td>
-                                                   
+                                                    <td>{{ user.name|default:user.mobile }}</td>
+                                                    <td>{{ user.mobile }}</td>
+                                                    <td>{{ user.email|default:"-" }}</td>
+                                                    <td>
+                                                        {% if user.is_agent %}
+                                                            Vendor
+                                                        {% else %}
+                                                            Customer
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if user.userkyc.is_approved %}
+                                                            <span style="color:green; font-weight:bold;">&#10004;</span>  <!-- Right tick -->
+                                                        {% else %}
+                                                            <span style="color:red;">Pending</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {{ user.address_line1|default:"" }} {{ user.address_line2|default:"" }},
+                                                        {{ user.city|default:"" }}, {{ user.state|default:"" }},
+                                                        {{ user.pincode|default:"" }}, {{ user.country|default:"" }}
+                                                    </td>
+                                                    <td>{{ user.qualification|default:"-" }}</td>
+                                                    <td>{{ user.year_of_graduation|default:"-" }}</td>
                                                 </tr>
-                                            {% endfor %}
-                                            {% endif %}
+                                                {% empty %}
+                                                <tr>
+                                                    <td colspan="9">No users found</td>
+                                                </tr>
+                                                {% endfor %}
                                             </tbody>
                                         </table>
+
                                     </div>
                                 </div>
                             </div>
