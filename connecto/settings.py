@@ -21,16 +21,22 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+
+
 import os
-from dotenv import load_dotenv
 from pathlib import Path
+from dotenv import load_dotenv
 
+BASE_DIR1 = Path(__file__).resolve().parent.parent
 
-load_dotenv(os.path.join(BASE_DIR, 'connecto', '.env'))
+# Load .env
+load_dotenv(BASE_DIR1 / 'connecto' / '.env')
 
 RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
 RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET")
+
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -107,8 +113,7 @@ cred = credentials.Certificate(firebase_key_path)
 initialize_app(cred)
 
 
-RAZORPAY_KEY_ID = 'rzp_test_R5XV4nQlMkdVy8'
-RAZORPAY_KEY_SECRET = 'Hf5dz8SL9EW72SfHwpq1e540'
+
 
 LOGGING = {
     "version": 1,
