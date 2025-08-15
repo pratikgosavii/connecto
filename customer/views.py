@@ -763,3 +763,55 @@ from rest_framework.permissions import AllowAny
 
 #     kyc.save()
 #     return Response({"message": "Webhook processed successfully"})
+
+
+
+import razorpay
+from django.conf import settings
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+CREDIT_PACKAGES = {
+    "basic": {"amount": 9900, "credits": 3},    # amount in paise
+    "premium": {"amount": 29900, "credits": 10},
+}
+
+client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_order(request):
+    package_key = request.data.get("package_key")
+    package = CREDIT_PACKAGES.get(package_key)
+    if not package:
+        return Response({"error": "Invalid package"}, status=400)
+
+    order_data = {
+        "amount": package["amount"],
+        "currency": "INR",
+        "receipt": f"user_{request.user.id}_package_{package_key}",
+        "payment_capture": 1
+    }
+
+    order = client.order.create(order_data)
+    return Response({
+        "order_id": order["id"],
+        "amount": package["amount"],
+        "currency": "INR",
+        "package_key": package_key
+    })
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def payment_success(request):
+    # request.data will have razorpay_payment_id, razorpay_order_id, razorpay_signature, package_key
+    data = request.data
+    package_key = data.get("package_key")
+    package = CREDIT_PACKAGES.get(package_key)
+    if package:
+        user = request.user
+        user.credits += package["credits"]
+        user.save()
+        return Response({"status": "success", "credits": user.credits})
+    return Response({"error": "Invalid package"}, status=400)
