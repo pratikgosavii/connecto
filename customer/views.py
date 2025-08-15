@@ -876,16 +876,20 @@ def razorpay_webhook(request):
 
 
 
-    webhook_body = request.body
+    webhook_body = request.body.decode('utf-8')  # <-- decode bytes to string
     received_sig = request.headers.get("X-Razorpay-Signature")
 
-    # ✅ Verify signature using Razorpay utility
     try:
-        client.utility.verify_webhook_signature(webhook_body, received_sig, settings.RAZORPAY_WEBHOOK_SECRET)
+        client.utility.verify_webhook_signature(
+            webhook_body,
+            received_sig,
+            settings.RAZORPAY_WEBHOOK_SECRET
+        )
     except razorpay.errors.SignatureVerificationError:
         return Response({"error": "Invalid signature"}, status=400)
 
-    event = json.loads(webhook_body)
+    event = json.loads(webhook_body)  # now safe to load JSON
+
     payment_entity = event.get("payload", {}).get("payment", {}).get("entity", {})
     order_id = payment_entity.get("order_id")
     amount = payment_entity.get("amount")  # in paise
