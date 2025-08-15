@@ -122,12 +122,6 @@ class Customer_Order(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-    razorpay_order_id = models.CharField(max_length=100, blank=True, null=True)
-    razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
-    razorpay_signature = models.CharField(max_length=255, blank=True, null=True)
-    payment_status = models.CharField(max_length=20, default='pending')  # pending, paid, failed
-    
-
     def save(self, *args, **kwargs):
         if not self.tracking_id:
             last_id = Customer_Order.objects.aggregate(Max('id'))['id__max'] or 0

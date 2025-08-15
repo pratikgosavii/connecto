@@ -811,7 +811,8 @@ def payment_success(request):
     package = CREDIT_PACKAGES.get(package_key)
     if package:
         user = request.user
-        user.credits += package["credits"]
-        user.save()
+        user_credit_instance = UserCredit.objects.get(user = user)
+        user_credit_instance.credits += package["credits"]
+        user_credit_instance.save()
         return Response({"status": "success", "credits": user.credits})
     return Response({"error": "Invalid package"}, status=400)
