@@ -862,6 +862,20 @@ def create_order(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def razorpay_webhook(request):
+
+    import logging
+    logger = logging.getLogger(__name__)
+
+    # Print the webhook secret to see if it's loaded
+    logger.info(f"RAZORPAY_WEBHOOK_SECRET: {settings.RAZORPAY_WEBHOOK_SECRET!r}")
+
+    # Also safe check before using
+    if not settings.RAZORPAY_WEBHOOK_SECRET:
+        logger.error("Webhook secret is missing! Check your .env and settings.py")
+        return Response({"error": "Webhook secret not configured"}, status=500)
+
+
+
     webhook_body = request.body
     received_sig = request.headers.get("X-Razorpay-Signature")
 
