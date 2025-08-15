@@ -860,45 +860,83 @@ def create_order(request):
 # Razorpay Webhook
 # -----------------------------
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_order(request):
+    package_key = request.data.get("package_key")
+    package = CREDIT_PACKAGES.get(package_key)
+    if not package:
+        return Response({"error": "Invalid package"}, status=400)
+
+    order_data = {
+        "amount": package["amount"],
+        "currency": "INR",
+        "receipt": f"user_{request.user.id}_package_{package_key}",
+        "payment_capture": 1
+    }
+
+    order = client.order.create(order_data)
+
+    PaymentLog.objects.create(
+        user=request.user,
+        order_id=order["id"],
+        package_key=package_key,
+        amount=package["amount"],
+        status="created",
+        credits_added=False,
+        raw_data=order
+    )
+
+    return Response({
+        "order_id": order["id"],
+        "amount": package["amount"],
+        "currency": "INR",
+        "package_key": package_key
+    })
+
+# -----------------------------
+# Razorpay Webhook
+# -----------------------------
+
+import logging
+
+
+logger = logging.getLogger(__name__)
+
+
+@api_view(['POST'])
 @permission_classes([AllowAny])
 def razorpay_webhook(request):
-
-    import logging
-    logger = logging.getLogger(__name__)
-
-    # Print the webhook secret to see if it's loaded
+    # Log the webhook secret
     logger.info(f"RAZORPAY_WEBHOOK_SECRET: {settings.RAZORPAY_WEBHOOK_SECRET!r}")
-
-    # Also safe check before using
     if not settings.RAZORPAY_WEBHOOK_SECRET:
         logger.error("Webhook secret is missing! Check your .env and settings.py")
         return Response({"error": "Webhook secret not configured"}, status=500)
 
-
-
-    webhook_body = request.body.decode('utf-8')  # <-- decode bytes to string
+    # Decode body
+    webhook_body = request.body.decode('utf-8')
     received_sig = request.headers.get("X-Razorpay-Signature")
 
+    # Verify signature
     try:
-        client.utility.verify_webhook_signature(
-            webhook_body,
-            received_sig,
-            settings.RAZORPAY_WEBHOOK_SECRET
-        )
+        client.utility.verify_webhook_signature(webhook_body, received_sig, settings.RAZORPAY_WEBHOOK_SECRET)
     except razorpay.errors.SignatureVerificationError:
         return Response({"error": "Invalid signature"}, status=400)
 
-    event = json.loads(webhook_body)  # now safe to load JSON
-
+    event = json.loads(webhook_body)
     payment_entity = event.get("payload", {}).get("payment", {}).get("entity", {})
+
     order_id = payment_entity.get("order_id")
     amount = payment_entity.get("amount")  # in paise
-    receipt = payment_entity.get("notes", {}).get("receipt", "")
 
-    # ✅ Parse receipt for user and package
+    # Safe notes parsing
+    notes = payment_entity.get("notes", {})
+    receipt = notes.get("receipt") if isinstance(notes, dict) else ""
+
+    # Identify user and package
     user = None
     package_key = None
-    if receipt.startswith("user_"):
+    user_credit_instance = None
+    if receipt and receipt.startswith("user_"):
         parts = receipt.split("_")
         try:
             user_id = int(parts[1])
@@ -909,7 +947,7 @@ def razorpay_webhook(request):
             user_credit_instance = None
             user = None
 
-    # ✅ Find or create PaymentLog
+    # Find or create PaymentLog
     log, created = PaymentLog.objects.get_or_create(
         order_id=order_id,
         defaults={
@@ -927,6 +965,7 @@ def razorpay_webhook(request):
     log.payment_id = payment_entity.get("id")
     log.signature = received_sig
 
+    # Map status
     status_map = {
         "captured": "captured",
         "failed": "failed",
@@ -935,12 +974,11 @@ def razorpay_webhook(request):
     }
     log.status = status_map.get(payment_entity.get("status"), "pending")
 
-    # ✅ Add credits atomically
-    if log.status == "captured" and user and package_key and not log.credits_added:
+    # Add credits atomically only once
+    if log.status == "captured" and user and package_key and user_credit_instance and not log.credits_added:
         package = CREDIT_PACKAGES.get(package_key)
         if package and amount == package["amount"]:
             with transaction.atomic():
-                user_credit_instance = UserCredit.objects.get(user=user)
                 user_credit_instance.credits += package["credits"]
                 user_credit_instance.save()
                 log.credits_added = True
