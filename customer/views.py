@@ -906,20 +906,19 @@ logger = logging.getLogger(__name__)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def razorpay_webhook(request):
-    # Log the webhook secret
-    logger.info(f"RAZORPAY_WEBHOOK_SECRET: {settings.RAZORPAY_WEBHOOK_SECRET!r}")
+    webhook_body = request.body
+    received_sig = request.headers.get("X-Razorpay-Signature")
+
+    # Verify that the webhook secret is configured
     if not settings.RAZORPAY_WEBHOOK_SECRET:
         logger.error("Webhook secret is missing! Check your .env and settings.py")
         return Response({"error": "Webhook secret not configured"}, status=500)
 
-    # Decode body
-    webhook_body = request.body.decode('utf-8')
-    received_sig = request.headers.get("X-Razorpay-Signature")
-
-    # Verify signature
+    # Verify signature using Razorpay utility
     try:
         client.utility.verify_webhook_signature(webhook_body, received_sig, settings.RAZORPAY_WEBHOOK_SECRET)
     except razorpay.errors.SignatureVerificationError:
+        logger.warning("Invalid webhook signature received")
         return Response({"error": "Invalid signature"}, status=400)
 
     event = json.loads(webhook_body)
@@ -927,16 +926,14 @@ def razorpay_webhook(request):
 
     order_id = payment_entity.get("order_id")
     amount = payment_entity.get("amount")  # in paise
-
-    # Safe notes parsing
     notes = payment_entity.get("notes", {})
-    receipt = notes.get("receipt") if isinstance(notes, dict) else ""
+    receipt = notes.get("receipt", "") if isinstance(notes, dict) else ""
 
-    # Identify user and package
+    # Parse receipt for user and package
     user = None
     package_key = None
     user_credit_instance = None
-    if receipt and receipt.startswith("user_"):
+    if receipt.startswith("user_"):
         parts = receipt.split("_")
         try:
             user_id = int(parts[1])
@@ -944,8 +941,7 @@ def razorpay_webhook(request):
             user_credit_instance = UserCredit.objects.get(user__id=user_id)
             user = user_credit_instance.user
         except (IndexError, ValueError, UserCredit.DoesNotExist):
-            user_credit_instance = None
-            user = None
+            logger.warning(f"Failed to parse receipt: {receipt}")
 
     # Find or create PaymentLog
     log, created = PaymentLog.objects.get_or_create(
@@ -965,7 +961,7 @@ def razorpay_webhook(request):
     log.payment_id = payment_entity.get("id")
     log.signature = received_sig
 
-    # Map status
+    # Map Razorpay payment status
     status_map = {
         "captured": "captured",
         "failed": "failed",
@@ -975,13 +971,17 @@ def razorpay_webhook(request):
     log.status = status_map.get(payment_entity.get("status"), "pending")
 
     # Add credits atomically only once
-    if log.status == "captured" and user and package_key and user_credit_instance and not log.credits_added:
+    if log.status == "captured" and user_credit_instance and package_key and not log.credits_added:
         package = CREDIT_PACKAGES.get(package_key)
         if package and amount == package["amount"]:
-            with transaction.atomic():
-                user_credit_instance.credits += package["credits"]
-                user_credit_instance.save()
-                log.credits_added = True
+            try:
+                with transaction.atomic():
+                    user_credit_instance.credits += package["credits"]
+                    user_credit_instance.save()
+                    log.credits_added = True
+                    logger.info(f"Added {package['credits']} credits to user {user.id}")
+            except Exception as e:
+                logger.error(f"Failed to add credits: {e}")
 
     log.save()
     return Response({"status": "ok"})
