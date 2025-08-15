@@ -21,12 +21,16 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+
+
 import os
-from dotenv import load_dotenv
 from pathlib import Path
+from dotenv import load_dotenv
 
+BASE_DIR1 = Path(__file__).resolve().parent.parent
 
-load_dotenv(os.path.join(BASE_DIR, 'connecto', '.env'))
+# Load .env
+load_dotenv(BASE_DIR1 / 'connecto' / '.env')
 
 RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
