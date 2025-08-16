@@ -617,6 +617,35 @@ from django.conf import settings
 from django.contrib import messages
 
 
+import base64
+import uuid
+from django.core.files.base import ContentFile
+
+
+def save_base64_image(base64_string):
+    """
+    Convert base64 string to a Django ContentFile so it can be saved into an ImageField.
+    Returns None if input is invalid.
+    """
+    if not base64_string:
+        return None
+
+    try:
+        # Remove header like 'data:image/png;base64,...'
+        if "base64," in base64_string:
+            base64_string = base64_string.split("base64,")[1]
+
+        decoded_img = base64.b64decode(base64_string)
+        file_name = f"{uuid.uuid4().hex}.png"  # generate random file name
+        return ContentFile(decoded_img, name=file_name)
+
+    except Exception as e:
+        print("Error decoding base64 image:", e)
+        return None
+
+
+
+
 class FetchDigilockerDocumentsView(APIView):
 
     permission_classes = [IsAuthenticated]
