@@ -111,7 +111,8 @@ RAZORPAY_KEY_ID = 'rzp_test_R5XV4nQlMkdVy8'
 RAZORPAY_KEY_SECRET = 'Hf5dz8SL9EW72SfHwpq1e540'
 RAZORPAY_WEBHOOK_SECRET='s8f7s9df87s9df87s9df87s9df87s9df8'
 
-
+STREAM_API_KEY = "c7wwttj85hg7"
+STREAM_API_SECRET = "cgptvrzsttwj9vcebwy25k7y6aqkd6nxh56gkwxhsj3djs989g7k5wraprep926d"
 
 
 from datetime import timedelta
