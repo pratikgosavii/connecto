@@ -959,9 +959,14 @@ def razorpay_webhook(request):
 
     order_id = payment_entity.get("order_id")
     amount = payment_entity.get("amount")  # in paise
+    # Extract receipt safely
     notes = payment_entity.get("notes", {})
-    receipt = notes.get("receipt", "") if isinstance(notes, dict) else ""
-    print('-------------------------1------------------------------')
+    receipt = notes.get("receipt") if isinstance(notes, dict) else None
+
+    if not receipt:
+        receipt = event.get("payload", {}).get("order", {}).get("entity", {}).get("receipt", "")
+
+    print("Receipt received:", receipt)
 
     # Parse receipt for user and package
     user = None
@@ -980,8 +985,8 @@ def razorpay_webhook(request):
 
         except (IndexError, ValueError, UserCredit.DoesNotExist):
             print('-------------------------4------------------------------')
-
             logger.warning(f"Failed to parse receipt: {receipt}")
+
 
     # Find or create PaymentLog
     log, created = PaymentLog.objects.get_or_create(
@@ -1011,7 +1016,8 @@ def razorpay_webhook(request):
     }
     log.status = status_map.get(payment_entity.get("status"), "pending")
     print('-------------------------6------------------------------')
-
+    print(log)
+    print(log.status)
     # Add credits atomically only once
     if log.status == "captured" and user_credit_instance and package_key and not log.credits_added:
 
