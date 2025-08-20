@@ -972,6 +972,7 @@ def razorpay_webhook(request):
     user = None
     package_key = None
     user_credit_instance = None
+    print('reciept : ---------------------', receipt)
     if receipt.startswith("user_"):
         print('-------------------------2------------------------------')
 
