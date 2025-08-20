@@ -937,8 +937,11 @@ logger = logging.getLogger(__name__)
 def razorpay_webhook(request):
     webhook_body = request.body.decode("utf-8")
 
-    print("webhook_body")
+    print("---------------webhook_body----------------------")
     received_sig = request.headers.get("X-Razorpay-Signature")
+    print(webhook_body)
+    print("webhook_body")
+
 
     # Verify that the webhook secret is configured
     if not settings.RAZORPAY_WEBHOOK_SECRET:
