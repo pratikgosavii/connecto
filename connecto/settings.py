@@ -107,6 +107,11 @@ cred = credentials.Certificate(firebase_key_path)
 initialize_app(cred)
 
 
+RAZORPAY_KEY_ID = 'rzp_test_R5XV4nQlMkdVy8'
+RAZORPAY_KEY_SECRET = 'Hf5dz8SL9EW72SfHwpq1e540'
+RAZORPAY_WEBHOOK_SECRET='s8f7s9df87s9df87s9df87s9df87s9df8'
+
+
 
 
 from datetime import timedelta
