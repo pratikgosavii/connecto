@@ -961,19 +961,26 @@ def razorpay_webhook(request):
     amount = payment_entity.get("amount")  # in paise
     notes = payment_entity.get("notes", {})
     receipt = notes.get("receipt", "") if isinstance(notes, dict) else ""
+    print('-------------------------1------------------------------')
 
     # Parse receipt for user and package
     user = None
     package_key = None
     user_credit_instance = None
     if receipt.startswith("user_"):
+        print('-------------------------2------------------------------')
+
         parts = receipt.split("_")
         try:
             user_id = int(parts[1])
             package_key = parts[3] if len(parts) >= 4 else None
             user_credit_instance = UserCredit.objects.get(user__id=user_id)
             user = user_credit_instance.user
+            print('-------------------------3------------------------------')
+
         except (IndexError, ValueError, UserCredit.DoesNotExist):
+            print('-------------------------4------------------------------')
+
             logger.warning(f"Failed to parse receipt: {receipt}")
 
     # Find or create PaymentLog
@@ -988,6 +995,7 @@ def razorpay_webhook(request):
             "raw_data": event
         }
     )
+    print('-------------------------5------------------------------')
 
     # Update log
     log.raw_data = event
@@ -1002,19 +1010,29 @@ def razorpay_webhook(request):
         "created": "pending",
     }
     log.status = status_map.get(payment_entity.get("status"), "pending")
+    print('-------------------------6------------------------------')
 
     # Add credits atomically only once
     if log.status == "captured" and user_credit_instance and package_key and not log.credits_added:
+
+        print('-------------------------7------------------------------')
         package = CREDIT_PACKAGES.get(package_key)
         if package and amount == package["amount"]:
             try:
+                print('-------------------------8------------------------------')
+
                 with transaction.atomic():
+                    print('-------------------------9-----------------------------')
+
                     user_credit_instance.credits += package["credits"]
                     user_credit_instance.save()
                     log.credits_added = True
                     logger.info(f"Added {package['credits']} credits to user {user.id}")
             except Exception as e:
+                print('-------------------------10------------------------------')
+
                 logger.error(f"Failed to add credits: {e}")
+    print('-------------------------11------------------------------')
 
     log.save()
     return Response({"status": "ok"})
