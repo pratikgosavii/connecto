@@ -405,10 +405,10 @@ class get_chat_token(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        api_key = os.getenv("STREAM_API_KEY")
-        api_secret = os.getenv("STREAM_API_SECRET")
+        api_key = settings.STREAM_API_KEY
+        api_secret = settings.STREAM_API_SECRET
 
-        print("✅ STREAM_API_KEY from .env:", os.getenv("STREAM_API_KEY"))
+        print("✅ STREAM_API_KEY from .env:", settings.STREAM_API_KEY)
 
         print(api_key)
         print(api_secret)
