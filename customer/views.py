@@ -837,7 +837,7 @@ from .models import PaymentLog
 # -----------------------------
 CREDIT_PACKAGES = {
     "basic": {"amount": 9900, "credits": 3},    # amount in paise
-    "premium": {"amount": 29900, "credits": 10},
+    "premium": {"amount": 24900, "credits": 10},
 }
 
 # -----------------------------
