@@ -694,7 +694,7 @@ class FetchDigilockerDocumentsView(APIView):
                 elif doc_type == "PANCR" and downloaded:
                     kyc.pan_status = "verified"
                     pan_verified = True
-                elif doc_type == "DL" and downloaded:
+                elif doc_type == "DRVLC" and downloaded:
                     kyc.dl_status = "verified"
                     dl_verified = True
 
