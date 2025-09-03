@@ -684,70 +684,79 @@ class FetchDigilockerDocumentsView(APIView):
             pan_verified = False
             dl_verified = False
 
+            user_name_updated = False
+            aadhaar_data = {}
+
+            # Loop over all docs
             for doc in documents:
                 doc_type = doc.get("doc_type")
+                file_id = doc.get("file_id")
                 downloaded = doc.get("downloaded", False)
 
+                # Aadhaar (special API)
                 if doc_type == "ADHAR" and downloaded:
                     kyc.aadhaar_status = "verified"
                     aadhaar_verified = True
-                elif doc_type == "PANCR" and downloaded:
-                    kyc.pan_status = "verified"
-                    pan_verified = True
-                elif doc_type == "DRVLC" and downloaded:
-                    kyc.dl_status = "verified"
-                    dl_verified = True
 
+                    aadhaar_url = f"https://kyc-api.surepass.app/api/v1/digilocker/download-aadhaar/{client_id}"
+                    aadhaar_resp = requests.get(aadhaar_url, headers=headers)
+                    aadhaar_data = aadhaar_resp.json()
+                    print(aadhaar_data)
+
+                    if aadhaar_data.get("success") and "data" in aadhaar_data:
+                        data_block = aadhaar_data["data"]
+                        aadhaar_info = data_block.get("aadhaar_xml_data", {})
+
+                        # Convert and save image
+                        profile_image_file = save_base64_image(aadhaar_info.get("profile_image"))
+                        kyc.aadhaar_status = 'verified'
+
+                        AadhaarDetails.objects.update_or_create(
+                            user=user,
+                            client_id=data_block.get("client_id"),
+                            defaults={
+                                "name": data_block.get("digilocker_metadata", {}).get("name"),
+                                "gender": data_block.get("digilocker_metadata", {}).get("gender"),
+                                "dob": data_block.get("digilocker_metadata", {}).get("dob"),
+                                "yob": aadhaar_info.get("yob"),
+                                "zip_code": aadhaar_info.get("zip"),
+                                "profile_image": profile_image_file,
+                                "masked_aadhaar": aadhaar_info.get("masked_aadhaar"),
+                                "full_address": aadhaar_info.get("full_address"),
+                                "father_name": aadhaar_info.get("father_name"),
+                                "address_json": aadhaar_info.get("address"),
+                                "xml_url": data_block.get("xml_url"),
+                            }
+                        )
+
+                        # Update user name
+                        full_name = data_block.get("digilocker_metadata", {}).get("name")
+                        if full_name:
+                            user.name = full_name
+                            user.save()
+                            user_name_updated = True
+
+                # PAN (download by file_id)
+                if doc_type == "PANCR" and downloaded:
+                    pan_url = f"https://kyc-api.surepass.app/api/v1/digilocker/downloaddocument/{client_id}/{file_id}"
+                    resp = requests.get(pan_url, headers=headers)
+                    if resp.status_code == 200:
+                        kyc.pan_file.save(f"{user.id}_pan.pdf", ContentFile(resp.content), save=False)
+                        kyc.pan_status = "verified"
+                        pan_verified = True
+
+                # Driving License (download by file_id)
+                if doc_type == "DRVLC" and downloaded:
+                    dl_url = f"https://kyc-api.surepass.app/api/v1/digilocker/downloaddocument/{client_id}/{file_id}"
+                    resp = requests.get(dl_url, headers=headers)
+                    if resp.status_code == 200:
+                        kyc.dl_file.save(f"{user.id}_dl.pdf", ContentFile(resp.content), save=False)
+                        kyc.dl_status = "verified"
+                        dl_verified = True
+
+            # Save KYC after processing all docs
             kyc.save()
             kyc.check_and_update_approval()
-
-            # Step 2: If Aadhaar verified, fetch detailed Aadhaar info
-            user_name_updated = False
-            if aadhaar_verified:
-                aadhaar_url = f"https://kyc-api.surepass.app/api/v1/digilocker/download-aadhaar/{client_id}"
-                aadhaar_resp = requests.get(aadhaar_url, headers=headers)
-                aadhaar_data = aadhaar_resp.json()
-                print(aadhaar_data)
-
-                if aadhaar_data.get("success") and "data" in aadhaar_data:
-                    data_block = aadhaar_data["data"]
-                    aadhaar_info = data_block.get("aadhaar_xml_data", {})
-
-                    # Convert and save image
-                    profile_image_file = save_base64_image(aadhaar_info.get("profile_image"))
-
-                    AadhaarDetails.objects.update_or_create(
-                        user=user,
-                        client_id=data_block.get("client_id"),
-                        defaults={
-                            "name": data_block.get("digilocker_metadata", {}).get("name"),
-                            "gender": data_block.get("digilocker_metadata", {}).get("gender"),
-                            "dob": data_block.get("digilocker_metadata", {}).get("dob"),
-                            "yob": aadhaar_info.get("yob"),
-                            "zip_code": aadhaar_info.get("zip"),
-                            "profile_image": profile_image_file,  # Now it's an ImageField
-                            "masked_aadhaar": aadhaar_info.get("masked_aadhaar"),
-                            "full_address": aadhaar_info.get("full_address"),
-                            "father_name": aadhaar_info.get("father_name"),
-                            "address_json": aadhaar_info.get("address"),
-                            "xml_url": data_block.get("xml_url"),
-                        }
-                    )
-
-                    # Update user name
-                    full_name = data_block.get("digilocker_metadata", {}).get("name")
-                    if full_name:
-                        user.name = full_name
-                        user.save()
-
-                        # Update logged in user name
-                        user.name = full_name
-                        user.save()
-                        user_name_updated = True
-
-                        # Example: Call your own API to block user or other action here
-                        # For example:
-                        # block_user_api(user.id)
 
             return Response({
                 "message": "Documents fetched and statuses updated successfully.",
@@ -765,7 +774,7 @@ class FetchDigilockerDocumentsView(APIView):
                 "details": str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-           
+        
 
 
 from rest_framework.decorators import api_view, permission_classes

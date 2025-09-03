@@ -112,6 +112,9 @@
                                                     <th>Address</th>
                                                     <th>Qualification</th>
                                                     <th>Year of Graduation</th>
+                                                    <th>Adhaar</th>
+                                                    <th>Pan Card</th>
+                                                    <th>Driving Licence</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -123,9 +126,9 @@
                                                     <td>{{ user.email|default:"-" }}</td>
                                                     <td>
                                                         {% if user.is_agent %}
-                                                            Vendor
+                                                            Vendor + Customer
                                                         {% else %}
-                                                            Customer
+                                                            Only Customer
                                                         {% endif %}
                                                     </td>
                                                     <td>
@@ -142,6 +145,29 @@
                                                     </td>
                                                     <td>{{ user.qualification|default:"-" }}</td>
                                                     <td>{{ user.year_of_graduation|default:"-" }}</td>
+                                                    <td>
+                                                        {% if user.profile_photo %}
+                                                            <a href="{{ user.profile_photo.url }}" target="_blank" class="btn btn-info btn-sm">View Aadhaar</a>
+                                                        {% else %}
+                                                            -
+                                                        {% endif %}
+                                                    </td>
+
+                                                    <td>
+                                                        {% if user.userkyc.pan_file %}
+                                                            <a href="{{ user.userkyc.pan_file.url }}" target="_blank" class="btn btn-info btn-sm">View PAN</a>
+                                                        {% else %}
+                                                            -
+                                                        {% endif %}
+                                                    </td>
+
+                                                    <td>
+                                                        {% if user.userkyc.dl_file %}
+                                                            <a href="{{ user.userkyc.dl_file.url }}" target="_blank" class="btn btn-info btn-sm">View DL</a>
+                                                        {% else %}
+                                                            -
+                                                        {% endif %}
+                                                    </td>
                                                 </tr>
                                                 {% empty %}
                                                 <tr>

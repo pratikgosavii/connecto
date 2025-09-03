@@ -105,6 +105,9 @@ class UserKYC(models.Model):
     pan_status = models.CharField(max_length=10, choices=DOCUMENT_STATUS_CHOICES, default='pending')
     dl_status = models.CharField(max_length=10, choices=DOCUMENT_STATUS_CHOICES, default='pending')
 
+    pan_file = models.FileField(upload_to="kyc_docs/pan/", null=True, blank=True)
+    dl_file = models.FileField(upload_to="kyc_docs/driving_license/", null=True, blank=True)
+    
     is_approved = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
