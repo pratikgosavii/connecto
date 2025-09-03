@@ -284,3 +284,29 @@ def mark_notification_read(request, pk):
     except Notification.DoesNotExist:
         return Response({'error': 'Not found'}, status=404)
     
+
+
+
+
+def update_credits(request, user_id):
+
+    user_instance = User.objects.get(id = user_id)
+
+    if request.method == 'POST':
+
+        credits = request.POST.get("credits")
+
+        user_credits = UserCredit.objects.get(user = user_instance)
+        user_credits.credits = credits
+        user_credits.save()
+
+        return redirect('user_list')    
+    
+    else:
+
+        
+
+        context = {
+            'user_instance': user_instance
+        }
+        return render(request, 'update_credits.html', context)

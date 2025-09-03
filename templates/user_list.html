@@ -108,6 +108,7 @@
                                                     <th>Mobile</th>
                                                     <th>Email</th>
                                                     <th>Type</th>
+                                                    <th>Credits</th>
                                                     <th>KYC Status</th>
                                                     <th>Address</th>
                                                     <th>Qualification</th>
@@ -115,6 +116,7 @@
                                                     <th>Adhaar</th>
                                                     <th>Pan Card</th>
                                                     <th>Driving Licence</th>
+                                                    <th>Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -130,6 +132,9 @@
                                                         {% else %}
                                                             Only Customer
                                                         {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {{ user.usercredit.credits }}
                                                     </td>
                                                     <td>
                                                         {% if user.userkyc.is_approved %}
@@ -167,6 +172,11 @@
                                                         {% else %}
                                                             -
                                                         {% endif %}
+                                                    </td>  update_credits
+
+                                                    <td>
+                                                        <!-- remove Button -->
+                                                        <a href="{% url 'update_credits' user.id %}" ><i class="bi bi-pencil-square text-primary action-icons edit"  title="Edit"></i>  </a>
                                                     </td>
                                                 </tr>
                                                 {% empty %}
