@@ -109,9 +109,9 @@
                                                         </td>
                                                         <td>{{ payment.created_at|date:"Y-m-d H:i" }}</td>
                                                         <td>
-                                                            <a href="{% url 'view_payment' payment.id %}">
+                                                            {% comment %} <a href="{% url 'view_payment' payment.id %}">
                                                                 <i class="bi bi-eye text-info" title="View"></i>
-                                                            </a>
+                                                            </a> {% endcomment %}
                                                         </td>
                                                     </tr>
                                                 {% endfor %}

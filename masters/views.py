@@ -1,6 +1,9 @@
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 
+from customer.filters import DeliveryRequestFilter, PaymentLogFilter
+from vendor.filters import TripFilter
+
 
 # Create your views here.
 
@@ -461,25 +464,63 @@ def all_shipments(request):
 
 def all_parcels(request):
 
+    data = DeliveryRequest.objects.all().order_by("-id")
 
-    data = DeliveryRequest.objects.all()
+    # apply filters
+    filterset = DeliveryRequestFilter(request.GET, queryset=data)
+    filtered_requests = filterset.qs
+
+    # paginate trips
+    paginator = Paginator(data, 20)
+    page = request.GET.get("page")
+    data = paginator.get_page(page)
 
     context = {
-        'data' : data
+        "data": filtered_requests,   # trips
+        "filterset": filterset,
     }
 
     return render(request, 'all_parcels.html', context)
 
 def all_trip(request):
 
+    data = trip.objects.all().order_by("-id")
 
-    data = trip.objects.all()
+    # apply filters
+    filterset = TripFilter(request.GET, queryset=data)
+    filtered_requests = filterset.qs
+
+    # paginate trips
+    paginator = Paginator(data, 20)
+    page = request.GET.get("page")
+    data = paginator.get_page(page)
 
     context = {
-        'data' : data
+        "data": filtered_requests,   # trips
+        "filterset": filterset,
     }
+    return render(request, "all_trip.html", context)
 
-    return render(request, 'all_trip.html', context)
+def payment_list(request):
+
+    data = PaymentLog.objects.all().order_by("-id")
+
+    # apply filters
+    filterset = PaymentLogFilter(request.GET, queryset=data)
+    filtered_requests = filterset.qs
+
+    # paginate filtered results
+    paginator = Paginator(filtered_requests, 20)
+    page = request.GET.get("page")
+    data = paginator.get_page(page)
+
+    context = {
+        "data": data,            # paginated filtered results
+        "filterset": filterset,
+    }
+    return render(request, "all_payments.html", context)
+
+
 
 def view_parcel(request, parcel_id):
 

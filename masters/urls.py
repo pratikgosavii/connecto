@@ -50,6 +50,7 @@ urlpatterns = [
     path('all-shipments/', all_shipments, name='all_shipments'),
     path('all-parcels/', all_parcels, name='all_parcels'),
     path('all-trip/', all_trip, name='all_trip'),
+    path('payment-trilistp/', payment_list, name='payment_list'),
     path('view-trip/<trip_id>', view_trip, name='view_trip'),
     path('view-parcel/<parcel_id>', view_parcel, name='view_parcel'),
     path('view-order-detail/<booking_id>', view_order_detail, name='view_order_detail'),
