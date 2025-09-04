@@ -659,8 +659,13 @@ import base64
 
 def generate_aadhaar_card_image(data, profile_image_b64=None):
     """
-    Generate Aadhaar card-like image with dummy data.
+    Generate Aadhaar card-like image with provided data and optional base64 profile image.
+    Saves a demo PNG locally for verification and also returns a ContentFile for DB.
     """
+    from PIL import Image, ImageDraw, ImageFont
+    import base64, os
+    from io import BytesIO
+    from django.core.files.base import ContentFile
 
     # Card size
     img = Image.new("RGB", (800, 500), color="white")
@@ -678,17 +683,25 @@ def generate_aadhaar_card_image(data, profile_image_b64=None):
     draw.rectangle([0, 0, 800, 40], fill=(255, 153, 51))  # Orange
     draw.rectangle([0, 40, 800, 80], fill=(255, 255, 255))  # White
     draw.rectangle([0, 80, 800, 120], fill=(19, 136, 8))   # Green
-
     draw.text((250, 45), "Government of India", fill="black", font=bold_font)
 
     # Aadhaar Number
-    draw.text((280, 130), f"{data.get('masked_aadhaar')}", fill="black", font=bold_font)
+    draw.text((280, 130), f"{data.get('masked_aadhaar', '')}", fill="black", font=bold_font)
 
-    # Insert Profile Photo (if given)
+    # Insert Profile Photo
     if profile_image_b64:
         try:
+            # Handle "data:image/..." prefix if present
+            if profile_image_b64.startswith("data:image"):
+                profile_image_b64 = profile_image_b64.split(",")[1]
+
             profile_data = base64.b64decode(profile_image_b64)
             profile_img = Image.open(BytesIO(profile_data)).resize((150, 180))
+
+            # Ensure same mode
+            if profile_img.mode != "RGB":
+                profile_img = profile_img.convert("RGB")
+
             img.paste(profile_img, (50, 180))
         except Exception as e:
             print("Profile photo error:", e)
@@ -698,22 +711,28 @@ def generate_aadhaar_card_image(data, profile_image_b64=None):
     y_offset = 180
     line_gap = 40
 
-    draw.text((x_offset, y_offset), f"Name: {data.get('name')}", fill="black", font=font)
-    draw.text((x_offset, y_offset + line_gap), f"Father's Name: {data.get('father_name')}", fill="black", font=font)
-    draw.text((x_offset, y_offset + 2*line_gap), f"DOB: {data.get('dob')}", fill="black", font=font)
-    draw.text((x_offset, y_offset + 3*line_gap), f"Gender: {data.get('gender')}", fill="black", font=font)
-    draw.text((x_offset, y_offset + 4*line_gap), f"Address: {data.get('full_address')}", fill="black", font=font)
-    draw.text((x_offset, y_offset + 5*line_gap), f"Pincode: {data.get('zip_code')}", fill="black", font=font)
+    draw.text((x_offset, y_offset), f"Name: {data.get('name','')}", fill="black", font=font)
+    draw.text((x_offset, y_offset + line_gap), f"Father's Name: {data.get('father_name','')}", fill="black", font=font)
+    draw.text((x_offset, y_offset + 2*line_gap), f"DOB: {data.get('dob','')}", fill="black", font=font)
+    draw.text((x_offset, y_offset + 3*line_gap), f"Gender: {data.get('gender','')}", fill="black", font=font)
+    draw.text((x_offset, y_offset + 4*line_gap), f"Address: {data.get('full_address','')}", fill="black", font=font)
+    draw.text((x_offset, y_offset + 5*line_gap), f"Pincode: {data.get('zip_code','')}", fill="black", font=font)
 
-    # Fake QR Box (right side bottom)
-  
     # Footer
-    draw.text((250, 460), "Demo - Aadhaar ", fill="red", font=bold_font)
+    draw.text((250, 460), "Demo - Aadhaar", fill="red", font=bold_font)
 
     # Save to buffer
     buffer = BytesIO()
     img.save(buffer, format="PNG")
+
+    # 🔹 Save demo image locally for testing
+    demo_path = os.path.join("/tmp", "aadhaar_demo.png")  # change path if needed
+    img.save(demo_path, format="PNG")
+    print(f"Aadhaar card demo saved at: {demo_path}")
+
     return ContentFile(buffer.getvalue(), "aadhaar_card.png")
+
+
 
 
 
@@ -765,6 +784,9 @@ class FetchDigilockerDocumentsView(APIView):
                 file_id = doc.get("file_id")
                 downloaded = doc.get("downloaded", False)
 
+
+                print(doc_type, 'file id-----------------------', file_id)
+
                 # Aadhaar (special API)
                 if doc_type == "ADHAR" and downloaded:
                     kyc.aadhaar_status = "verified"
@@ -784,7 +806,7 @@ class FetchDigilockerDocumentsView(APIView):
                         # Convert and save image
                         profile_image_file = save_base64_image(aadhaar_info.get("profile_image"))
                         kyc.aadhaar_status = 'verified'
-
+                
                         AadhaarDetails.objects.update_or_create(
                             user=user,
                             client_id=data_block.get("client_id"),
@@ -813,10 +835,11 @@ class FetchDigilockerDocumentsView(APIView):
                             "masked_aadhaar": aadhaar_info.get("masked_aadhaar"),
                             "full_address": aadhaar_info.get("full_address"),
                             "father_name": aadhaar_info.get("father_name"),
-                            "profile_photo": profile_image_file,   # 👈 include photo in generated card
-                        })
+                        }, profile_image_b64=aadhaar_info.get("profile_image"))
+
 
                         # Save Aadhaar card image in FileField
+                        print('saving fileeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
                         kyc.adhar_image_file.save(f"{user.id}_aadhaar.png", aadhaar_card_file)
                         kyc.save()
                      
@@ -830,21 +853,37 @@ class FetchDigilockerDocumentsView(APIView):
 
                 # PAN (download by file_id)
                 if doc_type == "PANCR" and downloaded:
+                    print('--------------------1--1--1--1-1-1-1-1--1----------------')
 
-                    print('--------------------1-------------------------1-----------------------1-------------------')
-                    pan_url = f"https://kyc-api.surepass.app/api/v1/digilocker/downloaddocument/{client_id}/{file_id}"
+                    pan_url = f"https://kyc-api.surepass.app/api/v1/digilocker/download-document/{client_id}/{file_id}"
                     resp = requests.get(pan_url, headers=headers)
-                    if resp.status_code == 200:
-                        kyc.pan_file.save(f"{user.id}_pan.pdf", ContentFile(resp.content), save=False)
-                        kyc.pan_status = "verified"
-                        pan_verified = True
+                    print('pan url:----------', pan_url)
+                    print("PAN Response status:", resp.status_code)
+
+
+                    if resp.status_code == 200 and resp.json().get("success"):
+                        download_url = resp.json()["data"]["download_url"]
+
+                        # Now fetch actual PDF
+                        pdf_resp = requests.get(download_url)
+                        if pdf_resp.status_code == 200:
+                            kyc.pan_file.save(f"{user.id}_pan.pdf", ContentFile(pdf_resp.content), save=False)
+                            kyc.pan_status = "verified"
+                            pan_verified = True
+                            print("✅ PAN file saved successfully")
+                        else:
+                            print("❌ Failed to download PAN PDF:", pdf_resp.text)
+                    else:
+                        print("PAN download failed:", resp.text)
 
                 # Driving License (download by file_id)
                 if doc_type == "DRVLC" and downloaded:
                     print('--------------------2222222222222222----------------')
 
                     dl_url = f"https://kyc-api.surepass.app/api/v1/digilocker/downloaddocument/{client_id}/{file_id}"
+                    print('dr url:----------', dl_url)
                     resp = requests.get(dl_url, headers=headers)
+                    print(resp)
                     if resp.status_code == 200:
                         kyc.dl_file.save(f"{user.id}_dl.pdf", ContentFile(resp.content), save=False)
                         kyc.dl_status = "verified"

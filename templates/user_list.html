@@ -151,8 +151,8 @@
                                                     <td>{{ user.qualification|default:"-" }}</td>
                                                     <td>{{ user.year_of_graduation|default:"-" }}</td>
                                                     <td>
-                                                        {% if user.profile_photo %}
-                                                            <a href="{{ user.profile_photo.url }}" target="_blank" class="btn btn-info btn-sm">View Aadhaar</a>
+                                                        {% if user.adhar_image_file %}
+                                                            <a href="{{ user.adhar_image_file.url }}" target="_blank" class="btn btn-info btn-sm">View Aadhaar</a>
                                                         {% else %}
                                                             -
                                                         {% endif %}
