@@ -17,14 +17,14 @@ class TripFilter(django_filters.FilterSet):
     )
 
 
-    # City filters (FK lookup by city name)
-    source = django_filters.CharFilter(
-        field_name="source__name", lookup_expr="icontains", label="Source City",
+    # Source/Destination city names from Google fields
+    source_city_name = django_filters.CharFilter(
+        field_name="source_city_name", lookup_expr="icontains", label="Source City",
         widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Source City"})
     )
 
-    destination = django_filters.CharFilter(
-        field_name="destination__name", lookup_expr="icontains", label="Destination City",
+    destination_city_name = django_filters.CharFilter(
+        field_name="destination_city_name", lookup_expr="icontains", label="Destination City",
         widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Destination City"})
     )
 
@@ -62,8 +62,8 @@ class TripFilter(django_filters.FilterSet):
         model = trip
         fields = [
             "user",
-            "source",
-            "destination",
+            "source_city_name",
+            "destination_city_name",
             "mode_of_transport",
             "status",
             "departure_from",

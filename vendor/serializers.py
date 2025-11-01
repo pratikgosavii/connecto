@@ -14,8 +14,7 @@ from users.serializer import *
 class trip_Serializer(serializers.ModelSerializer):
 
     user = UserProfileSerializer(read_only=True)  # nest user details
-    
-    
+
     class Meta:
         model = trip
         fields = '__all__'
