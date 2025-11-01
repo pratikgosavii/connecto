@@ -302,7 +302,7 @@ class UpdateVendorLocationView(APIView):
             return Response({"error": "Invalid latitude/longitude"}, status=400)
 
         # Upsert live location row per order
-        from .models import VendorLiveLocation
+        from customer.models import VendorLiveLocation
         live, _ = VendorLiveLocation.objects.get_or_create(
             order=order,
             defaults={"vendor": order.trip.user}
