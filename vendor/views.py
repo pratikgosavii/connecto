@@ -265,3 +265,51 @@ class MarkOrderDeliveredAPIView(APIView):
             return Response({"detail": "Order marked as delivered."})
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+            
+class UpdateVendorLocationView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        """Vendor updates live location for an order while in_transit."""
+        order_id = request.data.get('order_id')
+        lat = request.data.get('latitude')
+        lng = request.data.get('longitude')
+
+        if not order_id or lat is None or lng is None:
+            return Response({"error": "order_id, latitude and longitude are required"}, status=400)
+
+        try:
+            order = Customer_Order.objects.get(id=order_id)
+        except Customer_Order.DoesNotExist:
+            return Response({"error": "Order not found"}, status=404)
+
+        # Ensure requester is the vendor for this order
+        if request.user != order.trip.user:
+            return Response({"error": "Not authorized"}, status=403)
+
+        # Only allow updates while in_transit
+        if order.status != 'in_transit':
+            return Response({"error": "Location updates allowed only in 'in_transit'"}, status=400)
+
+        try:
+            lat_val = float(lat)
+            lng_val = float(lng)
+        except (TypeError, ValueError):
+            return Response({"error": "Invalid latitude/longitude"}, status=400)
+
+        # Upsert live location row per order
+        from .models import VendorLiveLocation
+        live, _ = VendorLiveLocation.objects.get_or_create(
+            order=order,
+            defaults={"vendor": order.trip.user}
+        )
+        live.vendor = order.trip.user
+        live.latitude = lat_val
+        live.longitude = lng_val
+        live.save()
+
+        return Response({"message": "Location updated"}, status=200)

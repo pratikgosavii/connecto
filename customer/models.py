@@ -28,22 +28,28 @@ class DeliveryRequest(models.Model):
     delivery_date = models.DateField()
 
     # Pickup Location
-    pickup_address_line1 = models.CharField(max_length=255, blank=True, null=True)
-    pickup_address_line2 = models.CharField(max_length=255, blank=True, null=True)
-    pickup_pincode = models.CharField(max_length=10, blank=True, null=True)
-    pickup_state = models.CharField(max_length=100, blank=True, null=True)
-    pickup_city = models.ForeignKey("masters.city", on_delete=models.CASCADE, related_name="pickup_city", blank=True, null=True)
+  
     pickup_contact = models.CharField(max_length=20, blank=True, null=True)
+
+    # Google Maps pickup metadata
+    pickup_latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    pickup_longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    pickup_place_id = models.CharField(max_length=255, blank=True, null=True)
+    pickup_formatted_address = models.TextField(blank=True, null=True)
+    pickup_city_name = models.CharField(max_length=100, blank=True, null=True)
 
     request_type = models.ManyToManyField(RequestType)
 
     # Destination
-    destination_address_line1 = models.CharField(max_length=255, blank=True, null=True)
-    destination_address_line2 = models.CharField(max_length=255, blank=True, null=True)
-    destination_pincode = models.CharField(max_length=10, blank=True, null=True)
-    destination_state = models.CharField(max_length=100, blank=True, null=True)
-    destination_city = models.ForeignKey("masters.city", on_delete=models.CASCADE, related_name="destination_city", blank=True, null=True)
+   
     destination_contact = models.CharField(max_length=20, blank=True, null=True)
+
+    # Google Maps destination metadata
+    destination_latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    destination_longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    destination_place_id = models.CharField(max_length=255, blank=True, null=True)
+    destination_formatted_address = models.TextField(blank=True, null=True)
+    destination_city_name = models.CharField(max_length=100, blank=True, null=True)
 
     is_agent_assigned = models.BooleanField(default=False)
 
@@ -137,6 +143,18 @@ class Customer_Order(models.Model):
         return f"Order {self.tracking_id} - Parcel #{self.parcel.id}"
 
 
+
+class VendorLiveLocation(models.Model):
+    order = models.OneToOneField(Customer_Order, on_delete=models.CASCADE, related_name='live_location')
+    vendor = models.ForeignKey('users.User', on_delete=models.CASCADE)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"LiveLocation for Order {self.order_id}"
+
+        
 
 class DeliveryRating(models.Model):
     user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='user')

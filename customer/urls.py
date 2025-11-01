@@ -34,12 +34,10 @@ urlpatterns = router.urls + [
     path("stream/get-vendor-chat-token/", get_chat_vendor_token.as_view()),
 
     path('show-trip-parcels/', ShowTripParcels.as_view(), name='ShowTripParcels'),
+    # Live tracking
+    path('shipments/vendor-location/', GetVendorLocationView.as_view(), name='get_vendor_location'),
     
 
-    
-    path("stream/get-chat-token/", get_chat_token.as_view()),
-    path("stream/get-vendor-chat-token/", get_chat_vendor_token.as_view()),
-    
     path('purchase/create-order/', create_order, name='create_order'),
     path('purchase/razorpay/webhook/', razorpay_webhook, name='razorpay_webhook'),
 

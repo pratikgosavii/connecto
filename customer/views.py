@@ -24,6 +24,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from vendor.models import *
 from vendor.serializers import *
+from users.models import UserCredit
 from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -991,44 +992,6 @@ client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_S
 
 
 # -----------------------------
-# Create Razorpay Order
-# -----------------------------
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def create_order(request):
-    package_key = request.data.get("package_key")
-    package = CREDIT_PACKAGES.get(package_key)
-    if not package:
-        return Response({"error": "Invalid package"}, status=400)
-
-    order_data = {
-        "amount": package["amount"],
-        "currency": "INR",
-        "receipt": f"user_{request.user.id}_package_{package_key}",
-        "payment_capture": 1
-    }
-
-    order = client.order.create(order_data)
-
-    PaymentLog.objects.create(
-        user=request.user,
-        order_id=order["id"],
-        package_key=package_key,
-        amount=package["amount"],
-        status="created",
-        credits_added=False,
-        raw_data=order
-    )
-
-    return Response({
-        "order_id": order["id"],
-        "amount": package["amount"],
-        "currency": "INR",
-        "package_key": package_key
-    })
-
-
-# -----------------------------
 # Razorpay Webhook
 # -----------------------------
 @api_view(['POST'])
@@ -1082,6 +1045,9 @@ def razorpay_webhook(request):
 
     print("---------------webhook_body----------------------")
     received_sig = request.headers.get("X-Razorpay-Signature")
+    if not received_sig:
+        logger.warning("Missing X-Razorpay-Signature")
+        return Response({"error": "Missing signature"}, status=400)
     print(webhook_body)
     print("webhook_body")
 
@@ -1102,6 +1068,9 @@ def razorpay_webhook(request):
     payment_entity = event.get("payload", {}).get("payment", {}).get("entity", {})
 
     order_id = payment_entity.get("order_id")
+    if not order_id:
+        logger.warning("Webhook missing order_id; event ignored")
+        return Response({"status": "ignored"}, status=200)
     amount = payment_entity.get("amount")  # in paise
     # Extract receipt safely
     notes = payment_entity.get("notes", {})
@@ -1187,3 +1156,36 @@ def razorpay_webhook(request):
 
     log.save()
     return Response({"status": "ok"})
+
+
+
+
+class GetVendorLocationView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Customer fetches vendor live location while order is active (before completion)."""
+        order_id = request.query_params.get('order_id')
+        if not order_id:
+            return Response({"error": "order_id is required"}, status=400)
+
+        try:
+            order = Customer_Order.objects.get(id=order_id, user=request.user)
+        except Customer_Order.DoesNotExist:
+            return Response({"error": "Order not found"}, status=404)
+
+        if order.status in ['delivered', 'delivered_by_customer', 'cancelled_by_vendor', 'cancelled_by_customer']:
+            return Response({"error": "Location sharing ended"}, status=400)
+
+        from .models import VendorLiveLocation
+        try:
+            live = VendorLiveLocation.objects.get(order=order)
+        except VendorLiveLocation.DoesNotExist:
+            return Response({"latitude": None, "longitude": None, "updated_at": None, "status": order.status}, status=200)
+
+        return Response({
+            "latitude": live.latitude,
+            "longitude": live.longitude,
+            "updated_at": live.updated_at,
+            "status": order.status,
+        }, status=200)

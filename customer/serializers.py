@@ -22,8 +22,6 @@ class DeliveryRequestSerializer(serializers.ModelSerializer):
         )
     
     user = UserProfileSerializer(read_only=True)  # nest user details
-    pickup_city_details = city_Serializer(source="pickup_city", read_only=True)
-    destination_city_details = city_Serializer(source="destination_city", read_only=True)
 
     class Meta:
         model = DeliveryRequest

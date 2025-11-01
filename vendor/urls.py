@@ -33,6 +33,8 @@ urlpatterns = [
 
     path('orders/<int:id>/mark-delivered/', MarkOrderDeliveredAPIView.as_view(), name='mark-order-delivered'),
 
+    path('shipments/update-vendor-location/', UpdateVendorLocationView.as_view(), name='update_vendor_location'),
+
 ]  + router.urls
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

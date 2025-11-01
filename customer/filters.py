@@ -38,18 +38,19 @@ class DeliveryRequestFilter(django_filters.FilterSet):
         widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Search Parcel"})
     )
 
-    pickup_city = django_filters.ModelChoiceFilter(
-        queryset=city.objects.all(),
-        field_name="pickup_city",
-        label="Pickup City",
-        widget=forms.Select(attrs={"class": "form-control"})
+    # New: text filters based on Google city names
+    pickup_city_name = django_filters.CharFilter(
+        field_name="pickup_city_name",
+        lookup_expr="icontains",
+        label="Pickup City (text)",
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Pickup city"})
     )
 
-    destination_city = django_filters.ModelChoiceFilter(
-        queryset=city.objects.all(),
-        field_name="destination_city",
-        label="Destination City",
-        widget=forms.Select(attrs={"class": "form-control"})
+    destination_city_name = django_filters.CharFilter(
+        field_name="destination_city_name",
+        lookup_expr="icontains",
+        label="Destination City (text)",
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Destination city"})
     )
 
     delivery_date_from = django_filters.DateFilter(
@@ -71,8 +72,8 @@ class DeliveryRequestFilter(django_filters.FilterSet):
         fields = [
             "user",
             "parcel_title",
-            "pickup_city",
-            "destination_city",
+            "pickup_city_name",
+            "destination_city_name",
             "delivery_date_from",
             "delivery_date_to",
         ]
