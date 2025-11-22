@@ -47,6 +47,16 @@ class RequestVendorForDeliverySerializer(serializers.ModelSerializer):
     trip_details = trip_Serializer(source='trip', read_only=True)
     parcel_details = DeliveryRequestSerializer(source="parcel", read_only=True)
     
+    def validate(self, attrs):
+        request = self.context.get("request")
+        user = request.user if request else None
+        parcel = attrs.get("parcel")
+        trip_instance = attrs.get("trip")
+        if user and parcel and trip_instance:
+            if Request_Vendor_for_Delivery.objects.filter(user=user, parcel=parcel, trip=trip_instance).exists():
+                raise serializers.ValidationError({"detail": "you already request for this trip"})
+        return attrs
+
     class Meta:
         model = Request_Vendor_for_Delivery
         fields = '__all__'
