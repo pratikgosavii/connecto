@@ -90,14 +90,6 @@ class RequestVendorForDeliveryViewSet(viewsets.ModelViewSet):
         return Request_Vendor_for_Delivery.objects.filter(user=self.request.user).order_by('-id')
 
     def perform_create(self, serializer):
-        # Prevent duplicate request for same (user, parcel, trip)
-        parcel = serializer.validated_data.get("parcel")
-        trip_instance = serializer.validated_data.get("trip")
-        if Request_Vendor_for_Delivery.objects.filter(user=self.request.user, parcel=parcel, trip=trip_instance).exists():
-            # Raise a DRF error response
-            from rest_framework.exceptions import ValidationError
-            raise ValidationError({"detail": "you already request for this trip"})
-
         request_obj = serializer.save(user=self.request.user)
 
         # ✅ Create notification on creation
@@ -1016,6 +1008,9 @@ def create_order(request):
         "receipt": f"user_{request.user.id}_package_{package_key}",
         "payment_capture": 1
     }
+
+    print('--------------------------order_data')
+    print(order_data)
 
     order = client.order.create(order_data)
 
