@@ -1002,10 +1002,13 @@ def create_order(request):
     if not package:
         return Response({"error": "Invalid package"}, status=400)
 
+    receipt_val = f"user_{request.user.id}_package_{package_key}"
+
     order_data = {
         "amount": package["amount"],
         "currency": "INR",
-        "receipt": f"user_{request.user.id}_package_{package_key}",
+        "receipt": receipt_val,
+        "notes": {"receipt": receipt_val},   # <-- REQUIRED
         "payment_capture": 1
     }
 
