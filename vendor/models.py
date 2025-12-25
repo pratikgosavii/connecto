@@ -32,6 +32,8 @@ class trip(models.Model):
     source_place_id = models.CharField(max_length=255, blank=True, null=True)
     source_formatted_address = models.TextField(blank=True, null=True)
     source_city_name = models.CharField(max_length=100, blank=True, null=True)
+    source_state_name = models.CharField(max_length=100, blank=True, null=True)
+    source_pincode = models.CharField(max_length=10, blank=True, null=True)
 
     # Destination (Google Maps)
     destination_latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
@@ -39,6 +41,9 @@ class trip(models.Model):
     destination_place_id = models.CharField(max_length=255, blank=True, null=True)
     destination_formatted_address = models.TextField(blank=True, null=True)
     destination_city_name = models.CharField(max_length=100, blank=True, null=True)
+    destination_state_name = models.CharField(max_length=100, blank=True, null=True)
+    destination_pincode = models.CharField(max_length=10, blank=True, null=True)
+
     mode_of_transport = models.CharField(max_length=20, choices=MODE_OF_TRANSPORT_CHOICES)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, null=True, blank=True)
     private_vehicle_type = models.CharField(max_length=20, choices=PRIVATE_VEHICLE_CHOICES, null=True, blank=True)
@@ -60,9 +65,7 @@ class trip(models.Model):
     # Pickup Location
     pickup_address_line1 = models.CharField(max_length=255)
     pickup_address_line2 = models.CharField(max_length=255, blank=True, null=True)
-    pickup_pincode = models.CharField(max_length=10, blank=True, null=True)
-    pickup_state = models.CharField(max_length=100, blank=True, null=True)
-    pickup_city = models.CharField(max_length=100, blank=True, null=True)
+    
     pickup_contact = models.CharField(max_length=20, blank=True, null=True)
 
     departure_datetime = models.DateTimeField()

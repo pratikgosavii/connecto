@@ -37,6 +37,8 @@ class DeliveryRequest(models.Model):
     pickup_place_id = models.CharField(max_length=255, blank=True, null=True)
     pickup_formatted_address = models.TextField(blank=True, null=True)
     pickup_city_name = models.CharField(max_length=100, blank=True, null=True)
+    pickup_state_name = models.CharField(max_length=100, blank=True, null=True)
+    pickup_pincode = models.CharField(max_length=10, blank=True, null=True)
 
     request_type = models.ManyToManyField(RequestType)
 
@@ -50,7 +52,9 @@ class DeliveryRequest(models.Model):
     destination_place_id = models.CharField(max_length=255, blank=True, null=True)
     destination_formatted_address = models.TextField(blank=True, null=True)
     destination_city_name = models.CharField(max_length=100, blank=True, null=True)
-
+    destination_state_name = models.CharField(max_length=100, blank=True, null=True)
+    destination_pincode = models.CharField(max_length=10, blank=True, null=True)
+    
     is_agent_assigned = models.BooleanField(default=False)
 
     fragile = models.BooleanField(default=False)
@@ -60,15 +64,11 @@ class DeliveryRequest(models.Model):
      # Home Pickup Location
     home_pickup_address_line1 = models.CharField(max_length=255)
     home_pickup_address_line2 = models.CharField(max_length=255, blank=True, null=True)
-    home_pickup_pincode = models.CharField(max_length=10, blank=True, null=True)
-    home_pickup_state = models.CharField(max_length=100, blank=True, null=True)
     home_pickup_contact = models.CharField(max_length=20, blank=True, null=True)
     
     # Home Drop Pickup Location
     home_drop_address_line1 = models.CharField(max_length=255)
     home_drop_address_line2 = models.CharField(max_length=255, blank=True, null=True)
-    home_drop_pincode = models.CharField(max_length=10, blank=True, null=True)
-    home_drop_state = models.CharField(max_length=100, blank=True, null=True)
     home_drop_contact = models.CharField(max_length=20, blank=True, null=True)
     
     
