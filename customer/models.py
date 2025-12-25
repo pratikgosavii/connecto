@@ -57,7 +57,19 @@ class DeliveryRequest(models.Model):
     legal_confirmation = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
-
+     # Home Pickup Location
+    home_pickup_address_line1 = models.CharField(max_length=255)
+    home_pickup_address_line2 = models.CharField(max_length=255, blank=True, null=True)
+    home_pickup_pincode = models.CharField(max_length=10, blank=True, null=True)
+    home_pickup_state = models.CharField(max_length=100, blank=True, null=True)
+    home_pickup_contact = models.CharField(max_length=20, blank=True, null=True)
+    
+    # Home Drop Pickup Location
+    home_drop_pickup_address_line1 = models.CharField(max_length=255)
+    home_drop_pickup_address_line2 = models.CharField(max_length=255, blank=True, null=True)
+    home_drop_pickup_pincode = models.CharField(max_length=10, blank=True, null=True)
+    home_drop_pickup_state = models.CharField(max_length=100, blank=True, null=True)
+    home_drop_pickup_contact = models.CharField(max_length=20, blank=True, null=True)
     
     
 class Request_Vendor_for_Delivery(models.Model):
