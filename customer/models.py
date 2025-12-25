@@ -65,11 +65,11 @@ class DeliveryRequest(models.Model):
     home_pickup_contact = models.CharField(max_length=20, blank=True, null=True)
     
     # Home Drop Pickup Location
-    home_drop_pickup_address_line1 = models.CharField(max_length=255)
-    home_drop_pickup_address_line2 = models.CharField(max_length=255, blank=True, null=True)
-    home_drop_pickup_pincode = models.CharField(max_length=10, blank=True, null=True)
-    home_drop_pickup_state = models.CharField(max_length=100, blank=True, null=True)
-    home_drop_pickup_contact = models.CharField(max_length=20, blank=True, null=True)
+    home_drop_address_line1 = models.CharField(max_length=255)
+    home_drop_address_line2 = models.CharField(max_length=255, blank=True, null=True)
+    home_drop_pincode = models.CharField(max_length=10, blank=True, null=True)
+    home_drop_state = models.CharField(max_length=100, blank=True, null=True)
+    home_drop_contact = models.CharField(max_length=20, blank=True, null=True)
     
     
 class Request_Vendor_for_Delivery(models.Model):
