@@ -743,13 +743,52 @@ class FetchDigilockerDocumentsView(APIView):
 
     def get(self, request, *args, **kwargs):
         client_id = request.GET.get('client_id')
+        refresh = request.GET.get('refresh', 'false').lower() == 'true'  # Force refresh from API
         
         user = request.user
 
         try:
             kyc, _ = UserKYC.objects.get_or_create(user=user)
 
+            # Check if documents already exist in DB and are verified
+            if not refresh:
+                has_aadhaar = kyc.aadhaar_status == 'verified' and kyc.adhar_image_file
+                has_pan = kyc.pan_status == 'verified' and kyc.pan_file
+                has_dl = kyc.dl_status == 'verified' and kyc.dl_file
+                
+                # If all documents are already verified and exist, return from DB
+                if has_aadhaar or has_pan or has_dl:
+                    aadhaar_data = {}
+                    try:
+                        aadhaar_details = AadhaarDetails.objects.filter(user=user).first()
+                        if aadhaar_details:
+                            aadhaar_data = {
+                                "name": aadhaar_details.name,
+                                "gender": aadhaar_details.gender,
+                                "dob": str(aadhaar_details.dob) if aadhaar_details.dob else None,
+                                "yob": aadhaar_details.yob,
+                                "zip_code": aadhaar_details.zip_code,
+                                "masked_aadhaar": aadhaar_details.masked_aadhaar,
+                                "full_address": aadhaar_details.full_address,
+                                "father_name": aadhaar_details.father_name,
+                            }
+                    except Exception:
+                        pass
+                    
+                    return Response({
+                        "message": "Documents fetched from database.",
+                        "source": "database",
+                        "aadhaar_verified": has_aadhaar,
+                        "dl_verified": has_dl,
+                        "pan_verified": has_pan,
+                        "aadhaar_data": aadhaar_data,
+                        "aadhaar_status": kyc.aadhaar_status,
+                        "pan_status": kyc.pan_status,
+                        "dl_status": kyc.dl_status,
+                        "is_approved": kyc.is_approved,
+                    }, status=status.HTTP_200_OK)
             
+            # If refresh is requested or documents don't exist, fetch from DigiLocker API
             if not client_id:
                 return Response({"error": "DigiLocker Client ID not found for this user."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -896,11 +935,16 @@ class FetchDigilockerDocumentsView(APIView):
 
             return Response({
                 "message": "Documents fetched and statuses updated successfully.",
+                "source": "digilocker_api",
                 "aadhaar_verified": aadhaar_verified,
                 "dl_verified": dl_verified,
                 "pan_verified": pan_verified,
                 "aadhaar_data": aadhaar_data,
                 "user_name_updated": user_name_updated,
+                "aadhaar_status": kyc.aadhaar_status,
+                "pan_status": kyc.pan_status,
+                "dl_status": kyc.dl_status,
+                "is_approved": kyc.is_approved,
             })
 
         except Exception as e:
