@@ -31,6 +31,12 @@ def ensure_city_exists(city_name):
     """
     Check if a city exists in the city table, if not, create it.
     Returns the city instance.
+    
+    Args:
+        city_name: The name of the city to check/create
+        
+    Returns:
+        city instance if successful, None otherwise
     """
     if not city_name:
         return None
@@ -38,8 +44,9 @@ def ensure_city_exists(city_name):
     try:
         from masters.models import city
         
-        city_name = city_name.strip()
-        if not city_name:
+        # Clean and validate city name
+        city_name = str(city_name).strip()
+        if not city_name or city_name.lower() in ['none', 'null', '']:
             return None
         
         # Check if city exists (case-insensitive)
@@ -47,11 +54,25 @@ def ensure_city_exists(city_name):
         
         if not city_instance:
             # City doesn't exist, create it
-            city_instance = city.objects.create(name=city_name)
+            try:
+                city_instance = city.objects.create(name=city_name)
+                print(f"✅ Created new city: {city_name} (ID: {city_instance.id})")
+            except Exception as create_error:
+                # If creation fails (e.g., duplicate key), try to get it again
+                print(f"⚠️ Error creating city '{city_name}': {create_error}, trying to fetch...")
+                city_instance = city.objects.filter(name__iexact=city_name).first()
+                if city_instance:
+                    print(f"✓ City found after creation error: {city_name}")
+                else:
+                    raise
+        else:
+            print(f"✓ City already exists: {city_name} (ID: {city_instance.id})")
         
         return city_instance
     except Exception as e:
-        print(f"Error ensuring city exists: {e}")
+        print(f"❌ Error ensuring city exists for '{city_name}': {e}")
+        import traceback
+        traceback.print_exc()
         return None
 
 

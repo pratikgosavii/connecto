@@ -77,10 +77,12 @@ class DeliveryRequest(models.Model):
         
         # Check pickup city
         if self.pickup_city_name:
+            print(f"Checking pickup city: {self.pickup_city_name}")
             ensure_city_exists(self.pickup_city_name)
         
         # Check destination city
         if self.destination_city_name:
+            print(f"Checking destination city: {self.destination_city_name}")
             ensure_city_exists(self.destination_city_name)
         
         super().save(*args, **kwargs)

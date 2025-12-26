@@ -80,10 +80,12 @@ class trip(models.Model):
         
         # Check source city
         if self.source_city_name:
+            print(f"🔍 Checking source city: {self.source_city_name}")
             ensure_city_exists(self.source_city_name)
         
         # Check destination city
         if self.destination_city_name:
+            print(f"🔍 Checking destination city: {self.destination_city_name}")
             ensure_city_exists(self.destination_city_name)
         
         super().save(*args, **kwargs)
