@@ -53,3 +53,25 @@ def ensure_city_exists(city_name):
     except Exception as e:
         print(f"Error ensuring city exists: {e}")
         return None
+
+
+def create_no_retry_session():
+    """
+    Create a requests session with no automatic retries.
+    This prevents "too many tries" errors when proxy blocks requests.
+    """
+    import requests
+    from requests.adapters import HTTPAdapter
+    from urllib3.util.retry import Retry
+    
+    session = requests.Session()
+    # Configure retry strategy: no retries at all
+    retry_strategy = Retry(
+        total=0,  # No retries
+        backoff_factor=0,
+        status_forcelist=[],
+    )
+    adapter = HTTPAdapter(max_retries=retry_strategy)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    return session

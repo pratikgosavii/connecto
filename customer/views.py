@@ -790,6 +790,41 @@ class FetchDigilockerDocumentsView(APIView):
             
             # If refresh is requested or documents don't exist, fetch from DigiLocker API
             if not client_id:
+                # If no client_id but we have some data in DB, return that
+                has_any_doc = (kyc.aadhaar_status == 'verified' and kyc.adhar_image_file) or \
+                             (kyc.pan_status == 'verified' and kyc.pan_file) or \
+                             (kyc.dl_status == 'verified' and kyc.dl_file)
+                if has_any_doc:
+                    aadhaar_data = {}
+                    try:
+                        aadhaar_details = AadhaarDetails.objects.filter(user=user).first()
+                        if aadhaar_details:
+                            aadhaar_data = {
+                                "name": aadhaar_details.name,
+                                "gender": aadhaar_details.gender,
+                                "dob": str(aadhaar_details.dob) if aadhaar_details.dob else None,
+                                "yob": aadhaar_details.yob,
+                                "zip_code": aadhaar_details.zip_code,
+                                "masked_aadhaar": aadhaar_details.masked_aadhaar,
+                                "full_address": aadhaar_details.full_address,
+                                "father_name": aadhaar_details.father_name,
+                            }
+                    except Exception:
+                        pass
+                    
+                    return Response({
+                        "message": "Documents fetched from database (no client_id provided).",
+                        "source": "database",
+                        "aadhaar_verified": kyc.aadhaar_status == 'verified' and kyc.adhar_image_file,
+                        "dl_verified": kyc.dl_status == 'verified' and kyc.dl_file,
+                        "pan_verified": kyc.pan_status == 'verified' and kyc.pan_file,
+                        "aadhaar_data": aadhaar_data,
+                        "aadhaar_status": kyc.aadhaar_status,
+                        "pan_status": kyc.pan_status,
+                        "dl_status": kyc.dl_status,
+                        "is_approved": kyc.is_approved,
+                    }, status=status.HTTP_200_OK)
+                
                 return Response({"error": "DigiLocker Client ID not found for this user."}, status=status.HTTP_400_BAD_REQUEST)
 
             url = f"https://kyc-api.surepass.app/api/v1/digilocker/list-documents/{client_id}"
@@ -798,8 +833,74 @@ class FetchDigilockerDocumentsView(APIView):
                 "Content-Type": "application/json"
             }
 
-            response = requests.get(url, headers=headers)
-            data = response.json()
+            try:
+                # Disable automatic retries to prevent "too many tries" error
+                from requests.adapters import HTTPAdapter
+                from urllib3.util.retry import Retry
+                
+                session = requests.Session()
+                # Configure retry strategy: no retries for 403/401, max 2 retries for other errors
+                retry_strategy = Retry(
+                    total=0,  # No retries at all
+                    backoff_factor=0,
+                    status_forcelist=[],
+                )
+                adapter = HTTPAdapter(max_retries=retry_strategy)
+                session.mount("http://", adapter)
+                session.mount("https://", adapter)
+                
+                response = session.get(url, headers=headers, timeout=30)
+                
+                # Check for 403 specifically (proxy error)
+                if response.status_code == 403:
+                    raise requests.exceptions.HTTPError("403 Forbidden: Proxy blocked the request")
+                
+                response.raise_for_status()  # Raise an exception for bad status codes
+                data = response.json()
+            except (requests.exceptions.RequestException, requests.exceptions.HTTPError) as api_error:
+                # If API call fails, try to return existing data from DB
+                has_any_doc = (kyc.aadhaar_status == 'verified' and kyc.adhar_image_file) or \
+                             (kyc.pan_status == 'verified' and kyc.pan_file) or \
+                             (kyc.dl_status == 'verified' and kyc.dl_file)
+                
+                if has_any_doc:
+                    aadhaar_data = {}
+                    try:
+                        aadhaar_details = AadhaarDetails.objects.filter(user=user).first()
+                        if aadhaar_details:
+                            aadhaar_data = {
+                                "name": aadhaar_details.name,
+                                "gender": aadhaar_details.gender,
+                                "dob": str(aadhaar_details.dob) if aadhaar_details.dob else None,
+                                "yob": aadhaar_details.yob,
+                                "zip_code": aadhaar_details.zip_code,
+                                "masked_aadhaar": aadhaar_details.masked_aadhaar,
+                                "full_address": aadhaar_details.full_address,
+                                "father_name": aadhaar_details.father_name,
+                            }
+                    except Exception:
+                        pass
+                    
+                    return Response({
+                        "message": "Documents fetched from database (API unavailable).",
+                        "source": "database",
+                        "warning": "DigiLocker API is currently unavailable. Showing cached data.",
+                        "aadhaar_verified": kyc.aadhaar_status == 'verified' and kyc.adhar_image_file,
+                        "dl_verified": kyc.dl_status == 'verified' and kyc.dl_file,
+                        "pan_verified": kyc.pan_status == 'verified' and kyc.pan_file,
+                        "aadhaar_data": aadhaar_data,
+                        "aadhaar_status": kyc.aadhaar_status,
+                        "pan_status": kyc.pan_status,
+                        "dl_status": kyc.dl_status,
+                        "is_approved": kyc.is_approved,
+                    }, status=status.HTTP_200_OK)
+                
+                # If no data in DB and API fails, return error
+                return Response({
+                    "error": "Unable to fetch documents from DigiLocker API.",
+                    "details": str(api_error),
+                    "message": "Network error: Please try again later or contact support."
+                }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
             if not data.get("success"):
                 return Response({"error": f"Surepass Error: {data.get('message', 'Unknown error')}"}, status=status.HTTP_400_BAD_REQUEST)
@@ -833,9 +934,15 @@ class FetchDigilockerDocumentsView(APIView):
                     aadhaar_verified = True
 
                     aadhaar_url = f"https://kyc-api.surepass.app/api/v1/digilocker/download-aadhaar/{client_id}"
-                    aadhaar_resp = requests.get(aadhaar_url, headers=headers)
-                    aadhaar_data = aadhaar_resp.json()
-                    print(aadhaar_data)
+                    try:
+                        aadhaar_resp = requests.get(aadhaar_url, headers=headers, timeout=30)
+                        aadhaar_resp.raise_for_status()
+                        aadhaar_data = aadhaar_resp.json()
+                        print(aadhaar_data)
+                    except requests.exceptions.RequestException as e:
+                        print(f"Error fetching Aadhaar data: {e}")
+                        # Continue with other documents if Aadhaar fails
+                        continue
 
                     if aadhaar_data.get("success") and "data" in aadhaar_data:
                         print('--------------------11111111111111111----------------')
@@ -896,16 +1003,41 @@ class FetchDigilockerDocumentsView(APIView):
                     print('--------------------1--1--1--1-1-1-1-1--1----------------')
 
                     pan_url = f"https://kyc-api.surepass.app/api/v1/digilocker/download-document/{client_id}/{file_id}"
-                    resp = requests.get(pan_url, headers=headers)
-                    print('pan url:----------', pan_url)
-                    print("PAN Response status:", resp.status_code)
-
+                    try:
+                        # Use session without retries
+                        session = requests.Session()
+                        from requests.adapters import HTTPAdapter
+                        from urllib3.util.retry import Retry
+                        retry_strategy = Retry(total=0)
+                        adapter = HTTPAdapter(max_retries=retry_strategy)
+                        session.mount("https://", adapter)
+                        
+                        resp = session.get(pan_url, headers=headers, timeout=30)
+                        if resp.status_code == 403:
+                            raise requests.exceptions.HTTPError("403 Forbidden: Proxy blocked")
+                        resp.raise_for_status()
+                        print('pan url:----------', pan_url)
+                        print("PAN Response status:", resp.status_code)
+                    except (requests.exceptions.RequestException, requests.exceptions.HTTPError) as e:
+                        print(f"Error fetching PAN: {e}")
+                        continue
 
                     if resp.status_code == 200 and resp.json().get("success"):
                         download_url = resp.json()["data"]["download_url"]
 
                         # Now fetch actual PDF
-                        pdf_resp = requests.get(download_url)
+                        try:
+                            from customer.utils import create_no_retry_session
+                            session = create_no_retry_session()
+                            
+                            pdf_resp = session.get(download_url, timeout=30)
+                            if pdf_resp.status_code == 403:
+                                raise requests.exceptions.HTTPError("403 Forbidden: Proxy blocked")
+                            pdf_resp.raise_for_status()
+                        except (requests.exceptions.RequestException, requests.exceptions.HTTPError) as e:
+                            print(f"Error downloading PAN PDF: {e}")
+                            continue
+                        
                         if pdf_resp.status_code == 200:
                             kyc.pan_file.save(f"{user.id}_pan.pdf", ContentFile(pdf_resp.content), save=False)
                             kyc.pan_status = "verified"
@@ -922,8 +1054,14 @@ class FetchDigilockerDocumentsView(APIView):
 
                     dl_url = f"https://kyc-api.surepass.app/api/v1/digilocker/downloaddocument/{client_id}/{file_id}"
                     print('dr url:----------', dl_url)
-                    resp = requests.get(dl_url, headers=headers)
-                    print(resp)
+                    try:
+                        resp = requests.get(dl_url, headers=headers, timeout=30)
+                        resp.raise_for_status()
+                        print(resp)
+                    except requests.exceptions.RequestException as e:
+                        print(f"Error fetching DL: {e}")
+                        continue
+                    
                     if resp.status_code == 200:
                         kyc.dl_file.save(f"{user.id}_dl.pdf", ContentFile(resp.content), save=False)
                         kyc.dl_status = "verified"
