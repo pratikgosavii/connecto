@@ -71,6 +71,20 @@ class DeliveryRequest(models.Model):
     home_drop_address_line2 = models.CharField(max_length=255, blank=True, null=True)
     home_drop_contact = models.CharField(max_length=20, blank=True, null=True)
     
+    def save(self, *args, **kwargs):
+        # Check and add cities before saving
+        from customer.utils import ensure_city_exists
+        
+        # Check pickup city
+        if self.pickup_city_name:
+            ensure_city_exists(self.pickup_city_name)
+        
+        # Check destination city
+        if self.destination_city_name:
+            ensure_city_exists(self.destination_city_name)
+        
+        super().save(*args, **kwargs)
+    
     
 class Request_Vendor_for_Delivery(models.Model):
     

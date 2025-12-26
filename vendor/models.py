@@ -74,6 +74,20 @@ class trip(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def save(self, *args, **kwargs):
+        # Check and add cities before saving
+        from customer.utils import ensure_city_exists
+        
+        # Check source city
+        if self.source_city_name:
+            ensure_city_exists(self.source_city_name)
+        
+        # Check destination city
+        if self.destination_city_name:
+            ensure_city_exists(self.destination_city_name)
+        
+        super().save(*args, **kwargs)
+
     
 
 

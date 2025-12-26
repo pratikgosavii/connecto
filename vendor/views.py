@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404, render
 # Create your views here.
 
 from rest_framework import viewsets, permissions
+from rest_framework.exceptions import ValidationError
 
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
@@ -28,7 +29,17 @@ class add_trip_ViewSet(ModelViewSet):
 
     def get_queryset(self):
         # Return only the trips created by the current user
-        return trip.objects.filter(user=self.request.user).order_by('-id') 
+        return trip.objects.filter(user=self.request.user).order_by('-id')
+    
+    def perform_destroy(self, instance):
+        # Check if any parcels are attached to this trip
+        # Check if there are any orders (assigned parcels)
+        if Customer_Order.objects.filter(trip=instance).exists():
+            raise ValidationError({"message": "already parcel is assigned to this trip cant delete trip"})
+
+        
+        # If no parcels are attached, allow deletion
+        instance.delete() 
     
 
 
