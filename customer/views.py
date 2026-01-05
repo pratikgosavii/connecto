@@ -742,13 +742,24 @@ class FetchDigilockerDocumentsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
+        print(f"\n{'='*80}")
+        print(f"🚀 FetchDigilockerDocumentsView - GET request started")
+        print(f"{'='*80}")
+        
         client_id = request.GET.get('client_id')
         refresh = request.GET.get('refresh', 'false').lower() == 'true'  # Force refresh from API
         
+        print(f"📋 Request parameters:")
+        print(f"   - client_id: {client_id}")
+        print(f"   - refresh: {refresh}")
+        
         user = request.user
+        print(f"   - user: {user} (ID: {user.id})")
 
         try:
+            print(f"\n🔍 Getting or creating UserKYC record...")
             kyc, _ = UserKYC.objects.get_or_create(user=user)
+            print(f"✅ UserKYC record: {kyc} (ID: {kyc.id})")
 
             # Check if documents already exist in DB and are verified
             if not refresh:
@@ -912,8 +923,11 @@ class FetchDigilockerDocumentsView(APIView):
                 return Response({"error": f"Surepass Error: {data.get('message', 'Unknown error')}"}, status=status.HTTP_400_BAD_REQUEST)
 
             documents = data["data"].get("documents", [])
-            print(f"📋 Total documents received: {len(documents)}")
-            print(f"📄 Documents list: {documents}")
+            print(f"\n{'='*80}")
+            print(f"📋 Documents received from DigiLocker API:")
+            print(f"   - Total documents: {len(documents)}")
+            print(f"   - Documents list: {documents}")
+            print(f"{'='*80}")
             
             # Reset statuses
             kyc.aadhaar_status = 'pending'
@@ -928,16 +942,25 @@ class FetchDigilockerDocumentsView(APIView):
             aadhaar_data = {}
 
             # Loop over all docs
-            for doc in documents:
+            print(f"\n🔄 Starting document processing loop - {len(documents)} documents to process")
+            for idx, doc in enumerate(documents, 1):
+                print(f"\n{'='*60}")
+                print(f"📄 Processing document #{idx} of {len(documents)}")
+                print(f"{'='*60}")
+                
                 doc_type = doc.get("doc_type")
                 file_id = doc.get("file_id")
                 downloaded = doc.get("downloaded", False)
 
-                print(f"📑 Processing document - doc_type: '{doc_type}', file_id: '{file_id}', downloaded: {downloaded}")
-                print(f"📑 Full doc data: {doc}")
+                print(f"📑 Document details:")
+                print(f"   - doc_type: '{doc_type}' (type: {type(doc_type)})")
+                print(f"   - file_id: '{file_id}'")
+                print(f"   - downloaded: {downloaded}")
+                print(f"   - Full doc data: {doc}")
 
                 # Aadhaar (special API)
                 if doc_type == "ADHAR" and downloaded:
+                    print(f"✅ AADHAAR document detected - processing...")
                     kyc.aadhaar_status = "verified"
                     aadhaar_verified = True
 
@@ -1009,14 +1032,20 @@ class FetchDigilockerDocumentsView(APIView):
                 # PAN (download by file_id)
                 # Check for PAN document types (case-insensitive)
                 # Process PAN documents even if downloaded=False (document exists in DigiLocker)
+                print(f"\n🔍 Checking if document is PAN...")
                 pan_doc_types = ["PANCR", "PAN", "pancr", "pan"]
                 is_pan_doc = doc_type and doc_type.upper() in [dt.upper() for dt in pan_doc_types]
                 
-                print(f"🔍 Checking PAN - doc_type: '{doc_type}', type(doc_type): {type(doc_type)}, downloaded: {downloaded}, file_id: {file_id}")
-                print(f"🔍 PAN check - doc_type.upper(): '{doc_type.upper() if doc_type else None}', is_pan_doc: {is_pan_doc}")
+                print(f"   - doc_type: '{doc_type}'")
+                print(f"   - doc_type.upper(): '{doc_type.upper() if doc_type else None}'")
+                print(f"   - Checking against PAN types: {pan_doc_types}")
+                print(f"   - is_pan_doc: {is_pan_doc}")
+                print(f"   - downloaded: {downloaded}")
+                print(f"   - file_id: '{file_id}'")
                 
                 if is_pan_doc:
-                    print(f"✅ PAN document detected! Processing... (downloaded={downloaded})")
+                    print(f"\n✅✅✅ PAN DOCUMENT DETECTED! ✅✅✅")
+                    print(f"   Processing PAN document... (downloaded={downloaded})")
                     
                     if not file_id:
                         print(f"⚠️ PAN document found but file_id is missing.")
@@ -1027,10 +1056,15 @@ class FetchDigilockerDocumentsView(APIView):
                         pan_verified = True
                         continue
                     
-                    print(f'🔍 Processing PAN document - doc_type: {doc_type}, file_id: {file_id}, downloaded: {downloaded}')
+                    print(f'   📋 PAN Processing Details:')
+                    print(f'      - doc_type: {doc_type}')
+                    print(f'      - file_id: {file_id}')
+                    print(f'      - downloaded: {downloaded}')
+                    print(f'      - client_id: {client_id}')
 
                     pan_url = f"https://kyc-api.surepass.app/api/v1/digilocker/download-document/{client_id}/{file_id}"
-                    print(f'📥 PAN URL: {pan_url}')
+                    print(f'   📥 PAN Download URL: {pan_url}')
+                    print(f'   🔄 Making API call to get PAN download URL...')
                     
                     try:
                         # Use session without retries
@@ -1042,22 +1076,27 @@ class FetchDigilockerDocumentsView(APIView):
                         session.mount("https://", adapter)
                         
                         resp = session.get(pan_url, headers=headers, timeout=30)
-                        print(f'📊 PAN API Response status: {resp.status_code}')
+                        print(f'   📊 PAN API Response received:')
+                        print(f'      - Status Code: {resp.status_code}')
+                        print(f'      - Response Headers: {dict(resp.headers)}')
                         
                         if resp.status_code == 403:
-                            print("❌ 403 Forbidden: Proxy blocked PAN API call")
+                            print("   ❌ 403 Forbidden: Proxy blocked PAN API call")
                             raise requests.exceptions.HTTPError("403 Forbidden: Proxy blocked")
                         
                         resp.raise_for_status()
-                        print(f'✅ PAN API call successful')
+                        print(f'   ✅ PAN API call successful (status: {resp.status_code})')
                     except (requests.exceptions.RequestException, requests.exceptions.HTTPError) as e:
-                        print(f"❌ Error fetching PAN download URL: {e}")
-                        print(f"⚠️ Skipping PAN verification due to API error")
+                        print(f"   ❌ Error fetching PAN download URL: {type(e).__name__}: {e}")
+                        print(f"   ⚠️ Skipping PAN verification due to API error")
+                        import traceback
+                        traceback.print_exc()
                         continue
 
                     try:
+                        print(f'   📄 Parsing PAN API response JSON...')
                         resp_data = resp.json()
-                        print(f'📄 PAN API Response data: {resp_data}')
+                        print(f'   📄 PAN API Response data: {resp_data}')
                         
                         if resp.status_code == 200 and resp_data.get("success"):
                             download_url = resp_data["data"].get("download_url")
@@ -1163,10 +1202,12 @@ class FetchDigilockerDocumentsView(APIView):
                         print(f"✅ PAN verification complete (fallback) - pan_verified: {pan_verified}, pan_status: {kyc.pan_status}")
                 else:
                     # Not a PAN document, skip
-                    pass
+                    print(f"   ⏭️ Not a PAN document (doc_type: '{doc_type}')")
 
                 # Driving License (download by file_id)
+                print(f"\n🔍 Checking if document is Driving License...")
                 if doc_type == "DRVLC" and downloaded:
+                    print(f"✅ DRIVING LICENSE document detected - processing...")
                     print('--------------------2222222222222222----------------')
 
                     dl_url = f"https://kyc-api.surepass.app/api/v1/digilocker/downloaddocument/{client_id}/{file_id}"
@@ -1183,8 +1224,15 @@ class FetchDigilockerDocumentsView(APIView):
                         kyc.dl_file.save(f"{user.id}_dl.pdf", ContentFile(resp.content), save=False)
                         kyc.dl_status = "verified"
                         dl_verified = True
+                        print(f"✅ Driving License saved and verified")
+                else:
+                    print(f"   ⏭️ Not a Driving License document (doc_type: '{doc_type}', downloaded: {downloaded})")
+                
+                print(f"📄 Finished processing document #{idx} - doc_type: '{doc_type}'")
+                print(f"{'='*60}\n")
 
             # Save KYC after processing all docs
+            print(f"\n🔄 Finished processing all {len(documents)} documents")
             print(f"\n📊 Document Processing Summary:")
             print(f"   - Aadhaar: {'✅ Verified' if aadhaar_verified else '❌ Not verified'} (status: {kyc.aadhaar_status})")
             print(f"   - PAN: {'✅ Verified' if pan_verified else '❌ Not verified'} (status: {kyc.pan_status})")
