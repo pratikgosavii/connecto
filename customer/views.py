@@ -912,7 +912,9 @@ class FetchDigilockerDocumentsView(APIView):
                 return Response({"error": f"Surepass Error: {data.get('message', 'Unknown error')}"}, status=status.HTTP_400_BAD_REQUEST)
 
             documents = data["data"].get("documents", [])
-            print(documents)
+            print(f"📋 Total documents received: {len(documents)}")
+            print(f"📄 Documents list: {documents}")
+            
             # Reset statuses
             kyc.aadhaar_status = 'pending'
             kyc.pan_status = 'pending'
@@ -931,8 +933,8 @@ class FetchDigilockerDocumentsView(APIView):
                 file_id = doc.get("file_id")
                 downloaded = doc.get("downloaded", False)
 
-
-                print(doc_type, 'file id-----------------------', file_id)
+                print(f"📑 Processing document - doc_type: '{doc_type}', file_id: '{file_id}', downloaded: {downloaded}")
+                print(f"📑 Full doc data: {doc}")
 
                 # Aadhaar (special API)
                 if doc_type == "ADHAR" and downloaded:
@@ -1005,10 +1007,18 @@ class FetchDigilockerDocumentsView(APIView):
                             user_name_updated = True
 
                 # PAN (download by file_id)
-                if doc_type == "PANCR" and downloaded:
-                    print('--------------------1--1--1--1-1-1-1-1--1----------------')
+                # Check for PAN document types (case-insensitive)
+                pan_doc_types = ["PANCR", "PAN", "pancr", "pan"]
+                if doc_type and doc_type.upper() in [dt.upper() for dt in pan_doc_types] and downloaded:
+                    if not file_id:
+                        print(f"⚠️ PAN document found but file_id is missing. Skipping...")
+                        continue
+                    
+                    print(f'🔍 Processing PAN document - doc_type: {doc_type}, file_id: {file_id}, downloaded: {downloaded}')
 
                     pan_url = f"https://kyc-api.surepass.app/api/v1/digilocker/download-document/{client_id}/{file_id}"
+                    print(f'📥 PAN URL: {pan_url}')
+                    
                     try:
                         # Use session without retries
                         session = requests.Session()
@@ -1019,40 +1029,72 @@ class FetchDigilockerDocumentsView(APIView):
                         session.mount("https://", adapter)
                         
                         resp = session.get(pan_url, headers=headers, timeout=30)
+                        print(f'📊 PAN API Response status: {resp.status_code}')
+                        
                         if resp.status_code == 403:
+                            print("❌ 403 Forbidden: Proxy blocked PAN API call")
                             raise requests.exceptions.HTTPError("403 Forbidden: Proxy blocked")
+                        
                         resp.raise_for_status()
-                        print('pan url:----------', pan_url)
-                        print("PAN Response status:", resp.status_code)
+                        print(f'✅ PAN API call successful')
                     except (requests.exceptions.RequestException, requests.exceptions.HTTPError) as e:
-                        print(f"Error fetching PAN: {e}")
+                        print(f"❌ Error fetching PAN download URL: {e}")
+                        print(f"⚠️ Skipping PAN verification due to API error")
                         continue
 
-                    if resp.status_code == 200 and resp.json().get("success"):
-                        download_url = resp.json()["data"]["download_url"]
-
-                        # Now fetch actual PDF
-                        try:
-                            from customer.utils import create_no_retry_session
-                            session = create_no_retry_session()
-                            
-                            pdf_resp = session.get(download_url, timeout=30)
-                            if pdf_resp.status_code == 403:
-                                raise requests.exceptions.HTTPError("403 Forbidden: Proxy blocked")
-                            pdf_resp.raise_for_status()
-                        except (requests.exceptions.RequestException, requests.exceptions.HTTPError) as e:
-                            print(f"Error downloading PAN PDF: {e}")
-                            continue
+                    try:
+                        resp_data = resp.json()
+                        print(f'📄 PAN API Response data: {resp_data}')
                         
-                        if pdf_resp.status_code == 200:
-                            kyc.pan_file.save(f"{user.id}_pan.pdf", ContentFile(pdf_resp.content), save=False)
-                            kyc.pan_status = "verified"
-                            pan_verified = True
-                            print("✅ PAN file saved successfully")
+                        if resp.status_code == 200 and resp_data.get("success"):
+                            download_url = resp_data["data"].get("download_url")
+                            print(f'📥 PAN PDF Download URL: {download_url}')
+                            
+                            if not download_url:
+                                print("❌ No download URL in PAN response")
+                                continue
+
+                            # Now fetch actual PDF
+                            try:
+                                from customer.utils import create_no_retry_session
+                                session = create_no_retry_session()
+                                
+                                print(f'⬇️ Downloading PAN PDF from: {download_url}')
+                                pdf_resp = session.get(download_url, timeout=30)
+                                print(f'📊 PAN PDF Response status: {pdf_resp.status_code}')
+                                
+                                if pdf_resp.status_code == 403:
+                                    print("❌ 403 Forbidden: Proxy blocked PAN PDF download")
+                                    raise requests.exceptions.HTTPError("403 Forbidden: Proxy blocked")
+                                
+                                pdf_resp.raise_for_status()
+                            except (requests.exceptions.RequestException, requests.exceptions.HTTPError) as e:
+                                print(f"❌ Error downloading PAN PDF: {e}")
+                                print(f"⚠️ Skipping PAN verification due to PDF download error")
+                                continue
+                            
+                            if pdf_resp.status_code == 200 and pdf_resp.content:
+                                print(f'💾 Saving PAN file (size: {len(pdf_resp.content)} bytes)')
+                                try:
+                                    kyc.pan_file.save(f"{user.id}_pan.pdf", ContentFile(pdf_resp.content), save=False)
+                                    kyc.pan_status = "verified"
+                                    kyc.save()  # Explicitly save the status
+                                    pan_verified = True
+                                    print(f"✅ PAN file saved successfully and status updated to verified")
+                                    print(f"✅ PAN verification complete - pan_verified: {pan_verified}, pan_status: {kyc.pan_status}")
+                                except Exception as save_error:
+                                    print(f"❌ Error saving PAN file: {save_error}")
+                                    import traceback
+                                    traceback.print_exc()
+                            else:
+                                print(f"❌ Failed to download PAN PDF - Status: {pdf_resp.status_code}, Content length: {len(pdf_resp.content) if pdf_resp.content else 0}")
                         else:
-                            print("❌ Failed to download PAN PDF:", pdf_resp.text)
-                    else:
-                        print("PAN download failed:", resp.text)
+                            print(f"❌ PAN API response not successful - Status: {resp.status_code}, Success: {resp_data.get('success')}, Message: {resp_data.get('message', 'N/A')}")
+                    except Exception as json_error:
+                        print(f"❌ Error parsing PAN API response: {json_error}")
+                        print(f"Response text: {resp.text[:500] if hasattr(resp, 'text') else 'N/A'}")
+                        import traceback
+                        traceback.print_exc()
 
                 # Driving License (download by file_id)
                 if doc_type == "DRVLC" and downloaded:
