@@ -611,6 +611,7 @@ class TicketMessageViewSet(viewsets.ViewSet):
 
 
 import requests
+import sys
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.conf import settings
@@ -763,12 +764,19 @@ class FetchDigilockerDocumentsView(APIView):
 
             # Check if documents already exist in DB and are verified
             if not refresh:
+                print(f"\n🔍 Checking existing documents in database...")
                 has_aadhaar = kyc.aadhaar_status == 'verified' and kyc.adhar_image_file
                 has_pan = kyc.pan_status == 'verified' and kyc.pan_file
                 has_dl = kyc.dl_status == 'verified' and kyc.dl_file
                 
+                print(f"   - Aadhaar verified: {has_aadhaar} (status: {kyc.aadhaar_status}, file exists: {bool(kyc.adhar_image_file)})")
+                print(f"   - PAN verified: {has_pan} (status: {kyc.pan_status}, file exists: {bool(kyc.pan_file)})")
+                print(f"   - DL verified: {has_dl} (status: {kyc.dl_status}, file exists: {bool(kyc.dl_file)})")
+                print(f"   - refresh flag: {refresh}")
+                
                 # If all documents are already verified and exist, return from DB
                 if has_aadhaar or has_pan or has_dl:
+                    print(f"\n✅ Found verified documents in database - returning cached data (refresh={refresh})")
                     aadhaar_data = {}
                     try:
                         aadhaar_details = AadhaarDetails.objects.filter(user=user).first()
@@ -930,6 +938,11 @@ class FetchDigilockerDocumentsView(APIView):
             print(f"{'='*80}")
             
             # Reset statuses
+            print(f"\n🔄 Resetting document statuses to 'pending'...")
+            print(f"   - Previous Aadhaar status: {kyc.aadhaar_status}")
+            print(f"   - Previous PAN status: {kyc.pan_status}")
+            print(f"   - Previous DL status: {kyc.dl_status}")
+            
             kyc.aadhaar_status = 'pending'
             kyc.pan_status = 'pending'
             kyc.dl_status = 'pending'
@@ -940,6 +953,8 @@ class FetchDigilockerDocumentsView(APIView):
 
             user_name_updated = False
             aadhaar_data = {}
+            
+            print(f"✅ Statuses reset. Starting fresh verification process...")
 
             # Loop over all docs
             print(f"\n🔄 Starting document processing loop - {len(documents)} documents to process")
@@ -1046,6 +1061,7 @@ class FetchDigilockerDocumentsView(APIView):
                 if is_pan_doc:
                     print(f"\n✅✅✅ PAN DOCUMENT DETECTED! ✅✅✅")
                     print(f"   Processing PAN document... (downloaded={downloaded})")
+                    sys.stdout.flush()  # Force flush to ensure logs are printed immediately
                     
                     if not file_id:
                         print(f"⚠️ PAN document found but file_id is missing.")
@@ -1065,6 +1081,7 @@ class FetchDigilockerDocumentsView(APIView):
                     pan_url = f"https://kyc-api.surepass.app/api/v1/digilocker/download-document/{client_id}/{file_id}"
                     print(f'   📥 PAN Download URL: {pan_url}')
                     print(f'   🔄 Making API call to get PAN download URL...')
+                    sys.stdout.flush()  # Force flush
                     
                     try:
                         # Use session without retries
@@ -1086,6 +1103,7 @@ class FetchDigilockerDocumentsView(APIView):
                         
                         resp.raise_for_status()
                         print(f'   ✅ PAN API call successful (status: {resp.status_code})')
+                        sys.stdout.flush()  # Force flush
                     except (requests.exceptions.RequestException, requests.exceptions.HTTPError) as e:
                         print(f"   ❌ Error fetching PAN download URL: {type(e).__name__}: {e}")
                         print(f"   ⚠️ Skipping PAN verification due to API error")
@@ -1095,8 +1113,10 @@ class FetchDigilockerDocumentsView(APIView):
 
                     try:
                         print(f'   📄 Parsing PAN API response JSON...')
+                        sys.stdout.flush()  # Force flush
                         resp_data = resp.json()
                         print(f'   📄 PAN API Response data: {resp_data}')
+                        sys.stdout.flush()  # Force flush
                         
                         if resp.status_code == 200 and resp_data.get("success"):
                             download_url = resp_data["data"].get("download_url")
@@ -1155,6 +1175,7 @@ class FetchDigilockerDocumentsView(APIView):
                                     pan_verified = True
                                     print(f"✅ PAN file saved successfully and status updated to verified")
                                     print(f"✅ PAN verification complete - pan_verified: {pan_verified}, pan_status: {kyc.pan_status}")
+                                    sys.stdout.flush()  # Force flush
                                 except Exception as save_error:
                                     print(f"❌ Error saving PAN file: {save_error}")
                                     # Even if file save fails, if document exists, mark as verified
