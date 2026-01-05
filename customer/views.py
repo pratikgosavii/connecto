@@ -762,30 +762,32 @@ class FetchDigilockerDocumentsView(APIView):
                     try:
                         aadhaar_details = AadhaarDetails.objects.filter(user=user).first()
                         if aadhaar_details:
+                            # Ensure all values are JSON-serializable (strings, None, or basic types)
                             aadhaar_data = {
-                                "name": aadhaar_details.name,
-                                "gender": aadhaar_details.gender,
+                                "name": str(aadhaar_details.name) if aadhaar_details.name else None,
+                                "gender": str(aadhaar_details.gender) if aadhaar_details.gender else None,
                                 "dob": str(aadhaar_details.dob) if aadhaar_details.dob else None,
-                                "yob": aadhaar_details.yob,
-                                "zip_code": aadhaar_details.zip_code,
-                                "masked_aadhaar": aadhaar_details.masked_aadhaar,
-                                "full_address": aadhaar_details.full_address,
-                                "father_name": aadhaar_details.father_name,
+                                "yob": str(aadhaar_details.yob) if aadhaar_details.yob else None,
+                                "zip_code": str(aadhaar_details.zip_code) if aadhaar_details.zip_code else None,
+                                "masked_aadhaar": str(aadhaar_details.masked_aadhaar) if aadhaar_details.masked_aadhaar else None,
+                                "full_address": str(aadhaar_details.full_address) if aadhaar_details.full_address else None,
+                                "father_name": str(aadhaar_details.father_name) if aadhaar_details.father_name else None,
                             }
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        print(f"Error building aadhaar_data: {e}")
+                        aadhaar_data = {}
                     
                     return Response({
                         "message": "Documents fetched from database.",
                         "source": "database",
-                        "aadhaar_verified": has_aadhaar,
-                        "dl_verified": has_dl,
-                        "pan_verified": has_pan,
+                        "aadhaar_verified": bool(has_aadhaar),
+                        "dl_verified": bool(has_dl),
+                        "pan_verified": bool(has_pan),
                         "aadhaar_data": aadhaar_data,
-                        "aadhaar_status": kyc.aadhaar_status,
-                        "pan_status": kyc.pan_status,
-                        "dl_status": kyc.dl_status,
-                        "is_approved": kyc.is_approved,
+                        "aadhaar_status": str(kyc.aadhaar_status) if kyc.aadhaar_status else None,
+                        "pan_status": str(kyc.pan_status) if kyc.pan_status else None,
+                        "dl_status": str(kyc.dl_status) if kyc.dl_status else None,
+                        "is_approved": bool(kyc.is_approved),
                     }, status=status.HTTP_200_OK)
             
             # If refresh is requested or documents don't exist, fetch from DigiLocker API
@@ -799,30 +801,32 @@ class FetchDigilockerDocumentsView(APIView):
                     try:
                         aadhaar_details = AadhaarDetails.objects.filter(user=user).first()
                         if aadhaar_details:
+                            # Ensure all values are JSON-serializable (strings, None, or basic types)
                             aadhaar_data = {
-                                "name": aadhaar_details.name,
-                                "gender": aadhaar_details.gender,
+                                "name": str(aadhaar_details.name) if aadhaar_details.name else None,
+                                "gender": str(aadhaar_details.gender) if aadhaar_details.gender else None,
                                 "dob": str(aadhaar_details.dob) if aadhaar_details.dob else None,
-                                "yob": aadhaar_details.yob,
-                                "zip_code": aadhaar_details.zip_code,
-                                "masked_aadhaar": aadhaar_details.masked_aadhaar,
-                                "full_address": aadhaar_details.full_address,
-                                "father_name": aadhaar_details.father_name,
+                                "yob": str(aadhaar_details.yob) if aadhaar_details.yob else None,
+                                "zip_code": str(aadhaar_details.zip_code) if aadhaar_details.zip_code else None,
+                                "masked_aadhaar": str(aadhaar_details.masked_aadhaar) if aadhaar_details.masked_aadhaar else None,
+                                "full_address": str(aadhaar_details.full_address) if aadhaar_details.full_address else None,
+                                "father_name": str(aadhaar_details.father_name) if aadhaar_details.father_name else None,
                             }
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        print(f"Error building aadhaar_data: {e}")
+                        aadhaar_data = {}
                     
                     return Response({
                         "message": "Documents fetched from database (no client_id provided).",
                         "source": "database",
-                        "aadhaar_verified": kyc.aadhaar_status == 'verified' and kyc.adhar_image_file,
-                        "dl_verified": kyc.dl_status == 'verified' and kyc.dl_file,
-                        "pan_verified": kyc.pan_status == 'verified' and kyc.pan_file,
+                        "aadhaar_verified": bool(kyc.aadhaar_status == 'verified' and kyc.adhar_image_file),
+                        "dl_verified": bool(kyc.dl_status == 'verified' and kyc.dl_file),
+                        "pan_verified": bool(kyc.pan_status == 'verified' and kyc.pan_file),
                         "aadhaar_data": aadhaar_data,
-                        "aadhaar_status": kyc.aadhaar_status,
-                        "pan_status": kyc.pan_status,
-                        "dl_status": kyc.dl_status,
-                        "is_approved": kyc.is_approved,
+                        "aadhaar_status": str(kyc.aadhaar_status) if kyc.aadhaar_status else None,
+                        "pan_status": str(kyc.pan_status) if kyc.pan_status else None,
+                        "dl_status": str(kyc.dl_status) if kyc.dl_status else None,
+                        "is_approved": bool(kyc.is_approved),
                     }, status=status.HTTP_200_OK)
                 
                 return Response({"error": "DigiLocker Client ID not found for this user."}, status=status.HTTP_400_BAD_REQUEST)
@@ -868,31 +872,33 @@ class FetchDigilockerDocumentsView(APIView):
                     try:
                         aadhaar_details = AadhaarDetails.objects.filter(user=user).first()
                         if aadhaar_details:
+                            # Ensure all values are JSON-serializable (strings, None, or basic types)
                             aadhaar_data = {
-                                "name": aadhaar_details.name,
-                                "gender": aadhaar_details.gender,
+                                "name": str(aadhaar_details.name) if aadhaar_details.name else None,
+                                "gender": str(aadhaar_details.gender) if aadhaar_details.gender else None,
                                 "dob": str(aadhaar_details.dob) if aadhaar_details.dob else None,
-                                "yob": aadhaar_details.yob,
-                                "zip_code": aadhaar_details.zip_code,
-                                "masked_aadhaar": aadhaar_details.masked_aadhaar,
-                                "full_address": aadhaar_details.full_address,
-                                "father_name": aadhaar_details.father_name,
+                                "yob": str(aadhaar_details.yob) if aadhaar_details.yob else None,
+                                "zip_code": str(aadhaar_details.zip_code) if aadhaar_details.zip_code else None,
+                                "masked_aadhaar": str(aadhaar_details.masked_aadhaar) if aadhaar_details.masked_aadhaar else None,
+                                "full_address": str(aadhaar_details.full_address) if aadhaar_details.full_address else None,
+                                "father_name": str(aadhaar_details.father_name) if aadhaar_details.father_name else None,
                             }
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        print(f"Error building aadhaar_data: {e}")
+                        aadhaar_data = {}
                     
                     return Response({
                         "message": "Documents fetched from database (API unavailable).",
                         "source": "database",
                         "warning": "DigiLocker API is currently unavailable. Showing cached data.",
-                        "aadhaar_verified": kyc.aadhaar_status == 'verified' and kyc.adhar_image_file,
-                        "dl_verified": kyc.dl_status == 'verified' and kyc.dl_file,
-                        "pan_verified": kyc.pan_status == 'verified' and kyc.pan_file,
+                        "aadhaar_verified": bool(kyc.aadhaar_status == 'verified' and kyc.adhar_image_file),
+                        "dl_verified": bool(kyc.dl_status == 'verified' and kyc.dl_file),
+                        "pan_verified": bool(kyc.pan_status == 'verified' and kyc.pan_file),
                         "aadhaar_data": aadhaar_data,
-                        "aadhaar_status": kyc.aadhaar_status,
-                        "pan_status": kyc.pan_status,
-                        "dl_status": kyc.dl_status,
-                        "is_approved": kyc.is_approved,
+                        "aadhaar_status": str(kyc.aadhaar_status) if kyc.aadhaar_status else None,
+                        "pan_status": str(kyc.pan_status) if kyc.pan_status else None,
+                        "dl_status": str(kyc.dl_status) if kyc.dl_status else None,
+                        "is_approved": bool(kyc.is_approved),
                     }, status=status.HTTP_200_OK)
                 
                 # If no data in DB and API fails, return error
@@ -1071,18 +1077,38 @@ class FetchDigilockerDocumentsView(APIView):
             kyc.save()
             kyc.check_and_update_approval()
 
+            # Build serializable aadhaar_data from database (not from API response)
+            serializable_aadhaar_data = {}
+            try:
+                aadhaar_details = AadhaarDetails.objects.filter(user=user).first()
+                if aadhaar_details:
+                    # Ensure all values are JSON-serializable (strings, None, or basic types)
+                    serializable_aadhaar_data = {
+                        "name": str(aadhaar_details.name) if aadhaar_details.name else None,
+                        "gender": str(aadhaar_details.gender) if aadhaar_details.gender else None,
+                        "dob": str(aadhaar_details.dob) if aadhaar_details.dob else None,
+                        "yob": str(aadhaar_details.yob) if aadhaar_details.yob else None,
+                        "zip_code": str(aadhaar_details.zip_code) if aadhaar_details.zip_code else None,
+                        "masked_aadhaar": str(aadhaar_details.masked_aadhaar) if aadhaar_details.masked_aadhaar else None,
+                        "full_address": str(aadhaar_details.full_address) if aadhaar_details.full_address else None,
+                        "father_name": str(aadhaar_details.father_name) if aadhaar_details.father_name else None,
+                    }
+            except Exception as e:
+                print(f"Error building serializable_aadhaar_data: {e}")
+                serializable_aadhaar_data = {}
+
             return Response({
                 "message": "Documents fetched and statuses updated successfully.",
                 "source": "digilocker_api",
-                "aadhaar_verified": aadhaar_verified,
-                "dl_verified": dl_verified,
-                "pan_verified": pan_verified,
-                "aadhaar_data": aadhaar_data,
-                "user_name_updated": user_name_updated,
-                "aadhaar_status": kyc.aadhaar_status,
-                "pan_status": kyc.pan_status,
-                "dl_status": kyc.dl_status,
-                "is_approved": kyc.is_approved,
+                "aadhaar_verified": bool(aadhaar_verified),
+                "dl_verified": bool(dl_verified),
+                "pan_verified": bool(pan_verified),
+                "aadhaar_data": serializable_aadhaar_data,
+                "user_name_updated": bool(user_name_updated),
+                "aadhaar_status": str(kyc.aadhaar_status) if kyc.aadhaar_status else None,
+                "pan_status": str(kyc.pan_status) if kyc.pan_status else None,
+                "dl_status": str(kyc.dl_status) if kyc.dl_status else None,
+                "is_approved": bool(kyc.is_approved),
             })
 
         except Exception as e:
