@@ -115,7 +115,8 @@ class UserKYC(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def check_and_update_approval(self):
-        if (self.aadhaar_status == 'verified'and (self.pan_status == 'verified' or self.dl_status == 'verified')):
+        # Approval requires: Only Aadhaar verification
+        if self.aadhaar_status == 'verified':
             self.is_approved = True
         else:
             self.is_approved = False
