@@ -107,8 +107,8 @@ cred = credentials.Certificate(firebase_key_path)
 initialize_app(cred)
 
 
-RAZORPAY_KEY_ID = 'rzp_test_Rhy8NBxUoi3UsE'
-RAZORPAY_KEY_SECRET = 'I44vrD209dFoS24gtwdi9jVx'
+RAZORPAY_KEY_ID = 'rzp_live_S4aNvJgg7mxD5C'
+RAZORPAY_KEY_SECRET = 'rnU8drzvAw2AUivOQNvXmiz5'
 RAZORPAY_WEBHOOK_SECRET='s8f7s9df87s9df87s9df87s9df87s9df8'
 
 STREAM_API_KEY = "c7wwttj85hg7"
