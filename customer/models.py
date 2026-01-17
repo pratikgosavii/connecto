@@ -157,14 +157,25 @@ class Customer_Order(models.Model):
 
 
     def save(self, *args, **kwargs):
+        # Track if OTP was just generated
+        otp_just_generated = False
+        
         if not self.tracking_id:
             last_id = Customer_Order.objects.aggregate(Max('id'))['id__max'] or 0
             self.tracking_id = f"TRK{last_id + 1:05d}"  # Example: TRK00001
 
         if not self.otp:
             self.otp = f"{random.randint(100000, 999999)}"  # Generate 6-digit random OTP
+            otp_just_generated = True
 
         super().save(*args, **kwargs)
+        
+        # Send SMS when OTP is generated
+        if otp_just_generated and self.user and self.user.mobile:
+            from customer.utils import send_sms
+            message = f"Your OTP for order {self.tracking_id} is {self.otp}. Please share this OTP with the delivery agent for verification."
+            print(f"📱 Sending OTP SMS to {self.user.mobile} for order {self.tracking_id}")
+            send_sms(self.user.mobile, message)
 
  
     def __str__(self):

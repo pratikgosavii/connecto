@@ -244,6 +244,9 @@ def update_shipment_status(request, pk):
     except Customer_Order.DoesNotExist:
         return Response({'detail': 'Shipment not found.'}, status=status.HTTP_404_NOT_FOUND)
 
+    # Track old status to detect change to "delivered"
+    old_status = order.status
+
     new_status = request.data.get('status')  # ✅ Get status from incoming PATCH data
     trip_instance = order.trip
     if new_status == "in_transit" and order.trip:
@@ -259,6 +262,14 @@ def update_shipment_status(request, pk):
             title='Delivery Status Changed',
             message=f'Your delivery request #{instance.id} has been {instance.status}.'
         )
+        
+        # Send SMS when status changes to "delivered"
+        if old_status != 'delivered' and instance.status == 'delivered' and instance.user and instance.user.mobile:
+            from customer.utils import send_sms
+            message = f"Your order {instance.tracking_id} has been delivered! OTP: {instance.otp}. Please verify delivery with the agent."
+            print(f"📱 Sending delivery confirmation SMS to {instance.user.mobile} for order {instance.tracking_id}")
+            send_sms(instance.user.mobile, message)
+        
         return Response(serializer.data)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -270,9 +281,20 @@ class MarkOrderDeliveredAPIView(APIView):
     def post(self, request, id):
         order = get_object_or_404(Customer_Order, id=id)
         
+        # Track old status to detect change to "delivered"
+        old_status = order.status
+        
         serializer = CustomerOrderStatusUpdateSerializer(order, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
+            
+            # Send SMS when status changes to "delivered"
+            if old_status != 'delivered' and order.status == 'delivered' and order.user and order.user.mobile:
+                from customer.utils import send_sms
+                message = f"Your order {order.tracking_id} has been delivered! OTP: {order.otp}. Please verify delivery with the agent."
+                print(f"📱 Sending delivery confirmation SMS to {order.user.mobile} for order {order.tracking_id}")
+                send_sms(order.user.mobile, message)
+            
             return Response({"detail": "Order marked as delivered."})
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
