@@ -144,3 +144,41 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"To {self.user} - {self.title}"
+
+
+class OTP(models.Model):
+    """
+    One-time password used for mobile authentication.
+    """
+    mobile = models.CharField(max_length=15, db_index=True)
+    otp_code = models.CharField(max_length=10)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_verified = models.BooleanField(default=False)
+    verified_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['mobile', 'is_verified']),
+        ]
+
+    def __str__(self):
+        return f"{self.mobile} - {self.otp_code}"
+
+
+class UserToken(models.Model):
+    """
+    Stores device tokens (e.g. FCM) for push notifications.
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="device_tokens")
+    token = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "user_token"
+        ordering = ["-created_at"]
+        unique_together = ("user", "token")
+
+    def __str__(self):
+        return f"{self.user_id} - {self.token[:20]}..."

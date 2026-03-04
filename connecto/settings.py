@@ -28,9 +28,27 @@ from pathlib import Path
 
 load_dotenv(os.path.join(BASE_DIR, 'connecto', '.env'))
 
+# Razorpay (set in connecto/.env)
 RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
 RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET")
+
+# Stream Chat (set in connecto/.env)
+STREAM_API_KEY = os.getenv("STREAM_API_KEY")
+STREAM_API_SECRET = os.getenv("STREAM_API_SECRET")
+
+# Surepass / DigiLocker KYC (optional; set in connecto/.env)
+SUREPASS_TOKEN = os.getenv("SUREPASS_TOKEN", "")
+
+# OTP Configuration for msg.msgclub.net
+MSG_CLUB_API_URL = "http://msg.msgclub.net/rest/services/sendSMS/sendGroupSms"
+MSG_CLUB_API_KEY = "5f4e34db5673b2ee18ee66442e73d45"  # AUTH_KEY for msg.msgclub.net
+MSG_CLUB_SENDER_ID = "TOOTHT"  # Sender ID for SMS
+MSG_CLUB_ROUTE_ID = "8"  # Route ID (default: 1)
+MSG_CLUB_SMS_CONTENT_TYPE = "english"  # SMS content type
+OTP_MESSAGE_TEMPLATE = "OTP {otp_code} to verify your dental record on ToothTrack. Track treatment, reports & get 24x7 dental support. Download ToothTrack App. SNEHAL DIGITAL VENTURES PRIVATE LIMITED"  # OTP message template
+OTP_EXPIRY_MINUTES = 5  # OTP expires after 5 minutes
+OTP_LENGTH = 6  # 6-digit OTP
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -42,8 +60,6 @@ SECRET_KEY = 'django-insecure-4n+lfl+6m7g%z)%y6)*0q@+wu=yl!7xdn#h%+gtymvy!y+-w_v
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
-SUREPASS_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc1NDA1NDY5NywianRpIjoiMGFiZDlhZTYtMTJjOC00NWVmLTg1ZjAtNDcxZTA0MzE1NTc5IiwidHlwZSI6ImFjY2VzcyIsImlkZW50aXR5IjoiZGV2LnNvZmRhaWNvbkBzdXJlcGFzcy5pbyIsIm5iZiI6MTc1NDA1NDY5NywiZXhwIjoyMzg0Nzc0Njk3LCJlbWFpbCI6InNvZmRhaWNvbkBzdXJlcGFzcy5pbyIsInRlbmFudF9pZCI6Im1haW4iLCJ1c2VyX2NsYWltcyI6eyJzY29wZXMiOlsidXNlciJdfX0.68eV6-Ycajdbg8XoXQ3cpS2V3O_QRldSzevGIuwXyA4'
 
 # Application definition
 
@@ -97,25 +113,54 @@ REST_FRAMEWORK = {
 }
 
 
+# Logging configuration (requests.log + console for OTP / requests)
+LOG_DIR = os.path.join(BASE_DIR, "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(asctime)s %(levelname)s [%(name)s] %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'request_file': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'requests.log'),
+            'formatter': 'verbose',
+            'level': 'INFO',
+        },
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['console', 'request_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'otp_service': {
+            'handlers': ['console', 'request_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
+
+
 # # firebase_config.py
 import os
 from firebase_admin import credentials, initialize_app
+from datetime import timedelta
 
 # Firebase Admin SDK setup
 firebase_key_path = os.path.join(BASE_DIR, 'connecto', 'firebase_key.json')
 cred = credentials.Certificate(firebase_key_path)
 initialize_app(cred)
-
-
-RAZORPAY_KEY_ID = 'rzp_live_S4aNvJgg7mxD5C'
-RAZORPAY_KEY_SECRET = 'rnU8drzvAw2AUivOQNvXmiz5'
-RAZORPAY_WEBHOOK_SECRET='s8f7s9df87s9df87s9df87s9df87s9df8'
-
-STREAM_API_KEY = "c7wwttj85hg7"
-STREAM_API_SECRET = "cgptvrzsttwj9vcebwy25k7y6aqkd6nxh56gkwxhsj3djs989g7k5wraprep926d"
-
-
-from datetime import timedelta
 
 
 SIMPLE_JWT = {
