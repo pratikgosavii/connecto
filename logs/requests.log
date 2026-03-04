@@ -62,3 +62,5 @@ Traceback (most recent call last):
   File "C:\Users\Pratik Gosavi\AppData\Local\Programs\Python\Python310\lib\site-packages\django\db\backends\sqlite3\base.py", line 354, in execute
     return super().execute(query, params)
 django.db.utils.OperationalError: no such table: users_otp
+2026-03-04 20:25:01,311 INFO [otp_service] Sending OTP via msg.msgclub
+2026-03-04 20:25:02,297 INFO [otp_service] OTP gateway response
