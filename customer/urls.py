@@ -28,6 +28,7 @@ urlpatterns = router.urls + [
     path('assign-parcel-to-agent/', assign_parcel_to_agent, name='assign_parcel_to_agent'),
 
     path('connect-with-vendor/', connect_with_agent, name='connect_with_agent'),
+    path('connect-with-vendor-product/', connect_with_vendor_product, name='connect_with_vendor_product'),
     path('reject-vendor-request/', reject_vendor_request, name='reject_vendor_request'),
     path('reject-reverse-vendor-request/', reject_reserve_vendor_request, name='reject_reserve_vendor_request'),
 

@@ -260,6 +260,55 @@ def connect_with_agent(request):
         return Response({"error": "Trip not found"}, status=404)
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def connect_with_vendor_product(request):
+    """
+    Simple connect API for products:
+    - Marks the related Request_Vendor_for_Product as accepted (if exists)
+    - Returns vendor (trip.user) details.
+    """
+    user = request.user
+    product_id = request.data.get("product_id")
+    trip_id = request.data.get("trip_id")
+
+    if not product_id or not trip_id:
+        return Response({"error": "product_id and trip_id are required"}, status=400)
+
+    try:
+        product = Product.objects.get(id=product_id, user=user)
+        trip_instance = trip.objects.get(id=trip_id)
+    except Product.DoesNotExist:
+        return Response({"error": "Product not found"}, status=404)
+    except trip.DoesNotExist:
+        return Response({"error": "Trip not found"}, status=404)
+
+    # Update existing customer-originated request if present
+    try:
+        request_instance = Request_Vendor_for_Product.objects.get(
+            user=user, product=product, trip=trip_instance
+        )
+        if request_instance.status == "pending":
+            request_instance.status = "accepted"
+            request_instance.save()
+    except Request_Vendor_for_Product.DoesNotExist:
+        request_instance = None
+
+    agent_data = UserProfileSerializer(
+        trip_instance.user,
+        context={'request': request}
+    ).data
+
+    return Response(
+        {
+            "message": "Connected successfully",
+            "agent": agent_data,
+            "request_id": request_instance.id if request_instance else None,
+        },
+        status=200,
+    )
+
+
 
 from rest_framework.decorators import api_view, permission_classes
 
