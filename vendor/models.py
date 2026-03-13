@@ -119,3 +119,30 @@ class Request_Customer_for_Delivery(models.Model):
     
     class Meta:
         unique_together = ('trip', 'parcel', 'user') 
+
+
+class Request_Customer_for_Product(models.Model):
+    """
+    Vendor requests a customer's product for their trip.
+    """
+    user = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    product = models.ForeignKey("customer.Product", on_delete=models.CASCADE)
+    trip = models.ForeignKey(trip, on_delete=models.CASCADE)
+    requested_price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    status = models.CharField(
+        max_length=30,
+        choices=[
+            ('pending', 'Pending'),
+            ('accepted', 'Accepted'),
+            ("rejected_by_vendor", "Rejected By Vendor"),
+            ("rejected_by_customer", "Rejected By Customer"),
+            ('cancelled_by_customer', 'Cancelled'),
+        ],
+        default='pending',
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('trip', 'product', 'user')

@@ -7,6 +7,8 @@ from .views import *
 router = DefaultRouter()
 router.register('delivery-request', DeliveryRequestViewSet, basename='DeliveryRequestViewSet')
 router.register('request-vendor', RequestVendorForDeliveryViewSet, basename='RequestVendorForDeliveryViewSet')
+router.register('products', ProductViewSet, basename='ProductViewSet')
+router.register('request-vendor-product', RequestVendorForProductViewSet, basename='RequestVendorForProductViewSet')
 router.register('my-shipments', MyShipmentsViewSet, basename='my_shipmentsViewSet')
 router.register('delivery-ratings', DeliveryRatingViewSet, basename='delivery-rating')
 router.register('tickets', SupportTicketViewSet, basename='tickets')
@@ -17,6 +19,7 @@ urlpatterns = router.urls + [
     path('search-trips/', TripSearchAPIView.as_view(), name='search-trips'),
     path('avaiable-vendors/', avaiable_vendors.as_view(), name='avaiable_vendors'),
     path('view-vendor-request/', ViewVendorRequestViewSet.as_view(), name='ViewVendorRequestViewSet'),
+    path('view-vendor-product-request/', ViewVendorProductRequestViewSet.as_view(), name='ViewVendorProductRequestViewSet'),
 
     path('kyc/fetch-documents/', FetchDigilockerDocumentsView.as_view(), name='fetch_documents'),
     

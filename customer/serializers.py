@@ -29,6 +29,15 @@ class DeliveryRequestSerializer(serializers.ModelSerializer):
         read_only_fields = ['user', 'request_type_details', 'created_at', 'is_agent_assigned']
 
 
+class ProductSerializer(serializers.ModelSerializer):
+    user = UserProfileSerializer(read_only=True)
+
+    class Meta:
+        model = Product
+        fields = '__all__'
+        read_only_fields = ['user', 'created_at']
+
+
 class Customer_OrderSerializer(serializers.ModelSerializer):
 
     trip_details = trip_Serializer(source='trip', read_only=True)
@@ -59,6 +68,26 @@ class RequestVendorForDeliverySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Request_Vendor_for_Delivery
+        fields = '__all__'
+        read_only_fields = ['user', 'created_at', 'status', 'trip_details']
+
+
+class RequestVendorForProductSerializer(serializers.ModelSerializer):
+    user = UserProfileSerializer(read_only=True)
+    trip_details = trip_Serializer(source='trip', read_only=True)
+
+    def validate(self, attrs):
+        request = self.context.get("request")
+        user = request.user if request else None
+        product = attrs.get("product")
+        trip_instance = attrs.get("trip")
+        if user and product and trip_instance:
+            if Request_Vendor_for_Product.objects.filter(user=user, product=product, trip=trip_instance).exists():
+                raise serializers.ValidationError({"detail": "you already requested this trip for this product"})
+        return attrs
+
+    class Meta:
+        model = Request_Vendor_for_Product
         fields = '__all__'
         read_only_fields = ['user', 'created_at', 'status', 'trip_details']
 

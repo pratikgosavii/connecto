@@ -157,6 +157,24 @@ class ViewCustomerRequestViewSet(generics.ListAPIView):
             return Response({'detail': 'Request rejected by vendor.'}, status=200)
 
 
+class RequestCustomerForProductViewSet(viewsets.ModelViewSet):
+
+    serializer_class = RequestCustomerForProductSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Request_Customer_for_Product.objects.filter(user=self.request.user).order_by('-id')
+
+    def perform_create(self, serializer):
+        trip = serializer.validated_data.get('trip')
+        product = serializer.validated_data.get('product')
+
+        if Request_Customer_for_Product.objects.filter(trip=trip, product=product, user=self.request.user).exists():
+            raise serializers.ValidationError("A request already exists for this trip and product.")
+
+        serializer.save(user=self.request.user)
+
+
 
 class ShowOpenParcels(generics.ListAPIView):
     

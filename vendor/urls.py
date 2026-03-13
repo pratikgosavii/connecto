@@ -5,9 +5,6 @@ from .views import *
 from django.conf import settings
 from django.conf.urls.static import static
 
-
-
-
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
@@ -15,6 +12,7 @@ router = DefaultRouter()
 
 router.register('add-trip', add_trip_ViewSet, basename='add_trip_ViewSet')
 router.register('request-customer', RequestCustomerForDeliveryViewSet, basename='RequestVendorForDeliveryViewSet')
+router.register('request-customer-product', RequestCustomerForProductViewSet, basename='RequestCustomerForProductViewSet')
 router.register('vendor-my-shipments', VendorMyShipmentsViewSet, basename='Vendormy_shipmentsViewSet')
 
 

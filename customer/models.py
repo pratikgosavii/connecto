@@ -12,6 +12,40 @@ class RequestType(models.Model):
     # other fields ...
 
 
+class Product(models.Model):
+    """
+    Product that a customer wants to ship.
+    """
+    user = models.ForeignKey("users.User", on_delete=models.CASCADE)
+
+    product_name = models.CharField(max_length=255)
+    product_price = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField(blank=True, null=True)
+    budget = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+    expected_delivery_datetime = models.DateTimeField()
+    expected_pickup_datetime = models.DateTimeField()
+
+    source_city = models.CharField(max_length=100)
+    destination_city = models.CharField(max_length=100)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        # Ensure cities exist in masters.city
+        from customer.utils import ensure_city_exists
+
+        if self.source_city:
+            ensure_city_exists(self.source_city)
+        if self.destination_city:
+            ensure_city_exists(self.destination_city)
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.product_name} ({self.user_id})"
+
+
 class DeliveryRequest(models.Model):
     user = models.ForeignKey("users.User", on_delete=models.CASCADE)
 
@@ -192,6 +226,37 @@ class VendorLiveLocation(models.Model):
 
     def __str__(self):
         return f"LiveLocation for Order {self.order_id}"
+
+
+class Request_Vendor_for_Product(models.Model):
+    """
+    Customer requests a specific vendor trip for a product.
+    """
+    user = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    product = models.ForeignKey("customer.Product", on_delete=models.CASCADE)
+    trip = models.ForeignKey("vendor.trip", on_delete=models.CASCADE)
+    requested_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+    status = models.CharField(
+        max_length=30,
+        choices=[
+            ('pending', 'Pending'),
+            ('accepted_by_vendor', 'Vendor Accepted'),
+            ('accepted', 'Accepted'),
+            ("rejected_by_vendor", "Rejected By Vendor"),
+            ("rejected_by_customer", "Rejected By Customer"),
+            ('cancelled_by_customer', 'Cancelled'),
+        ],
+        default='pending',
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'product', 'trip')
+
+    def __str__(self):
+        return f"{self.product} -> {self.trip} ({self.status})"
 
         
 

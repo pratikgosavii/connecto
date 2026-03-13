@@ -16,6 +16,21 @@ class DeliveryRequestViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
+class ProductViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to add/list/update products for the authenticated customer.
+    """
+    queryset = Product.objects.all().order_by('-id')
+    serializer_class = ProductSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Product.objects.filter(user=self.request.user).order_by('-id')
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
 
 from rest_framework.decorators import api_view, permission_classes
 
@@ -76,6 +91,29 @@ class ViewVendorRequestViewSet(generics.ListAPIView):
         return queryset
 
 
+class ViewVendorProductRequestViewSet(generics.ListAPIView):
+    """
+    Show vendor requests on a given product for the logged-in customer.
+    """
+    serializer_class = RequestCustomerForProductSerializer
+    filter_backends = [DjangoFilterBackend]
+
+    def get_queryset(self):
+        user = self.request.user
+        product_id = self.request.query_params.get('product')  # ?product=123
+
+        queryset = Request_Customer_for_Product.objects.filter(
+            product__user=user
+        ).exclude(
+            status__in=['rejected_by_vendor', 'rejected_by_customer', 'cancelled_by_customer']
+        ).order_by('-id')
+
+        if product_id:
+            queryset = queryset.filter(product__id=product_id)
+
+        return queryset
+
+
 
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -93,8 +131,21 @@ class RequestVendorForDeliveryViewSet(viewsets.ModelViewSet):
         request_obj = serializer.save(user=self.request.user)
 
         # ✅ Create notification on creation
-       
-   
+        pass
+
+
+class RequestVendorForProductViewSet(viewsets.ModelViewSet):
+    """
+    Request vendor for a specific product and trip.
+    """
+    serializer_class = RequestVendorForProductSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Request_Vendor_for_Product.objects.filter(user=self.request.user).order_by('-id')
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
