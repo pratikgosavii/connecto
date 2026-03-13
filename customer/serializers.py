@@ -1,8 +1,7 @@
 from rest_framework import serializers
 
 from .models import *
-from vendor.models import *
-from vendor.serializers import *
+from vendor.models import trip
 from users.serializer import *
 
 
@@ -38,9 +37,15 @@ class ProductSerializer(serializers.ModelSerializer):
         read_only_fields = ['user', 'created_at']
 
 
+class TripSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = trip
+        fields = '__all__'
+
+
 class Customer_OrderSerializer(serializers.ModelSerializer):
 
-    trip_details = trip_Serializer(source='trip', read_only=True)
+    trip_details = TripSimpleSerializer(source='trip', read_only=True)
     parcel_details = DeliveryRequestSerializer(source='parcel', read_only=True)
 
 
@@ -53,7 +58,7 @@ class Customer_OrderSerializer(serializers.ModelSerializer):
 class RequestVendorForDeliverySerializer(serializers.ModelSerializer):
 
     user = UserProfileSerializer(read_only=True)  # nest user details
-    trip_details = trip_Serializer(source='trip', read_only=True)
+    trip_details = TripSimpleSerializer(source='trip', read_only=True)
     parcel_details = DeliveryRequestSerializer(source="parcel", read_only=True)
     
     def validate(self, attrs):
@@ -74,7 +79,7 @@ class RequestVendorForDeliverySerializer(serializers.ModelSerializer):
 
 class RequestVendorForProductSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer(read_only=True)
-    trip_details = trip_Serializer(source='trip', read_only=True)
+    trip_details = TripSimpleSerializer(source='trip', read_only=True)
 
     def validate(self, attrs):
         request = self.context.get("request")
