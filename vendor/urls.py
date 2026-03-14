@@ -28,6 +28,7 @@ urlpatterns = [
     path('open-parcels/<int:id>/', ShowOpenParcelDetail.as_view(), name='open-parcel-detail'),
 
     path('show-open-products/', ShowOpenProducts.as_view(), name='ShowOpenProducts'),
+    path('open-products/<int:id>/', ShowOpenProductDetail.as_view(), name='open-product-detail'),
 
     path('reject-customer-request/', reject_customer_request, name='reject_customer_request'),
 
