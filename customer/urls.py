@@ -10,6 +10,7 @@ router.register('request-vendor', RequestVendorForDeliveryViewSet, basename='Req
 router.register('products', ProductViewSet, basename='ProductViewSet')
 router.register('request-vendor-product', RequestVendorForProductViewSet, basename='RequestVendorForProductViewSet')
 router.register('my-shipments', MyShipmentsViewSet, basename='my_shipmentsViewSet')
+router.register('my-product-shipments', MyProductShipmentsViewSet, basename='my_product_shipmentsViewSet')
 router.register('delivery-ratings', DeliveryRatingViewSet, basename='delivery-rating')
 router.register('tickets', SupportTicketViewSet, basename='tickets')
 router.register('ticket-messages', TicketMessageViewSet, basename='ticket-messages')
@@ -34,6 +35,7 @@ urlpatterns = router.urls + [
     path('reject-reverse-vendor-request/', reject_reserve_vendor_request, name='reject_reserve_vendor_request'),
 
     path('confirm-shipment-delivery/', confirm_shipment_delivery, name='confirm_shipment_delivery'),
+    path('confirm-product-delivery/', confirm_product_delivery, name='confirm_product_delivery'),
 
     path("stream/get-chat-token/", get_chat_token.as_view()),
     path("stream/get-vendor-chat-token/", get_chat_vendor_token.as_view()),

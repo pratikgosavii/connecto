@@ -541,6 +541,19 @@ class MyShipmentsViewSet(viewsets.ModelViewSet):
       
 
 
+class MyProductShipmentsViewSet(viewsets.ModelViewSet):
+    """
+    Customer's product delivery requests (assigned / accepted / pending).
+    List and retrieve Request_Vendor_for_Product for the current user.
+    """
+    queryset = Request_Vendor_for_Product.objects.all().order_by('-id')
+    serializer_class = RequestVendorForProductSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Request_Vendor_for_Product.objects.filter(user=self.request.user).order_by('-id')
+
+
 class get_chat_token(APIView):
     
     permission_classes = [IsAuthenticated]
@@ -700,6 +713,29 @@ def confirm_shipment_delivery(request):
         return Response({"detail": "Shipment not found."}, status=status.HTTP_404_NOT_FOUND)
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def confirm_product_delivery(request):
+    """Customer confirms product delivery (counterpart to confirm_shipment_delivery)."""
+    request_id = request.data.get("request_id")  # Request_Vendor_for_Product id
+
+    if not request_id:
+        return Response({"error": "request_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        instance = Request_Vendor_for_Product.objects.get(id=request_id, user=request.user)
+    except Request_Vendor_for_Product.DoesNotExist:
+        return Response({"detail": "Product delivery request not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if instance.status == "delivered":
+        instance.status = "delivered_by_customer"
+        instance.save()
+        return Response({"message": "Product delivery marked as confirmed."}, status=status.HTTP_200_OK)
+
+    return Response({
+        "message": "Product delivery not marked as delivered by vendor yet.",
+        "current_status": instance.status,
+    }, status=status.HTTP_200_OK)
 
 
 from rest_framework import viewsets, permissions
