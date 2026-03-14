@@ -16,7 +16,7 @@ from .models import *
 # filters.py
 import django_filters
 from django import forms
-from .models import DeliveryRequest
+from .models import DeliveryRequest, Product
 from masters.models import city
 from users.models import *
 
@@ -77,6 +77,31 @@ class DeliveryRequestFilter(django_filters.FilterSet):
             "delivery_date_from",
             "delivery_date_to",
         ]
+
+
+class ProductFilter(django_filters.FilterSet):
+    product_name = django_filters.CharFilter(
+        field_name="product_name",
+        lookup_expr="icontains",
+        label="Product Name",
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Search Product"})
+    )
+    source_city = django_filters.CharFilter(
+        field_name="source_city",
+        lookup_expr="icontains",
+        label="Source City",
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Source city"})
+    )
+    destination_city = django_filters.CharFilter(
+        field_name="destination_city",
+        lookup_expr="icontains",
+        label="Destination City",
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Destination city"})
+    )
+
+    class Meta:
+        model = Product
+        fields = ["product_name", "source_city", "destination_city"]
 
 
 

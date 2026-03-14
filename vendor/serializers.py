@@ -53,6 +53,19 @@ class VendorShipmentStatusSerializer(serializers.ModelSerializer):
         if value == "completed":
             raise serializers.ValidationError("Can't mark as completed")
         return value
+
+
+class ProductRequestStatusSerializer(serializers.ModelSerializer):
+    """Vendor can update status of their product request (e.g. accepted, rejected_by_vendor)."""
+    class Meta:
+        model = Request_Customer_for_Product
+        fields = ['status']
+
+    def validate_status(self, value):
+        allowed = {'accepted', 'rejected_by_vendor', 'pending'}
+        if value not in allowed:
+            raise serializers.ValidationError(f"Status must be one of: {', '.join(allowed)}")
+        return value
     
 
 class CustomerOrderStatusUpdateSerializer(serializers.ModelSerializer):

@@ -14,13 +14,16 @@ router.register('add-trip', add_trip_ViewSet, basename='add_trip_ViewSet')
 router.register('request-customer', RequestCustomerForDeliveryViewSet, basename='RequestVendorForDeliveryViewSet')
 router.register('request-customer-product', RequestCustomerForProductViewSet, basename='RequestCustomerForProductViewSet')
 router.register('vendor-my-shipments', VendorMyShipmentsViewSet, basename='Vendormy_shipmentsViewSet')
+router.register('vendor-my-products', VendorMyProductsViewSet, basename='VendorMyProductsViewSet')
 
 
 urlpatterns = [
 
     path('search-parcel/', ParcelSearchAPIView.as_view(), name='search-parcel'),
+    path('search-product/', ProductSearchAPIView.as_view(), name='search-product'),
 
     path('my-shipments/<int:pk>/update-status/', update_shipment_status, name='update-shipment-status'),
+    path('my-products/<int:pk>/update-status/', update_product_request_status, name='update-product-request-status'),
 
     
     path('view-customer-request/', ViewCustomerRequestViewSet.as_view(), name='ViewCustomerRequestViewSet'),

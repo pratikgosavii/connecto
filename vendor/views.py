@@ -93,6 +93,13 @@ class ParcelSearchAPIView(generics.ListAPIView):
     filterset_class = DeliveryRequestFilter
 
 
+class ProductSearchAPIView(generics.ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProductFilter
+
+
 
 
 class ViewCustomerRequestViewSet(generics.ListAPIView):
@@ -333,6 +340,16 @@ class VendorMyShipmentsViewSet(viewsets.ModelViewSet):
         return Customer_Order.objects.filter(trip__user=self.request.user)
 
 
+class VendorMyProductsViewSet(viewsets.ModelViewSet):
+    """Vendor's product delivery requests (their requests to deliver customers' products)."""
+    queryset = Request_Customer_for_Product.objects.all().order_by('-id')
+    serializer_class = RequestCustomerForProductSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Request_Customer_for_Product.objects.filter(user=self.request.user).order_by('-id')
+
+
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status, permissions
@@ -377,6 +394,25 @@ def update_shipment_status(request, pk):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(['PATCH'])
+@permission_classes([permissions.IsAuthenticated])
+def update_product_request_status(request, pk):
+    try:
+        product_request = Request_Customer_for_Product.objects.get(pk=pk, user=request.user)
+    except Request_Customer_for_Product.DoesNotExist:
+        return Response({'detail': 'Product request not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = ProductRequestStatusSerializer(product_request, data=request.data, partial=True)
+    if serializer.is_valid():
+        instance = serializer.save()
+        Notification.objects.create(
+            user=instance.product.user,
+            title='Product Request Status Changed',
+            message=f'Your product request #{instance.id} has been {instance.status}.'
+        )
+        return Response(serializer.data)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class MarkOrderDeliveredAPIView(APIView):
