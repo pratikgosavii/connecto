@@ -243,6 +243,7 @@ class Request_Vendor_for_Product(models.Model):
             ('pending', 'Pending'),
             ('accepted_by_vendor', 'Vendor Accepted'),
             ('accepted', 'Accepted'),
+            ('assigned', 'Assigned'),
             ("rejected_by_vendor", "Rejected By Vendor"),
             ("rejected_by_customer", "Rejected By Customer"),
             ('cancelled_by_customer', 'Cancelled'),

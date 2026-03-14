@@ -26,6 +26,7 @@ urlpatterns = router.urls + [
     # path("webhook/surepass/", surepass_webhook, name="surepass-webhook"),
 
     path('assign-parcel-to-agent/', assign_parcel_to_agent, name='assign_parcel_to_agent'),
+    path('assign-product-to-agent/', assign_product_to_agent, name='assign_product_to_agent'),
 
     path('connect-with-vendor/', connect_with_agent, name='connect_with_agent'),
     path('connect-with-vendor-product/', connect_with_vendor_product, name='connect_with_vendor_product'),

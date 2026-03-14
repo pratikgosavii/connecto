@@ -475,6 +475,46 @@ def assign_parcel_to_agent(request):
         return Response({"error": "Trip not found"}, status=404)
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def assign_product_to_agent(request):
+    """Assign a product to a vendor trip (customer confirms assignment)."""
+    user = request.user
+    product_id = request.data.get('product_id')
+    trip_id = request.data.get('trip_id')
+
+    if not product_id or not trip_id:
+        return Response({"error": "product_id and trip_id are required"}, status=400)
+
+    try:
+        product = Product.objects.get(id=product_id, user=user)
+        trip_instance = trip.objects.get(id=trip_id)
+    except Product.DoesNotExist:
+        return Response({"error": "Product not found"}, status=404)
+    except trip.DoesNotExist:
+        return Response({"error": "Trip not found"}, status=404)
+
+    try:
+        request_instance = Request_Vendor_for_Product.objects.get(
+            user=user, product=product, trip=trip_instance
+        )
+    except Request_Vendor_for_Product.DoesNotExist:
+        return Response({"error": "Request not found for this product and trip"}, status=404)
+
+    if request_instance.status not in ('accepted', 'accepted_by_vendor'):
+        return Response(
+            {"error": "Request must be accepted by vendor before assigning"},
+            status=400,
+        )
+
+    request_instance.status = 'assigned'
+    request_instance.save()
+
+    return Response({
+        "message": "Product assigned to agent successfully",
+        "request_id": request_instance.id,
+        "status": request_instance.status,
+    })
 
 
 # views.py
