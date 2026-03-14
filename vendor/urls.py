@@ -27,6 +27,8 @@ urlpatterns = [
     path('show-open-parcels/', ShowOpenParcels.as_view(), name='ShowOpenParcels'),
     path('open-parcels/<int:id>/', ShowOpenParcelDetail.as_view(), name='open-parcel-detail'),
 
+    path('show-open-products/', ShowOpenProducts.as_view(), name='ShowOpenProducts'),
+
     path('reject-customer-request/', reject_customer_request, name='reject_customer_request'),
 
     path('orders/<int:id>/mark-delivered/', MarkOrderDeliveredAPIView.as_view(), name='mark-order-delivered'),

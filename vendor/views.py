@@ -192,6 +192,26 @@ class ShowOpenParcelDetail(generics.RetrieveAPIView):
     lookup_field = 'id'  # or 'pk' if you use the default
 
 
+class ShowOpenProducts(generics.ListAPIView):
+    """List products from other users that vendors can request to deliver."""
+    serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+
+    def get_queryset(self):
+        return Product.objects.exclude(user=self.request.user).order_by('-id')
+
+
+class ShowOpenProductDetail(generics.RetrieveAPIView):
+    """Retrieve a single open product by id."""
+    serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'id'
+
+    def get_queryset(self):
+        return Product.objects.exclude(user=self.request.user)
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def reject_customer_request(request):
