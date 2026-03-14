@@ -24,6 +24,7 @@ urlpatterns = [
 
     
     path('view-customer-request/', ViewCustomerRequestViewSet.as_view(), name='ViewCustomerRequestViewSet'),
+    path('view-customer-product-request/', ViewCustomerProductRequestViewSet.as_view(), name='ViewCustomerProductRequestViewSet'),
     path('show-open-parcels/', ShowOpenParcels.as_view(), name='ShowOpenParcels'),
     path('open-parcels/<int:id>/', ShowOpenParcelDetail.as_view(), name='open-parcel-detail'),
 

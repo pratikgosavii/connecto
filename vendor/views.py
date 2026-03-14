@@ -157,6 +157,70 @@ class ViewCustomerRequestViewSet(generics.ListAPIView):
             return Response({'detail': 'Request rejected by vendor.'}, status=200)
 
 
+class ViewCustomerProductRequestViewSet(generics.ListAPIView):
+    """
+    Vendor sees customer requests for their trips (products).
+    Lists Request_Vendor_for_Product where trip belongs to this vendor.
+    """
+    serializer_class = RequestVendorForProductSerializer
+    filter_backends = [DjangoFilterBackend]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        product_id = self.request.query_params.get('product')
+
+        queryset = Request_Vendor_for_Product.objects.filter(
+            trip__user=user, status='pending'
+        ).order_by('-id')
+
+        if product_id:
+            queryset = queryset.filter(product__id=product_id)
+
+        return queryset
+
+    def post(self, request):
+        """Accept or reject a product request (same pattern as view-customer-request)."""
+        request_id = request.data.get('id')
+        new_status = request.data.get('status')
+        request_price = request.data.get('requested_price')
+
+        if not request_id or new_status not in ['accepted', 'accepted_by_vendor', 'rejected_by_vendor', 'cancelled_by_customer']:
+            return Response({'error': 'Invalid status or request ID.'}, status=400)
+
+        try:
+            req = Request_Vendor_for_Product.objects.get(id=request_id, trip__user=request.user)
+        except Request_Vendor_for_Product.DoesNotExist:
+            return Response({'error': 'Request not found or unauthorized.'}, status=404)
+
+        if req.status != 'pending':
+            return Response({'error': 'Only pending requests can be updated.'}, status=400)
+
+        if new_status in ['accepted', 'accepted_by_vendor']:
+            if request_price is not None:
+                req.requested_price = request_price
+            req.status = 'accepted_by_vendor'
+            req.save()
+            Notification.objects.create(
+                user=req.user,
+                title='Product delivery request accepted',
+                message=f'Your product delivery request #{req.id} was accepted by the vendor.'
+            )
+            return Response({'detail': 'Request accepted.'}, status=200)
+
+        if new_status == 'rejected_by_vendor':
+            req.status = 'rejected_by_vendor'
+            req.save()
+            Notification.objects.create(
+                user=req.user,
+                title='Product delivery request rejected',
+                message=f'Your product delivery request #{req.id} was rejected by the vendor.'
+            )
+            return Response({'detail': 'Request rejected by vendor.'}, status=200)
+
+        return Response({'error': 'Invalid status.'}, status=400)
+
+
 class RequestCustomerForProductViewSet(viewsets.ModelViewSet):
 
     serializer_class = RequestCustomerForProductSerializer
