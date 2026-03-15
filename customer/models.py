@@ -217,6 +217,60 @@ class Customer_Order(models.Model):
 
 
 
+class Customer_Product_Order(models.Model):
+    """
+    Product equivalent of Customer_Order (for parcel).
+    """
+
+    tracking_id = models.CharField(max_length=100, unique=True)
+
+    otp = models.CharField(max_length=6, blank=True, null=True)
+
+    product = models.ForeignKey("customer.Product", on_delete=models.CASCADE)
+    trip = models.ForeignKey("vendor.trip", on_delete=models.CASCADE)
+    user = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name="product_orders_user")
+
+    STATUS_CHOICES = [
+        ("assigned", "Assigned"),
+        ("in_transit", "In Transit"),
+        ("delivered", "Delivered"),
+        ("delivered_by_customer", "Delivered By Customer"),
+        ("cancelled_by_vendor", "Cancelled By Vendor"),
+        ("cancelled_by_customer", "Cancelled By Customer"),
+    ]
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default="assigned")
+    connection_id = models.IntegerField(blank=True, null=True)
+    assigned_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        otp_just_generated = False
+
+        if not self.tracking_id:
+            from django.db.models import Max
+            last_id = Customer_Product_Order.objects.aggregate(Max('id'))['id__max'] or 0
+            self.tracking_id = f"TRK{last_id + 1:05d}"
+
+        if not self.otp:
+            import random
+            self.otp = f"{random.randint(100000, 999999)}"
+            otp_just_generated = True
+
+        super().save(*args, **kwargs)
+
+        if otp_just_generated and self.user and getattr(self.user, "mobile", None):
+            from customer.utils import send_sms
+            message = (
+                f"Your OTP for product order {self.tracking_id} is {self.otp}. "
+                f"Please share this OTP with the delivery agent for verification."
+            )
+            send_sms(self.user.mobile, message)
+
+    def __str__(self):
+        return f"ProductOrder {self.tracking_id} - Product #{self.product.id}"
+
+
+
 class VendorLiveLocation(models.Model):
     order = models.OneToOneField(Customer_Order, on_delete=models.CASCADE, related_name='live_location')
     vendor = models.ForeignKey('users.User', on_delete=models.CASCADE)

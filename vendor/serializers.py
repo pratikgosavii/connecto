@@ -6,7 +6,7 @@ from masters.models import *
 from masters.serializers import *
 
 from users.serializer import *
-from customer.models import Customer_Order, Product
+from customer.models import Customer_Order, Customer_Product_Order, Product
 from customer.serializers import DeliveryRequestSerializer, ProductSerializer
 
 
@@ -56,9 +56,9 @@ class VendorShipmentStatusSerializer(serializers.ModelSerializer):
 
 
 class ProductRequestStatusSerializer(serializers.ModelSerializer):
-    """Vendor can update status of their product request (e.g. accepted, rejected_by_vendor)."""
+    """Vendor can update status of a product order (product-side shipment)."""
     class Meta:
-        model = Request_Customer_for_Product
+        model = Customer_Product_Order
         fields = ['status']
 
     def validate_status(self, value):

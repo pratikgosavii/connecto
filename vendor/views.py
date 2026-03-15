@@ -341,13 +341,16 @@ class VendorMyShipmentsViewSet(viewsets.ModelViewSet):
 
 
 class VendorMyProductsViewSet(viewsets.ModelViewSet):
-    """Vendor's product delivery requests (their requests to deliver customers' products)."""
-    queryset = Request_Customer_for_Product.objects.all().order_by('-id')
-    serializer_class = RequestCustomerForProductSerializer
+    """Vendor's product orders (their accepted product shipments)."""
+    from customer.models import Customer_Product_Order
+
+    queryset = Customer_Product_Order.objects.all().order_by('-id')
+    serializer_class = ProductRequestStatusSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Request_Customer_for_Product.objects.filter(user=self.request.user).order_by('-id')
+        from customer.models import Customer_Product_Order
+        return Customer_Product_Order.objects.filter(trip__user=self.request.user).order_by('-id')
 
 
 from rest_framework.decorators import api_view, permission_classes
@@ -397,18 +400,20 @@ def update_shipment_status(request, pk):
 @api_view(['PATCH'])
 @permission_classes([permissions.IsAuthenticated])
 def update_product_request_status(request, pk):
-    try:
-        product_request = Request_Customer_for_Product.objects.get(pk=pk, user=request.user)
-    except Request_Customer_for_Product.DoesNotExist:
-        return Response({'detail': 'Product request not found.'}, status=status.HTTP_404_NOT_FOUND)
+    from customer.models import Customer_Product_Order
 
-    serializer = ProductRequestStatusSerializer(product_request, data=request.data, partial=True)
+    try:
+        order = Customer_Product_Order.objects.get(pk=pk, trip__user=request.user)
+    except Customer_Product_Order.DoesNotExist:
+        return Response({'detail': 'Product shipment not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = ProductRequestStatusSerializer(order, data=request.data, partial=True)
     if serializer.is_valid():
         instance = serializer.save()
         Notification.objects.create(
-            user=instance.product.user,
-            title='Product Request Status Changed',
-            message=f'Your product request #{instance.id} has been {instance.status}.'
+            user=instance.user,
+            title='Product Shipment Status Changed',
+            message=f'Your product shipment #{instance.id} has been {instance.status}.'
         )
         return Response(serializer.data)
 

@@ -264,13 +264,15 @@ def connect_with_agent(request):
 @permission_classes([IsAuthenticated])
 def connect_with_vendor_product(request):
     """
-    Simple connect API for products:
-    - Marks the related Request_Vendor_for_Product as accepted (if exists)
-    - Returns vendor (trip.user) details.
+    Product version of connect_with_agent:
+    - Handles both customer-originated and vendor-originated product requests
+    - Uses credits
+    - Returns assigned flag based on Customer_Product_Order.
     """
     user = request.user
     product_id = request.data.get("product_id")
     trip_id = request.data.get("trip_id")
+    request_origin = request.data.get("request_origin")
 
     if not product_id or not trip_id:
         return Response({"error": "product_id and trip_id are required"}, status=400)
@@ -278,35 +280,63 @@ def connect_with_vendor_product(request):
     try:
         product = Product.objects.get(id=product_id, user=user)
         trip_instance = trip.objects.get(id=trip_id)
+
+        # If there is already a product order for this product+trip, mark assigned
+        from .models import Customer_Product_Order
+        assigned = Customer_Product_Order.objects.filter(product=product, trip=trip_instance).exists()
+
+        agent_data = UserProfileSerializer(
+            trip_instance.user,
+            context={'request': request}
+        ).data
+
+        # No separate connection log for products; use credits logic only
+        user_credit = UserCredit.objects.get(user=user)
+        if user_credit.credits <= 0:
+            return Response({"error": "Insufficient credits"}, status=400)
+
+        # Deduct 1 credit per new connection attempt
+        user_credit.credits -= 1
+        user_credit.save()
+
+        # Update request status based on origin, similar to parcels
+        if request_origin == "customer":
+            try:
+                request_instance = Request_Vendor_for_Product.objects.get(
+                    user=user, product=product, trip=trip_instance
+                )
+                if request_instance.status == "pending":
+                    request_instance.status = "accepted"
+                    request_instance.save()
+            except Request_Vendor_for_Product.DoesNotExist:
+                request_instance = None
+        elif request_origin == "vendor":
+            try:
+                request_instance = Request_Customer_for_Product.objects.get(
+                    product=product, trip=trip_instance
+                )
+                if request_instance.status == "pending":
+                    request_instance.status = "accepted"
+                    request_instance.save()
+            except Request_Customer_for_Product.DoesNotExist:
+                request_instance = None
+        else:
+            request_instance = None
+
+        return Response(
+            {
+                "message": "Connected successfully",
+                "agent": agent_data,
+                "assigned": assigned,
+                "request_id": request_instance.id if request_instance else None,
+            },
+            status=200,
+        )
+
     except Product.DoesNotExist:
         return Response({"error": "Product not found"}, status=404)
     except trip.DoesNotExist:
         return Response({"error": "Trip not found"}, status=404)
-
-    # Update existing customer-originated request if present
-    try:
-        request_instance = Request_Vendor_for_Product.objects.get(
-            user=user, product=product, trip=trip_instance
-        )
-        if request_instance.status == "pending":
-            request_instance.status = "accepted"
-            request_instance.save()
-    except Request_Vendor_for_Product.DoesNotExist:
-        request_instance = None
-
-    agent_data = UserProfileSerializer(
-        trip_instance.user,
-        context={'request': request}
-    ).data
-
-    return Response(
-        {
-            "message": "Connected successfully",
-            "agent": agent_data,
-            "request_id": request_instance.id if request_instance else None,
-        },
-        status=200,
-    )
 
 
 
@@ -510,11 +540,22 @@ def assign_product_to_agent(request):
     request_instance.status = 'assigned'
     request_instance.save()
 
-    return Response({
-        "message": "Product assigned to agent successfully",
-        "request_id": request_instance.id,
-        "status": request_instance.status,
-    })
+    # Create product order (mirror of Customer_Order for parcels)
+    from .models import Customer_Product_Order
+    order = Customer_Product_Order.objects.create(
+        product=product,
+        trip=trip_instance,
+        user=user,
+        status='assigned',
+    )
+
+    return Response(
+        {
+            "message": "Product assigned to agent successfully",
+            "order_id": order.id,
+            "status": order.status,
+        }
+    )
 
 
 # views.py
@@ -543,15 +584,18 @@ class MyShipmentsViewSet(viewsets.ModelViewSet):
 
 class MyProductShipmentsViewSet(viewsets.ModelViewSet):
     """
-    Customer's product delivery requests (assigned / accepted / pending).
-    List and retrieve Request_Vendor_for_Product for the current user.
+    Customer's product orders (assigned / in_transit / delivered).
+    Mirrors MyShipmentsViewSet but for products.
     """
-    queryset = Request_Vendor_for_Product.objects.all().order_by('-id')
-    serializer_class = RequestVendorForProductSerializer
+    from .models import Customer_Product_Order
+
+    queryset = Customer_Product_Order.objects.all().order_by('-id')
+    serializer_class = Customer_Product_OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Request_Vendor_for_Product.objects.filter(user=self.request.user).order_by('-id')
+        from .models import Customer_Product_Order
+        return Customer_Product_Order.objects.filter(user=self.request.user).order_by('-id')
 
 
 class get_chat_token(APIView):
@@ -717,25 +761,30 @@ def confirm_shipment_delivery(request):
 @permission_classes([IsAuthenticated])
 def confirm_product_delivery(request):
     """Customer confirms product delivery (counterpart to confirm_shipment_delivery)."""
-    request_id = request.data.get("request_id")  # Request_Vendor_for_Product id
+    from .models import Customer_Product_Order
 
-    if not request_id:
-        return Response({"error": "request_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+    shipment_id = request.data.get("shipment_id")
+
+    if not shipment_id:
+        return Response({"error": "shipment_id is required"}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        instance = Request_Vendor_for_Product.objects.get(id=request_id, user=request.user)
-    except Request_Vendor_for_Product.DoesNotExist:
-        return Response({"detail": "Product delivery request not found."}, status=status.HTTP_404_NOT_FOUND)
+        instance = Customer_Product_Order.objects.get(id=shipment_id, user=request.user)
+    except Customer_Product_Order.DoesNotExist:
+        return Response({"detail": "Product shipment not found."}, status=status.HTTP_404_NOT_FOUND)
 
     if instance.status == "delivered":
         instance.status = "delivered_by_customer"
         instance.save()
-        return Response({"message": "Product delivery marked as confirmed."}, status=status.HTTP_200_OK)
+        return Response({"message": "Product shipment marked as delivered."}, status=status.HTTP_200_OK)
 
-    return Response({
-        "message": "Product delivery not marked as delivered by vendor yet.",
-        "current_status": instance.status,
-    }, status=status.HTTP_200_OK)
+    return Response(
+        {
+            "message": "Product shipment not marked as delivered by vendor yet.",
+            "current_status": instance.status,
+        },
+        status=status.HTTP_200_OK,
+    )
 
 
 from rest_framework import viewsets, permissions

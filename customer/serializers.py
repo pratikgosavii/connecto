@@ -54,6 +54,16 @@ class Customer_OrderSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class Customer_Product_OrderSerializer(serializers.ModelSerializer):
+    trip_details = TripSimpleSerializer(source='trip', read_only=True)
+    product_details = ProductSerializer(source='product', read_only=True)
+
+    class Meta:
+        from .models import Customer_Product_Order
+        model = Customer_Product_Order
+        fields = '__all__'
+
+
 
 class RequestVendorForDeliverySerializer(serializers.ModelSerializer):
 
