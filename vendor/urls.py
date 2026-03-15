@@ -37,6 +37,7 @@ urlpatterns = [
     path('reject-customer-request/', reject_customer_request, name='reject_customer_request'),
 
     path('orders/<int:id>/mark-delivered/', MarkOrderDeliveredAPIView.as_view(), name='mark-order-delivered'),
+    path('product-orders/<int:id>/mark-delivered/', MarkProductOrderDeliveredAPIView.as_view(), name='mark-product-order-delivered'),
 
     path('shipments/update-vendor-location/', UpdateVendorLocationView.as_view(), name='update_vendor_location'),
 

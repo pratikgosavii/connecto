@@ -443,6 +443,37 @@ class MarkOrderDeliveredAPIView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class MarkProductOrderDeliveredAPIView(APIView):
+    def post(self, request, id):
+        from customer.models import Customer_Product_Order
+
+        order = get_object_or_404(Customer_Product_Order, id=id)
+
+        # Track old status to detect change to "delivered"
+        old_status = order.status
+
+        # Reuse the same OTP/status validation logic as parcels by temporarily
+        # wrapping the product order in a serializer-like interface.
+        data = request.data.copy()
+        otp = data.get("otp")
+        if otp != order.otp:
+            return Response({"otp": ["OTP is incorrect"]}, status=status.HTTP_400_BAD_REQUEST)
+
+        if data.get("status") != "delivered":
+            return Response({"status": ["Only 'delivered' status is allowed."]}, status=status.HTTP_400_BAD_REQUEST)
+
+        order.status = "delivered"
+        order.save()
+
+        if old_status != "delivered" and order.status == "delivered" and order.user and order.user.mobile:
+            from customer.utils import send_sms
+            message = f"Your product order {order.tracking_id} has been delivered! OTP: {order.otp}. Please verify delivery with the agent."
+            print(f"📱 Sending delivery confirmation SMS to {order.user.mobile} for product order {order.tracking_id}")
+            send_sms(order.user.mobile, message)
+
+        return Response({"detail": "Product order marked as delivered."})
+
+
 
 
             
