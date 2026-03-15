@@ -12,7 +12,7 @@ from customer.models import (
     Customer_Product_Order,
     PaymentLog,
 )
-from users.models import User
+from users.models import User, UserCredit
 
 
 @login_required(login_url='login_admin')
@@ -39,6 +39,13 @@ def dashboard(request):
 
     # Treat successful payments as active subscriptions
     active_subscriptions = PaymentLog.objects.filter(status="captured").count()
+
+    # Recent entities for dynamic tables
+    recent_products = Product.objects.select_related("user").order_by("-created_at")[:5]
+    recent_parcel_orders = Customer_Order.objects.select_related("user", "parcel").order_by("-assigned_at")[:5]
+    recent_product_orders = Customer_Product_Order.objects.select_related("user", "product").order_by("-assigned_at")[:5]
+    recent_payments = PaymentLog.objects.select_related("user").order_by("-created_at")[:5]
+    top_user_credits = UserCredit.objects.select_related("user").order_by("-credits")[:5]
 
     # Simple 7‑day chart data for shipments (parcel + product)
     labels = []
@@ -67,6 +74,11 @@ def dashboard(request):
         "total_parcel_orders": total_parcel_orders,
         "total_product_orders": total_product_orders,
         "active_subscriptions": active_subscriptions,
+        "recent_products": recent_products,
+        "recent_parcel_orders": recent_parcel_orders,
+        "recent_product_orders": recent_product_orders,
+        "recent_payments": recent_payments,
+        "top_user_credits": top_user_credits,
         # Chart data (JSON for JS)
         "chart_labels": json.dumps(labels),
         "chart_parcel_series": json.dumps(parcel_series),
