@@ -139,3 +139,4 @@ Traceback (most recent call last):
     raise self.error(
 django.template.exceptions.TemplateSyntaxError: Invalid block tag on line 513: 'endblock'. Did you forget to register or load this tag?
 2026-03-15 14:30:16,397 WARNING [django.request] Not Found: /firebase-messaging-sw.js
+2026-03-15 14:32:15,987 WARNING [django.request] Not Found: /firebase-messaging-sw.js
