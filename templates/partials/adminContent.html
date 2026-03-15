@@ -19,101 +19,89 @@
 
                     <div class="row">
                         <div class="col-xl-3 col-md-6">
-                            <!-- card -->
                             <div class="card card-h-100">
-                                <!-- card body -->
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-grow-1">
-                                            <span class="text-muted mb-3 lh-1 d-block text-truncate">Total Sales</span>
+                                            <span class="text-muted mb-3 lh-1 d-block text-truncate">Total Trips</span>
                                             <h4 class="mb-3">
-                                                $<span class="counter-value" data-target="354.5">0</span>k
+                                                <span class="counter-value" data-target="{{ total_trips|default:0 }}">0</span>
                                             </h4>
                                             <div class="text-nowrap">
-                                                <span class="badge bg-soft-success text-success">+$20.9k</span>
-                                                <span class="ms-1 text-muted font-size-13">Since last week</span>
+                                                <span class="text-muted font-size-13">All time</span>
                                             </div>
                                         </div>
 
                                         <div class="flex-shrink-0 text-end dash-widget">
-                                            <div id="mini-chart1" data-colors='["#775599;", "#F0D28C"]' class="apex-charts"></div>
+                                            <div id="mini-chart1" class="apex-charts"></div>
                                         </div>
                                     </div>
-                                </div><!-- end card body -->
-                            </div><!-- end card -->
-                        </div><!-- end col -->
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="col-xl-3 col-md-6">
-                            <!-- card -->
                             <div class="card card-h-100">
-                                <!-- card body -->
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-grow-1">
-                                            <span class="text-muted mb-3 lh-1 d-block text-truncate">Total Items</span>
+                                            <span class="text-muted mb-3 lh-1 d-block text-truncate">Trips Today</span>
                                             <h4 class="mb-3">
-                                                <span class="counter-value" data-target="1256">0</span>
+                                                <span class="counter-value" data-target="{{ trips_today|default:0 }}">0</span>
                                             </h4>
                                             <div class="text-nowrap">
-                                                <span class="badge bg-soft-danger text-danger">-29 Trades</span>
-                                                <span class="ms-1 text-muted font-size-13">Since last week</span>
+                                                <span class="text-muted font-size-13">Today</span>
                                             </div>
                                         </div>
                                         <div class="flex-shrink-0 text-end dash-widget">
-                                            <div id="mini-chart2" data-colors='["#775599;", "#F0D28C"]' class="apex-charts"></div>
+                                            <div id="mini-chart2" class="apex-charts"></div>
                                         </div>
                                     </div>
-                                </div><!-- end card body -->
-                            </div><!-- end card -->
-                        </div><!-- end col-->
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="col-xl-3 col-md-6">
-                            <!-- card -->
                             <div class="card card-h-100">
-                                <!-- card body -->
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-grow-1">
-                                            <span class="text-muted mb-3 lh-1 d-block text-truncate">Average Sales</span>
+                                            <span class="text-muted mb-3 lh-1 d-block text-truncate">Total Products</span>
                                             <h4 class="mb-3">
-                                                $<span class="counter-value" data-target="7.54">0</span>M
+                                                <span class="counter-value" data-target="{{ total_products|default:0 }}">0</span>
                                             </h4>
                                             <div class="text-nowrap">
-                                                <span class="badge bg-soft-success text-success">+ $2.8k</span>
-                                                <span class="ms-1 text-muted font-size-13">Since last week</span>
+                                                <span class="text-muted font-size-13">All time</span>
                                             </div>
                                         </div>
                                         <div class="flex-shrink-0 text-end dash-widget">
-                                            <div id="mini-chart3" data-colors='["#775599;", "#F0D28C"]' class="apex-charts"></div>
+                                            <div id="mini-chart3" class="apex-charts"></div>
                                         </div>
                                     </div>
-                                </div><!-- end card body -->
-                            </div><!-- end card -->
-                        </div><!-- end col -->
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="col-xl-3 col-md-6">
-                            <!-- card -->
                             <div class="card card-h-100">
-                                <!-- card body -->
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-grow-1">
-                                            <span class="text-muted mb-3 lh-1 d-block text-truncate">Orders</span>
+                                            <span class="text-muted mb-3 lh-1 d-block text-truncate">Active Subscriptions</span>
                                             <h4 class="mb-3">
-                                                <span class="counter-value" data-target="{{ current_week_order_count }}">0</span>%
+                                                <span class="counter-value" data-target="{{ active_subscriptions|default:0 }}">0</span>
                                             </h4>
                                             <div class="text-nowrap">
-                                                <span class="badge bg-soft-success text-success">+{{ percentage_change }}%</span>
-                                                <span class="ms-1 text-muted font-size-13">Since last week</span>
+                                                <span class="text-muted font-size-13">Payments captured</span>
                                             </div>
                                         </div>
                                         <div class="flex-shrink-0 text-end dash-widget">
-                                            <div id="mini-chart4" data-colors='["#775599;", "#F0D28C"]' class="apex-charts"></div>
+                                            <div id="mini-chart4" class="apex-charts"></div>
                                         </div>
                                     </div>
-                                </div><!-- end card body -->
-                            </div><!-- end card -->
-                        </div><!-- end col -->
+                                </div>
+                            </div>
+                        </div>
                     </div><!-- end row-->
 
                     <div class="row">

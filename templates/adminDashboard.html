@@ -25,4 +25,33 @@
     <!-- dashboard init -->
     <script src="{% static 'js/pages/dashboard.init.js' %}"></script>
 
+    <script>
+      (function () {
+        const labels = {{ chart_labels|default:"[]"|safe }};
+        const parcelSeries = {{ chart_parcel_series|default:"[]"|safe }};
+        const productSeries = {{ chart_product_series|default:"[]"|safe }};
+
+        const el = document.querySelector('#orders-products-chart');
+        if (!el || !labels.length) return;
+
+        const options = {
+          chart: {
+            type: 'line',
+            height: 320,
+            toolbar: { show: false }
+          },
+          series: [
+            { name: 'Parcel Orders', data: parcelSeries },
+            { name: 'Product Orders', data: productSeries }
+          ],
+          xaxis: {
+            categories: labels
+          }
+        };
+
+        const chart = new ApexCharts(el, options);
+        chart.render();
+      })();
+    </script>
+
 {% endblock extra_js %}

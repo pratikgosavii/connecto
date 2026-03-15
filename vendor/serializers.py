@@ -56,15 +56,36 @@ class VendorShipmentStatusSerializer(serializers.ModelSerializer):
 
 
 class ProductRequestStatusSerializer(serializers.ModelSerializer):
-    """Vendor can update status of a product order (product-side shipment)."""
+    """
+    Vendor-side serializer for product orders.
+    Mirrors Customer_Product_OrderSerializer with nested trip & product details,
+    but only allows updating the status field.
+    """
+
+    trip_details = trip_Serializer(source='trip', read_only=True)
+    product_details = ProductSerializer(source='product', read_only=True)
+
     class Meta:
         model = Customer_Product_Order
-        fields = ['status']
+        fields = '__all__'
+        read_only_fields = [
+            'tracking_id',
+            'otp',
+            'product',
+            'trip',
+            'user',
+            'connection_id',
+            'assigned_at',
+            'updated_at',
+            'trip_details',
+            'product_details',
+        ]
 
     def validate_status(self, value):
-        allowed = {'accepted', 'rejected_by_vendor', 'pending'}
+        allowed = {'assigned', 'in_transit', 'delivered', 'delivered_by_customer',
+                   'cancelled_by_vendor', 'cancelled_by_customer'}
         if value not in allowed:
-            raise serializers.ValidationError(f"Status must be one of: {', '.join(allowed)}")
+            raise serializers.ValidationError(f"Status must be one of: {', '.join(sorted(allowed))}")
         return value
     
 
