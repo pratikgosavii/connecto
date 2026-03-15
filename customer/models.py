@@ -335,6 +335,28 @@ class DeliveryRating(models.Model):
         return f"Rating {self.rating} by {self.user} for {self.vendor}"
 
 
+class ProductDeliveryRating(models.Model):
+    """
+    Rating for product shipments (Customer_Product_Order), separate from parcel DeliveryRating.
+    """
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='product_rating_user')
+    vendor = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='product_rating_vendor')
+    product_shipment = models.ForeignKey('customer.Customer_Product_Order', on_delete=models.CASCADE, related_name='product_ratings')
+
+    rating = models.PositiveSmallIntegerField(
+        choices=[(i, f"{i} Star{'s' if i > 1 else ''}") for i in range(1, 6)]
+    )
+    feedback = models.TextField(blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('vendor', 'user', 'product_shipment')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"ProductRating {self.rating} by {self.user} for {self.vendor}"
+
 
 
 

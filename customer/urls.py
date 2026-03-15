@@ -12,7 +12,7 @@ router.register('request-vendor-product', RequestVendorForProductViewSet, basena
 router.register('my-shipments', MyShipmentsViewSet, basename='my_shipmentsViewSet')
 router.register('my-product-shipments', MyProductShipmentsViewSet, basename='my_product_shipmentsViewSet')
 router.register('delivery-ratings', DeliveryRatingViewSet, basename='delivery-rating')
-router.register('product-delivery-ratings', DeliveryRatingViewSet, basename='product-delivery-rating')
+router.register('product-delivery-ratings', ProductDeliveryRatingViewSet, basename='product-delivery-rating')
 router.register('tickets', SupportTicketViewSet, basename='tickets')
 router.register('ticket-messages', TicketMessageViewSet, basename='ticket-messages')
 

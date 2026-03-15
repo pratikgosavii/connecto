@@ -117,6 +117,15 @@ class DeliveryRatingSerializer(serializers.ModelSerializer):
         fields = ['vendor', 'rating', 'feedback', 'shipment']
 
 
+class ProductDeliveryRatingSerializer(serializers.ModelSerializer):
+    vendor = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+
+    class Meta:
+        from .models import ProductDeliveryRating
+        model = ProductDeliveryRating
+        fields = ['vendor', 'rating', 'feedback', 'product_shipment']
+
+
 class SupportTicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = SupportTicket
