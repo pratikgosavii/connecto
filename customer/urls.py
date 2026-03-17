@@ -34,6 +34,8 @@ urlpatterns = router.urls + [
     path('connect-with-vendor-product/', connect_with_vendor_product, name='connect_with_vendor_product'),
     path('reject-vendor-request/', reject_vendor_request, name='reject_vendor_request'),
     path('reject-reverse-vendor-request/', reject_reserve_vendor_request, name='reject_reserve_vendor_request'),
+    path('reject-vendor-product-request/', reject_vendor_product_request, name='reject_vendor_product_request'),
+    path('reject-reverse-vendor-product-request/', reject_reverse_vendor_product_request, name='reject_reverse_vendor_product_request'),
 
     path('confirm-shipment-delivery/', confirm_shipment_delivery, name='confirm_shipment_delivery'),
     path('confirm-product-delivery/', confirm_product_delivery, name='confirm_product_delivery'),

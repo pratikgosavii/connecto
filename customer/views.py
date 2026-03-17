@@ -428,6 +428,71 @@ def reject_reserve_vendor_request(request):
         return Response({"error": "Trip not found"}, status=404)
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def reject_vendor_product_request(request):
+    """
+    Customer rejects a vendor-initiated request for a product shipment.
+    Mirrors reject_vendor_request but for Product / Request_Customer_for_Product.
+    """
+    user = request.user
+    product_id = request.data.get("product_id")
+    trip_id = request.data.get("trip_id")
+
+    try:
+        product = Product.objects.get(id=product_id, user=user)
+        trip_instance = trip.objects.get(id=trip_id)
+
+        try:
+            request_instance = Request_Customer_for_Product.objects.get(trip=trip_instance, product=product)
+        except Request_Customer_for_Product:
+            return Response({"error": "Request not found"}, status=404)
+
+        if request_instance.status != "accepted":
+            request_instance.status = "rejected_by_customer"
+            request_instance.save()
+            return Response({"message": "Product request cancelled successfully"}, status=200)
+        else:
+            return Response({"message": "Request already accepted"}, status=200)
+
+    except Product.DoesNotExist:
+        return Response({"error": "Product not found"}, status=404)
+    except trip.DoesNotExist:
+        return Response({"error": "Trip not found"}, status=404)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def reject_reverse_vendor_product_request(request):
+    """
+    Customer rejects their own earlier product request (Request_Vendor_for_Product) after vendor response.
+    Mirrors reject_reserve_vendor_request for products.
+    """
+    user = request.user
+    product_id = request.data.get("product_id")
+    trip_id = request.data.get("trip_id")
+
+    try:
+        product = Product.objects.get(id=product_id, user=user)
+        trip_instance = trip.objects.get(id=trip_id)
+
+        try:
+            request_instance = Request_Vendor_for_Product.objects.get(trip=trip_instance, product=product)
+        except Request_Vendor_for_Product:
+            return Response({"error": "Request not found"}, status=404)
+
+        if request_instance.status != "accepted":
+            request_instance.status = "rejected_by_customer"
+            request_instance.save()
+            return Response({"message": "Product request cancelled successfully"}, status=200)
+        else:
+            return Response({"message": "Request already accepted"}, status=200)
+
+    except Product.DoesNotExist:
+        return Response({"error": "Product not found"}, status=404)
+    except trip.DoesNotExist:
+        return Response({"error": "Trip not found"}, status=404)
+
 
 
 
