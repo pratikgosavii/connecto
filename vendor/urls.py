@@ -1,0 +1,46 @@
+from django.urls import path
+
+from .views import *
+
+from django.conf import settings
+from django.conf.urls.static import static
+
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+# router.register(r'customer-address', customer_address_ViewSet, basename='pet-test-booking')
+
+router.register('add-trip', add_trip_ViewSet, basename='add_trip_ViewSet')
+router.register('request-customer', RequestCustomerForDeliveryViewSet, basename='RequestVendorForDeliveryViewSet')
+router.register('request-customer-product', RequestCustomerForProductViewSet, basename='RequestCustomerForProductViewSet')
+router.register('vendor-my-shipments', VendorMyShipmentsViewSet, basename='Vendormy_shipmentsViewSet')
+router.register('vendor-my-products', VendorMyProductsViewSet, basename='VendorMyProductsViewSet')
+
+
+urlpatterns = [
+
+    path('search-parcel/', ParcelSearchAPIView.as_view(), name='search-parcel'),
+    path('search-product/', ProductSearchAPIView.as_view(), name='search-product'),
+
+    path('my-shipments/<int:pk>/update-status/', update_shipment_status, name='update-shipment-status'),
+    path('my-products/<int:pk>/update-status/', update_product_request_status, name='update-product-request-status'),
+
+    
+    path('view-customer-request/', ViewCustomerRequestViewSet.as_view(), name='ViewCustomerRequestViewSet'),
+    path('view-customer-product-request/', ViewCustomerProductRequestViewSet.as_view(), name='ViewCustomerProductRequestViewSet'),
+    path('show-open-parcels/', ShowOpenParcels.as_view(), name='ShowOpenParcels'),
+    path('open-parcels/<int:id>/', ShowOpenParcelDetail.as_view(), name='open-parcel-detail'),
+
+    path('show-open-products/', ShowOpenProducts.as_view(), name='ShowOpenProducts'),
+    path('open-products/<int:id>/', ShowOpenProductDetail.as_view(), name='open-product-detail'),
+
+    path('reject-customer-request/', reject_customer_request, name='reject_customer_request'),
+
+    path('orders/<int:id>/mark-delivered/', MarkOrderDeliveredAPIView.as_view(), name='mark-order-delivered'),
+    path('product-orders/<int:id>/mark-delivered/', MarkProductOrderDeliveredAPIView.as_view(), name='mark-product-order-delivered'),
+
+    path('shipments/update-vendor-location/', UpdateVendorLocationView.as_view(), name='update_vendor_location'),
+
+]  + router.urls
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

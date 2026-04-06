@@ -1,0 +1,54 @@
+from rest_framework.routers import DefaultRouter
+from .views import *
+from django.urls import path
+
+from .views import *
+
+router = DefaultRouter()
+router.register('delivery-request', DeliveryRequestViewSet, basename='DeliveryRequestViewSet')
+router.register('request-vendor', RequestVendorForDeliveryViewSet, basename='RequestVendorForDeliveryViewSet')
+router.register('products', ProductViewSet, basename='ProductViewSet')
+router.register('request-vendor-product', RequestVendorForProductViewSet, basename='RequestVendorForProductViewSet')
+router.register('my-shipments', MyShipmentsViewSet, basename='my_shipmentsViewSet')
+router.register('my-product-shipments', MyProductShipmentsViewSet, basename='my_product_shipmentsViewSet')
+router.register('delivery-ratings', DeliveryRatingViewSet, basename='delivery-rating')
+router.register('product-delivery-ratings', ProductDeliveryRatingViewSet, basename='product-delivery-rating')
+router.register('tickets', SupportTicketViewSet, basename='tickets')
+router.register('ticket-messages', TicketMessageViewSet, basename='ticket-messages')
+
+urlpatterns = router.urls + [
+
+    path('search-trips/', TripSearchAPIView.as_view(), name='search-trips'),
+    path('avaiable-vendors/', avaiable_vendors.as_view(), name='avaiable_vendors'),
+    path('view-vendor-request/', ViewVendorRequestViewSet.as_view(), name='ViewVendorRequestViewSet'),
+    path('view-vendor-product-request/', ViewVendorProductRequestViewSet.as_view(), name='ViewVendorProductRequestViewSet'),
+
+    path('kyc/fetch-documents/', FetchDigilockerDocumentsView.as_view(), name='fetch_documents'),
+    
+    # path("webhook/surepass/", surepass_webhook, name="surepass-webhook"),
+
+    path('assign-parcel-to-agent/', assign_parcel_to_agent, name='assign_parcel_to_agent'),
+    path('assign-product-to-agent/', assign_product_to_agent, name='assign_product_to_agent'),
+
+    path('connect-with-vendor/', connect_with_agent, name='connect_with_agent'),
+    path('connect-with-vendor-product/', connect_with_vendor_product, name='connect_with_vendor_product'),
+    path('reject-vendor-request/', reject_vendor_request, name='reject_vendor_request'),
+    path('reject-reverse-vendor-request/', reject_reserve_vendor_request, name='reject_reserve_vendor_request'),
+    path('reject-vendor-product-request/', reject_vendor_product_request, name='reject_vendor_product_request'),
+    path('reject-reverse-vendor-product-request/', reject_reverse_vendor_product_request, name='reject_reverse_vendor_product_request'),
+
+    path('confirm-shipment-delivery/', confirm_shipment_delivery, name='confirm_shipment_delivery'),
+    path('confirm-product-delivery/', confirm_product_delivery, name='confirm_product_delivery'),
+
+    path("stream/get-chat-token/", get_chat_token.as_view()),
+    path("stream/get-vendor-chat-token/", get_chat_vendor_token.as_view()),
+
+    path('show-trip-parcels/', ShowTripParcels.as_view(), name='ShowTripParcels'),
+    # Live tracking
+    path('shipments/vendor-location/', GetVendorLocationView.as_view(), name='get_vendor_location'),
+    
+
+    path('purchase/create-order/', create_order, name='create_order'),
+    path('purchase/razorpay/webhook/', razorpay_webhook, name='razorpay_webhook'),
+
+]
