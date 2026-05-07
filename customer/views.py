@@ -130,8 +130,13 @@ class RequestVendorForDeliveryViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         request_obj = serializer.save(user=self.request.user)
 
-        # ✅ Create notification on creation
-        pass
+        from users.models import Notification
+        customer_name = self.request.user.name or self.request.user.mobile
+        Notification.objects.create(
+            user=request_obj.trip.user,
+            title='New Delivery Request',
+            message=f'Customer {customer_name} has requested you to deliver their parcel.'
+        )
 
 
 class RequestVendorForProductViewSet(viewsets.ModelViewSet):
@@ -145,7 +150,15 @@ class RequestVendorForProductViewSet(viewsets.ModelViewSet):
         return Request_Vendor_for_Product.objects.filter(user=self.request.user).order_by('-id')
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        request_obj = serializer.save(user=self.request.user)
+
+        from users.models import Notification
+        customer_name = self.request.user.name or self.request.user.mobile
+        Notification.objects.create(
+            user=request_obj.trip.user,
+            title='New Product Delivery Request',
+            message=f'Customer {customer_name} has requested you to deliver their product.'
+        )
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -244,6 +257,14 @@ def connect_with_agent(request):
         else:    
             assigned = False
 
+        from users.models import Notification
+        customer_name = user.name or user.mobile
+        Notification.objects.create(
+            user=trip_instance.user,
+            title='Connection Accepted',
+            message=f'Customer {customer_name} has connected with you for parcel delivery.'
+        )
+
         agent_data = UserProfileSerializer(trip_instance.user, context={'request': request,'parcel': parcel,'trip': trip_instance}).data
         return Response({
             "message": "Connected successfully",
@@ -322,6 +343,14 @@ def connect_with_vendor_product(request):
                 request_instance = None
         else:
             request_instance = None
+
+        from users.models import Notification
+        customer_name = user.name or user.mobile
+        Notification.objects.create(
+            user=trip_instance.user,
+            title='Connection Accepted',
+            message=f'Customer {customer_name} has connected with you for product delivery.'
+        )
 
         return Response(
             {

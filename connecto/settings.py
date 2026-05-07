@@ -158,9 +158,17 @@ from firebase_admin import credentials, initialize_app
 from datetime import timedelta
 
 # Firebase Admin SDK setup
-firebase_key_path = os.path.join(BASE_DIR, 'connecto', 'firebase_key.json')
-cred = credentials.Certificate(firebase_key_path)
-initialize_app(cred)
+firebase_key_path = os.path.join(BASE_DIR, "connecto", "firebase_key.json")
+
+if os.path.exists(firebase_key_path):
+    try:
+        cred = credentials.Certificate(firebase_key_path)
+        initialize_app(cred)
+        print("✅ Firebase Admin SDK initialized.")
+    except Exception as e:
+        print(f"❌ Failed to initialize Firebase: {e}")
+else:
+    print("⚠️ Firebase key not found. Ensure it's in connecto/firebase_key.json")
 
 
 SIMPLE_JWT = {

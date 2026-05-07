@@ -1,1 +1,1 @@
-echo web: gunicorn connecto.wsgi:application > Procfile
+web: gunicorn connecto.wsgi:application > Procfile

@@ -72,7 +72,15 @@ class RequestCustomerForDeliveryViewSet(viewsets.ModelViewSet):
         if Request_Customer_for_Delivery.objects.filter(trip=trip, parcel=parcel).exists():
             raise serializers.ValidationError("A request already exists for this trip and parcel.")
 
-        serializer.save(user=self.request.user)
+        req = serializer.save(user=self.request.user)
+
+        from users.models import Notification
+        vendor_name = self.request.user.name or self.request.user.mobile
+        Notification.objects.create(
+            user=parcel.user,
+            title='New Vendor Request',
+            message=f'Vendor {vendor_name} has requested to deliver your parcel.'
+        )
 
     @action(detail=True, methods=['post'])
     def cancel(self, request, pk=None):
@@ -243,7 +251,15 @@ class RequestCustomerForProductViewSet(viewsets.ModelViewSet):
         if Request_Customer_for_Product.objects.filter(trip=trip, product=product, user=self.request.user).exists():
             raise serializers.ValidationError("A request already exists for this trip and product.")
 
-        serializer.save(user=self.request.user)
+        req = serializer.save(user=self.request.user)
+
+        from users.models import Notification
+        vendor_name = self.request.user.name or self.request.user.mobile
+        Notification.objects.create(
+            user=product.user,
+            title='New Vendor Request',
+            message=f'Vendor {vendor_name} has requested to deliver your product.'
+        )
 
 
 
@@ -432,11 +448,18 @@ class MarkOrderDeliveredAPIView(APIView):
             serializer.save()
             
             # Send SMS when status changes to "delivered"
-            if old_status != 'delivered' and order.status == 'delivered' and order.user and order.user.mobile:
-                from customer.utils import send_sms
-                message = f"Your order {order.tracking_id} has been delivered! OTP: {order.otp}. Please verify delivery with the agent."
-                print(f"📱 Sending delivery confirmation SMS to {order.user.mobile} for order {order.tracking_id}")
-                send_sms(order.user.mobile, message)
+            if old_status != 'delivered' and order.status == 'delivered':
+                from users.models import Notification
+                Notification.objects.create(
+                    user=order.user,
+                    title='Order Delivered',
+                    message=f'Your order {order.tracking_id} has been delivered! Please verify with the agent.'
+                )
+                if order.user and order.user.mobile:
+                    from customer.utils import send_sms
+                    message = f"Your order {order.tracking_id} has been delivered! OTP: {order.otp}. Please verify delivery with the agent."
+                    print(f"📱 Sending delivery confirmation SMS to {order.user.mobile} for order {order.tracking_id}")
+                    send_sms(order.user.mobile, message)
             
             return Response({"detail": "Order marked as delivered."})
         else:
@@ -465,11 +488,18 @@ class MarkProductOrderDeliveredAPIView(APIView):
         order.status = "delivered"
         order.save()
 
-        if old_status != "delivered" and order.status == "delivered" and order.user and order.user.mobile:
-            from customer.utils import send_sms
-            message = f"Your product order {order.tracking_id} has been delivered! OTP: {order.otp}. Please verify delivery with the agent."
-            print(f"📱 Sending delivery confirmation SMS to {order.user.mobile} for product order {order.tracking_id}")
-            send_sms(order.user.mobile, message)
+        if old_status != "delivered" and order.status == "delivered":
+            from users.models import Notification
+            Notification.objects.create(
+                user=order.user,
+                title='Product Order Delivered',
+                message=f'Your product order {order.tracking_id} has been delivered! Please verify with the agent.'
+            )
+            if order.user and order.user.mobile:
+                from customer.utils import send_sms
+                message = f"Your product order {order.tracking_id} has been delivered! OTP: {order.otp}. Please verify delivery with the agent."
+                print(f"📱 Sending delivery confirmation SMS to {order.user.mobile} for product order {order.tracking_id}")
+                send_sms(order.user.mobile, message)
 
         return Response({"detail": "Product order marked as delivered."})
 
