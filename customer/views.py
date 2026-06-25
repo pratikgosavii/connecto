@@ -51,7 +51,7 @@ class TripSearchAPIView(generics.ListAPIView):
     filterset_class = TripFilter
 
     def get_queryset(self):
-        return trip.objects.exclude(created_by=self.request.user)
+        return trip.objects.exclude(user=self.request.user)
 
 
 class avaiable_vendors(generics.ListAPIView):
