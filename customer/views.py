@@ -46,10 +46,12 @@ from django_filters.rest_framework import DjangoFilterBackend
 from vendor.filters import *
 
 class TripSearchAPIView(generics.ListAPIView):
-    queryset = trip.objects.all()
     serializer_class = trip_Serializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = TripFilter
+
+    def get_queryset(self):
+        return trip.objects.exclude(created_by=self.request.user)
 
 
 class avaiable_vendors(generics.ListAPIView):
