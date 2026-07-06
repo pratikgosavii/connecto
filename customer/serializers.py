@@ -38,6 +38,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class TripSimpleSerializer(serializers.ModelSerializer):
+    user = UserProfileSerializer(read_only=True)
     class Meta:
         model = trip
         fields = '__all__'
