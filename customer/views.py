@@ -1336,38 +1336,6 @@ class FetchDigilockerDocumentsView(APIView):
                         profile_image_file = save_base64_image(aadhaar_info.get("profile_image"))
                         kyc.aadhaar_status = 'verified'
                 
-
-                        defaults = {
-                            "name": data_block.get("digilocker_metadata", {}).get("name"),
-                            "gender": data_block.get("digilocker_metadata", {}).get("gender"),
-                            "dob": data_block.get("digilocker_metadata", {}).get("dob"),
-                            "yob": aadhaar_info.get("yob"),
-                            "zip_code": aadhaar_info.get("zip"),
-                            "profile_image": profile_image_file,
-                            "masked_aadhaar": aadhaar_info.get("masked_aadhaar"),
-                            "full_address": aadhaar_info.get("full_address"),
-                            "father_name": aadhaar_info.get("father_name"),
-                            "address_json": aadhaar_info.get("address"),
-                            "xml_url": data_block.get("xml_url"),
-                        }
-
-                        print("\n========== FIELD LENGTHS ==========")
-                        print("client_id:", len(str(data_block.get("client_id", ""))), data_block.get("client_id"))
-
-                        for key, value in defaults.items():
-                            if isinstance(value, str):
-                                print(f"{key}: length={len(value)} value={value[:150]}")
-                            else:
-                                print(f"{key}: type={type(value).__name__}")
-                        print("==================================\n")
-
-                        AadhaarDetails.objects.update_or_create(
-                            user=user,
-                            client_id=data_block.get("client_id"),
-                            defaults=defaults,
-                        )
-
-
                         AadhaarDetails.objects.update_or_create(
                             user=user,
                             client_id=data_block.get("client_id"),
@@ -1744,19 +1712,14 @@ class FetchDigilockerDocumentsView(APIView):
                 "is_approved": bool(kyc.is_approved),
             })
 
-       
-
-                
         except Exception as e:
-            print("=" * 80)
-            print("FULL TRACEBACK")
-            traceback.print_exc()
-            print("=" * 80)
-
+            print("Surepass KYC fetch error:", e)
             return Response({
                 "error": "Something went wrong while fetching documents.",
                 "details": str(e)
-            }, status=500)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        
 
 
 from rest_framework.decorators import api_view, permission_classes
