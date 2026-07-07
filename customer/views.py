@@ -1368,7 +1368,23 @@ class FetchDigilockerDocumentsView(APIView):
                         )
 
 
-                       
+                        AadhaarDetails.objects.update_or_create(
+                            user=user,
+                            client_id=data_block.get("client_id"),
+                            defaults={
+                                "name": data_block.get("digilocker_metadata", {}).get("name"),
+                                "gender": data_block.get("digilocker_metadata", {}).get("gender"),
+                                "dob": data_block.get("digilocker_metadata", {}).get("dob"),
+                                "yob": aadhaar_info.get("yob"),
+                                "zip_code": aadhaar_info.get("zip"),
+                                "profile_image": profile_image_file,
+                                "masked_aadhaar": aadhaar_info.get("masked_aadhaar"),
+                                "full_address": aadhaar_info.get("full_address"),
+                                "father_name": aadhaar_info.get("father_name"),
+                                "address_json": aadhaar_info.get("address"),
+                                "xml_url": data_block.get("xml_url"),
+                            }
+                        )
 
 
                         aadhaar_card_file = generate_aadhaar_card_image({
