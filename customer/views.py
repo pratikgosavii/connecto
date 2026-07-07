@@ -1712,14 +1712,19 @@ class FetchDigilockerDocumentsView(APIView):
                 "is_approved": bool(kyc.is_approved),
             })
 
+       
+
+                
         except Exception as e:
-            print("Surepass KYC fetch error:", e)
+            print("=" * 80)
+            print("FULL TRACEBACK")
+            traceback.print_exc()
+            print("=" * 80)
+
             return Response({
                 "error": "Something went wrong while fetching documents.",
                 "details": str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        
+            }, status=500)
 
 
 from rest_framework.decorators import api_view, permission_classes
