@@ -1350,7 +1350,6 @@ class FetchDigilockerDocumentsView(APIView):
                                 "full_address": aadhaar_info.get("full_address"),
                                 "father_name": aadhaar_info.get("father_name"),
                                 "address_json": aadhaar_info.get("address"),
-                                "xml_url": data_block.get("xml_url"),
                             }
                         )
 
@@ -1713,33 +1712,11 @@ class FetchDigilockerDocumentsView(APIView):
             })
 
         except Exception as e:
-            debug_info = {}
-
-            try:
-                aadhaar_info = data_block.get("aadhaar_data", {})
-
-                debug_info = {
-                    "client_id": data_block.get("client_id"),
-                    "client_id_length": len(str(data_block.get("client_id", ""))),
-                    "xml_url_length": len(data_block.get("xml_url") or ""),
-                    "masked_aadhaar_length": len(aadhaar_info.get("masked_aadhaar") or ""),
-                    "father_name_length": len(aadhaar_info.get("father_name") or ""),
-                    "full_address_length": len(aadhaar_info.get("full_address") or ""),
-                    "zip_length": len(aadhaar_info.get("zip") or ""),
-                }
-            except Exception as debug_error:
-                debug_info = {
-                    "debug_error": str(debug_error)
-                }
-
-            return Response(
-                {
-                    "error": "Something went wrong while fetching documents.",
-                    "details": str(e),
-                    "debug": debug_info,
-                },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+            print("Surepass KYC fetch error:", e)
+            return Response({
+                "error": "Something went wrong while fetching documents.",
+                "details": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         
 
