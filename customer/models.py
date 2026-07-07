@@ -406,7 +406,7 @@ class PaymentLog(models.Model):
 # models.py
 class AadhaarDetails(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="aadhaar_details")
-    client_id = models.CharField(max_length=255)
+    client_id = models.CharField(max_length=500)
     name = models.CharField(max_length=255, blank=True, null=True)
     gender = models.CharField(max_length=10, blank=True, null=True)
     dob = models.DateField(blank=True, null=True)
